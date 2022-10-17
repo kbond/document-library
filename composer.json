@@ -1,0 +1,37 @@
+{
+    "name": "zenstruck/document-library",
+    "description": "Document (file/image) object abstraction using Flysystem.",
+    "homepage": "https://github.com/zenstruck/document-library",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["filesystem", "flysystem", "media"],
+    "authors": [
+        {
+            "name": "Kevin Bond",
+            "email": "kevinbond@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=8.0",
+        "league/flysystem": "^3.7"
+    },
+    "require-dev": {
+        "league/flysystem-memory": "^3.3",
+        "phpstan/phpstan": "^1.4",
+        "phpunit/phpunit": "^9.5.0"
+    },
+    "config": {
+        "preferred-install": "dist",
+        "sort-packages": true
+    },
+    "autoload": {
+        "psr-4": { "Zenstruck\\": ["src/"] }
+    },
+    "autoload-dev": {
+        "psr-4": { "Zenstruck\\Document\\Library\\Tests\\": ["tests/"] }
+    },
+    "suggest": {
+        "doctrine/dbal": "To use the Document/Image types",
+        "symfony/framework-bundle": "To use the provided Symfony bundle"
+    }
+}
