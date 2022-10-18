@@ -17,6 +17,7 @@
         "symfony/string": "^5.4|^6.0"
     },
     "require-dev": {
+        "doctrine/orm": "^2.13",
         "league/flysystem-memory": "^3.3",
         "phpstan/phpstan": "^1.4",
         "phpunit/phpunit": "^9.5.0",
