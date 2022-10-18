@@ -21,20 +21,18 @@ final class ObjectReflector
         $this->ref = new \ReflectionObject($object);
     }
 
-    public function load(LibraryRegistry $registry, ?string $property): void
+    public function load(LibraryRegistry $registry, string ...$properties): void
     {
-        if ($property && !isset($this->config[$property])) {
-            throw new \InvalidArgumentException(\sprintf('Property "%s" is not configured as a document on "%s".', $property, $this->ref->name));
-        }
+        $properties = $properties ?: \array_keys($this->config);
 
-        foreach ($property ? [$property => $this->config[$property]] : $this->config as $name => $config) {
-            $document = $this->get($name);
+        foreach ($properties as $property) {
+            $document = $this->get($property);
 
             if (!$document instanceof LazyDocument) {
                 continue;
             }
 
-            $document->setLibrary($registry->get($config['library']));
+            $document->setLibrary($registry->get($this->config[$property]['library']));
         }
     }
 

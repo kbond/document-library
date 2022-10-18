@@ -20,13 +20,13 @@ final class ObjectDocumentLoader
      *
      * @return T
      */
-    public function load(object $object, ?string $property = null): object
+    public function load(object $object, string ...$properties): object
     {
         if (!$config = $this->config->get($object::class)) {
             return $object;
         }
 
-        (new ObjectReflector($object, $config))->load($this->registry, $property);
+        (new ObjectReflector($object, $config))->load($this->registry, ...$properties);
 
         return $object;
     }
