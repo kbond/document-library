@@ -6,7 +6,7 @@ use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\ConversionException;
 use Doctrine\DBAL\Types\StringType;
 use Zenstruck\Document;
-use Zenstruck\Document\LazyDocument;
+use Zenstruck\Document\File\LazyFile;
 use Zenstruck\Document\PendingDocument;
 
 /**
@@ -29,7 +29,7 @@ final class DocumentType extends StringType
 
     public function convertToPHPValue($value, AbstractPlatform $platform): ?Document
     {
-        return \is_string($value) ? new LazyDocument($value) : null;
+        return \is_string($value) ? new LazyFile($value) : null;
     }
 
     public function getName(): string

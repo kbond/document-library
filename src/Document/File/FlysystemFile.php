@@ -1,6 +1,6 @@
 <?php
 
-namespace Zenstruck\Document;
+namespace Zenstruck\Document\File;
 
 use League\Flysystem\FilesystemOperator;
 use Zenstruck\Document;
@@ -8,7 +8,7 @@ use Zenstruck\Document;
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
  */
-final class FlysystemDocument implements Document
+final class FlysystemFile implements Document
 {
     private string $path;
     private int $lastModified;

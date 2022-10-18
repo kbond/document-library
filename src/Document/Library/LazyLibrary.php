@@ -21,13 +21,6 @@ final class LazyLibrary implements Library
         $this->library = $library;
     }
 
-    public function setLibrary(Library $library): static
-    {
-        $this->library = $library;
-
-        return $this;
-    }
-
     public function open(string $path): Document
     {
         return $this->library()->open($path);
