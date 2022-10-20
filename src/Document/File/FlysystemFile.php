@@ -15,6 +15,12 @@ final class FlysystemFile implements Document
     private int $size;
     private string $mimeType;
 
+    /** @var array<string,string> */
+    private array $checksum = [];
+
+    /** @var array<string,string> */
+    private array $url = [];
+
     public function __construct(private FilesystemOperator $filesystem, string $path)
     {
         if ('' === $this->path = \ltrim($path, '/')) {
@@ -54,11 +60,15 @@ final class FlysystemFile implements Document
 
     public function checksum(array $config = []): string
     {
+        if (isset($this->checksum[$serialized = \serialize($config)])) {
+            return $this->checksum[$serialized];
+        }
+
         if (!\method_exists($this->filesystem, 'checksum')) {
             throw new \LogicException(); // todo
         }
 
-        return $this->filesystem->checksum($this->path, $config);
+        return $this->checksum[$serialized] = $this->filesystem->checksum($this->path, $config);
     }
 
     public function contents(): string
@@ -73,11 +83,15 @@ final class FlysystemFile implements Document
 
     public function url(array $config = []): string
     {
+        if (isset($this->url[$serialized = \serialize($config)])) {
+            return $this->url[$serialized];
+        }
+
         if (!\method_exists($this->filesystem, 'publicUrl')) {
             throw new \LogicException(); // todo
         }
 
-        return $this->filesystem->publicUrl($this->path, $config);
+        return $this->url[$serialized] = $this->filesystem->publicUrl($this->path, $config);
     }
 
     public function exists(): bool
@@ -93,6 +107,7 @@ final class FlysystemFile implements Document
     public function refresh(): static
     {
         unset($this->size, $this->lastModified, $this->mimeType);
+        $this->checksum = $this->url = [];
 
         return $this;
     }

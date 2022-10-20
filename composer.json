@@ -21,7 +21,8 @@
         "league/flysystem-memory": "^3.3",
         "phpstan/phpstan": "^1.4",
         "phpunit/phpunit": "^9.5.0",
-        "symfony/http-foundation": "^5.4|^6.0"
+        "symfony/http-foundation": "^5.4|^6.0",
+        "symfony/serializer": "^5.4|^6.0"
     },
     "config": {
         "preferred-install": "dist",

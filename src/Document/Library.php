@@ -16,7 +16,7 @@ interface Library
     /**
      * @param array<string,mixed> $config
      */
-    public function store(string $path, Document|\SplFileInfo $document, array $config = []): static;
+    public function store(string $path, Document|\SplFileInfo|string $document, array $config = []): Document;
 
     public function delete(string $path): static;
 }

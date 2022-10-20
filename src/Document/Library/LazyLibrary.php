@@ -31,11 +31,9 @@ final class LazyLibrary implements Library
         return $this->library()->has($path);
     }
 
-    public function store(string $path, \SplFileInfo|Document $document, array $config = []): static
+    public function store(string $path, \SplFileInfo|Document|string $document, array $config = []): Document
     {
-        $this->library()->store($path, $document, $config);
-
-        return $this;
+        return $this->library()->store($path, $document, $config);
     }
 
     public function delete(string $path): static

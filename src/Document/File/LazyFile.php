@@ -11,10 +11,9 @@ use Zenstruck\Document\Library;
  */
 final class LazyFile implements LazyDocument
 {
-    private Library $library;
     private Document $document;
 
-    public function __construct(private string $path)
+    public function __construct(private string $path, private ?Library $library = null)
     {
     }
 

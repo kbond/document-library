@@ -26,8 +26,14 @@ final class FlysystemLibrary implements Library
         return $this->filesystem->fileExists($path);
     }
 
-    public function store(string $path, Document|\SplFileInfo $document, array $config = []): static
+    public function store(string $path, Document|\SplFileInfo|string $document, array $config = []): Document
     {
+        if (\is_string($document)) {
+            $this->filesystem->write($path, $document, $config);
+
+            return $this->open($path);
+        }
+
         if (false === $stream = $document instanceof Document ? $document->read() : \fopen($document, 'r')) {
             throw new \RuntimeException(); // todo
         }
@@ -36,7 +42,7 @@ final class FlysystemLibrary implements Library
 
         \fclose($stream);
 
-        return $this;
+        return $this->open($path);
     }
 
     public function delete(string $path): static
