@@ -9,8 +9,5 @@ use Zenstruck\Document;
  */
 interface Namer
 {
-    /**
-     * @param array<string,mixed> $context
-     */
     public function generateName(Document $document, array $context = []): string;
 }

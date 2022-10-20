@@ -10,13 +10,13 @@ use Zenstruck\Document\Library;
  */
 final class LazyLibrary implements Library
 {
-    /** @var callable():Library|Library|null */
+    /** @var Library|callable():Library */
     private $library;
 
     /**
-     * @param callable():Library|Library|null $library
+     * @param callable():Library $library
      */
-    public function __construct(callable|Library|null $library = null)
+    public function __construct(callable $library)
     {
         $this->library = $library;
     }

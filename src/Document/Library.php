@@ -13,9 +13,6 @@ interface Library
 
     public function has(string $path): bool;
 
-    /**
-     * @param array<string,mixed> $config
-     */
     public function store(string $path, Document|\SplFileInfo|string $document, array $config = []): Document;
 
     public function delete(string $path): static;

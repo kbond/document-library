@@ -29,9 +29,6 @@ interface Document
 
     public function size(): int;
 
-    /**
-     * @param array<string,mixed> $config
-     */
     public function checksum(array $config = []): string;
 
     public function contents(): string;
@@ -41,9 +38,6 @@ interface Document
      */
     public function read();
 
-    /**
-     * @param array<string,mixed> $config
-     */
     public function url(array $config = []): string;
 
     /**
