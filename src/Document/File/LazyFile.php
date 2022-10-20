@@ -11,10 +11,35 @@ use Zenstruck\Document\Library;
  */
 final class LazyFile implements LazyDocument
 {
+    private array $metadata;
     private Document $document;
 
-    public function __construct(private string $path, private ?Library $library = null)
+    public function __construct(string|array $metadata, private ?Library $library = null)
     {
+        if (\is_string($metadata)) {
+            $metadata = ['path' => $metadata];
+        }
+
+        $this->metadata = $metadata;
+    }
+
+    public static function serialize(Document $document, ?array $fields = null): string|array
+    {
+        if (!$fields) {
+            return $document->path();
+        }
+
+        $data = [];
+
+        foreach ($fields as $field) {
+            if (!\method_exists($document, $field)) {
+                throw new \LogicException(); // todo
+            }
+
+            $data[$field] = $document->{$field}();
+        }
+
+        return $data;
     }
 
     public function setLibrary(Library $library): static
@@ -26,37 +51,41 @@ final class LazyFile implements LazyDocument
 
     public function path(): string
     {
-        return $this->path;
+        return $this->metadata[__FUNCTION__] ?? throw new \LogicException(); // todo use namer
     }
 
     public function name(): string
     {
-        return \pathinfo($this->path, \PATHINFO_BASENAME);
+        return $this->metadata[__FUNCTION__] ??= \pathinfo($this->path(), \PATHINFO_BASENAME);
     }
 
     public function nameWithoutExtension(): string
     {
-        return \pathinfo($this->path, \PATHINFO_FILENAME);
+        return $this->metadata[__FUNCTION__] ??= \pathinfo($this->path(), \PATHINFO_FILENAME);
     }
 
     public function extension(): string
     {
-        return \pathinfo($this->path, \PATHINFO_EXTENSION);
+        return $this->metadata[__FUNCTION__] ??= \pathinfo($this->path(), \PATHINFO_EXTENSION);
     }
 
     public function lastModified(): int
     {
-        return $this->document()->lastModified();
+        return $this->metadata[__FUNCTION__] ??= $this->document()->lastModified();
     }
 
     public function size(): int
     {
-        return $this->document()->size();
+        return $this->metadata[__FUNCTION__] ??= $this->document()->size();
     }
 
     public function checksum(array $config = []): string
     {
-        return $this->document()->checksum($config);
+        if ($config) {
+            return $this->document()->checksum($config);
+        }
+
+        return $this->metadata[__FUNCTION__] ??= $this->document()->checksum();
     }
 
     public function contents(): string
@@ -71,7 +100,11 @@ final class LazyFile implements LazyDocument
 
     public function url(array $config = []): string
     {
-        return $this->document()->url($config);
+        if ($config) {
+            return $this->document()->url($config);
+        }
+
+        return $this->metadata[__FUNCTION__] ??= $this->document()->url();
     }
 
     public function exists(): bool
@@ -81,12 +114,13 @@ final class LazyFile implements LazyDocument
 
     public function mimeType(): string
     {
-        return $this->document()->mimeType();
+        return $this->metadata[__FUNCTION__] ??= $this->document()->mimeType();
     }
 
     public function refresh(): static
     {
         $this->document()->refresh();
+        $this->metadata = [];
 
         return $this;
     }
@@ -95,6 +129,6 @@ final class LazyFile implements LazyDocument
     {
         $this->library ?? throw new \LogicException(); // todo
 
-        return $this->document ??= $this->library->open($this->path);
+        return $this->document ??= $this->library->open($this->path());
     }
 }
