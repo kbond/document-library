@@ -33,7 +33,7 @@ final class PendingDocument implements Document
 
     public function nameWithoutExtension(): string
     {
-        return \mb_substr($this->name(), 0, -\mb_strlen((string) $this->extension()));
+        return \pathinfo($this->name(), \PATHINFO_FILENAME);
     }
 
     public function extension(): string
