@@ -7,6 +7,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\ORMSetup;
 use Doctrine\ORM\Tools\SchemaTool;
+use Doctrine\Persistence\ManagerRegistry;
 use Zenstruck\Document\Bridge\Doctrine\DBAL\Types\DocumentType;
 use Zenstruck\Document\Library\Tests\Bridge\Doctrine\Fixture\Entity1;
 
@@ -16,6 +17,14 @@ use Zenstruck\Document\Library\Tests\Bridge\Doctrine\Fixture\Entity1;
 trait HasORM
 {
     private static ?EntityManagerInterface $em = null;
+
+    protected function doctrine(): ManagerRegistry
+    {
+        $doctrine = $this->createMock(ManagerRegistry::class);
+        $doctrine->method('getManagerForClass')->withAnyParameters()->willReturn($this->em());
+
+        return $doctrine;
+    }
 
     protected function em(): EntityManagerInterface
     {

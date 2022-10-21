@@ -16,6 +16,6 @@ class Entity1
     #[ORM\Column(nullable: true)]
     public ?string $name = null;
 
-    #[ORM\Column(type: Document::class, nullable: true)]
+    #[ORM\Column(type: Document::class, nullable: true, options: ['library' => 'memory'])]
     public ?Document $document1 = null;
 }
