@@ -6,8 +6,8 @@ use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\NullAdapter;
 use Symfony\Contracts\Cache\CacheInterface;
-use Zenstruck\Document\Bridge\Doctrine\Persistence\Mapping\CacheMappingProvider;
-use Zenstruck\Document\Bridge\Doctrine\Persistence\Mapping\ManagerRegistryMappingProvider;
+use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\Mapping\CacheMappingProvider;
+use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\Mapping\ManagerRegistryMappingProvider;
 use Zenstruck\Document\Library\Tests\Bridge\Doctrine\Fixture\Entity1;
 use Zenstruck\Document\Library\Tests\Bridge\Doctrine\Persistence\MappingProviderTest;
 

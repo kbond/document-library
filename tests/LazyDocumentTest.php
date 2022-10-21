@@ -1,22 +1,21 @@
 <?php
 
-namespace Zenstruck\Document\Library\Tests\File;
+namespace Zenstruck\Document\Library\Tests;
 
 use Zenstruck\Document;
-use Zenstruck\Document\File\LazyFile;
-use Zenstruck\Document\Library\Tests\DocumentTest;
+use Zenstruck\Document\LazyDocument;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
  */
-final class LazyFileTest extends DocumentTest
+final class LazyDocumentTest extends DocumentTest
 {
     /**
      * @test
      */
     public function can_create_with_cached_metadata(): void
     {
-        $document = new LazyFile([
+        $document = new LazyDocument([
             'path' => '1',
             'name' => '2',
             'nameWithoutExtension' => '3',
@@ -44,6 +43,6 @@ final class LazyFileTest extends DocumentTest
         $library = self::inMemoryLibrary();
         $library->store($path, $file);
 
-        return (new LazyFile($path))->setLibrary($library);
+        return (new LazyDocument($path))->setLibrary($library);
     }
 }

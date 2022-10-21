@@ -5,8 +5,8 @@ namespace Zenstruck\Document\Library\Tests\Bridge\Symfony\Serializer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Serializer;
 use Zenstruck\Document;
-use Zenstruck\Document\Bridge\Symfony\Serializer\DocumentNormalizer;
-use Zenstruck\Document\File\LazyFile;
+use Zenstruck\Document\LazyDocument;
+use Zenstruck\Document\Library\Bridge\Symfony\Serializer\DocumentNormalizer;
 use Zenstruck\Document\Library\Tests\TestCase;
 use Zenstruck\Document\LibraryRegistry;
 
@@ -31,7 +31,7 @@ final class DocumentNormalizerTest extends TestCase
 
         $deserialized = $serializer->deserialize($serialized, Document::class, 'json');
 
-        $this->assertInstanceOf(LazyFile::class, $deserialized);
+        $this->assertInstanceOf(LazyDocument::class, $deserialized);
         $this->assertSame('some/file.txt', $deserialized->path());
         $this->assertSame('file.txt', $deserialized->name());
         $this->assertSame('file', $deserialized->nameWithoutExtension());
@@ -55,7 +55,7 @@ final class DocumentNormalizerTest extends TestCase
 
         $deserialized = $serializer->deserialize($serialized, Document::class, 'json', ['library' => 'memory']);
 
-        $this->assertInstanceOf(LazyFile::class, $deserialized);
+        $this->assertInstanceOf(LazyDocument::class, $deserialized);
         $this->assertSame('some/file.txt', $deserialized->path());
         $this->assertSame('file.txt', $deserialized->name());
         $this->assertSame('file', $deserialized->nameWithoutExtension());
@@ -77,7 +77,7 @@ final class DocumentNormalizerTest extends TestCase
 
         $deserialized = $serializer->deserialize($serialized, Document::class, 'json');
 
-        $this->assertInstanceOf(LazyFile::class, $deserialized);
+        $this->assertInstanceOf(LazyDocument::class, $deserialized);
         $this->assertSame('some/file.txt', $deserialized->path());
         $this->assertSame('file.txt', $deserialized->name());
         $this->assertSame('file', $deserialized->nameWithoutExtension());
@@ -103,7 +103,7 @@ final class DocumentNormalizerTest extends TestCase
 
         $deserialized = $serializer->deserialize($serialized, Document::class, 'json', ['library' => 'memory']);
 
-        $this->assertInstanceOf(LazyFile::class, $deserialized);
+        $this->assertInstanceOf(LazyDocument::class, $deserialized);
         $this->assertSame('some/file.txt', $deserialized->path());
         $this->assertSame('file.txt', $deserialized->name());
         $this->assertSame('file', $deserialized->nameWithoutExtension());

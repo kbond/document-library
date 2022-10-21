@@ -1,9 +1,9 @@
 <?php
 
-namespace Zenstruck\Document\Bridge\Doctrine\Persistence\Mapping;
+namespace Zenstruck\Document\Library\Bridge\Doctrine\Persistence\Mapping;
 
 use Symfony\Contracts\Cache\CacheInterface;
-use Zenstruck\Document\Bridge\Doctrine\Persistence\MappingProvider;
+use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\MappingProvider;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>

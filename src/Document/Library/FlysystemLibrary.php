@@ -4,7 +4,7 @@ namespace Zenstruck\Document\Library;
 
 use League\Flysystem\FilesystemOperator;
 use Zenstruck\Document;
-use Zenstruck\Document\File\FlysystemFile;
+use Zenstruck\Document\FlysystemDocument;
 use Zenstruck\Document\Library;
 
 /**
@@ -18,7 +18,7 @@ final class FlysystemLibrary implements Library
 
     public function open(string $path): Document
     {
-        return new FlysystemFile($this->filesystem, $path);
+        return new FlysystemDocument($this->filesystem, $path);
     }
 
     public function has(string $path): bool

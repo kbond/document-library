@@ -1,12 +1,12 @@
 <?php
 
-namespace Zenstruck\Document\Bridge\Doctrine\Persistence\Mapping;
+namespace Zenstruck\Document\Library\Bridge\Doctrine\Persistence\Mapping;
 
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Serializer\Annotation\Context;
-use Zenstruck\Document\Bridge\Doctrine\DBAL\Types\DocumentType;
-use Zenstruck\Document\Bridge\Doctrine\Persistence\MappingProvider;
+use Zenstruck\Document\Library\Bridge\Doctrine\DBAL\Types\DocumentType;
+use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\MappingProvider;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>

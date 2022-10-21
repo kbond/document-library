@@ -1,6 +1,6 @@
 <?php
 
-namespace Zenstruck\Document\Bridge\Doctrine\Persistence;
+namespace Zenstruck\Document\Library\Bridge\Doctrine\Persistence;
 
 use Zenstruck\Document\LibraryRegistry;
 

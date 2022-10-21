@@ -1,9 +1,9 @@
 <?php
 
-namespace Zenstruck\Document\Bridge\Symfony\HttpKernel;
+namespace Zenstruck\Document\Library\Bridge\Symfony\HttpKernel;
 
 use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmerInterface;
-use Zenstruck\Document\Bridge\Doctrine\Persistence\Mapping\CacheMappingProvider;
+use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\Mapping\CacheMappingProvider;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>

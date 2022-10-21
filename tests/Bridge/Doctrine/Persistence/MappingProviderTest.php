@@ -2,7 +2,7 @@
 
 namespace Zenstruck\Document\Library\Tests\Bridge\Doctrine\Persistence;
 
-use Zenstruck\Document\Bridge\Doctrine\Persistence\MappingProvider;
+use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\MappingProvider;
 use Zenstruck\Document\Library\Tests\Bridge\Doctrine\Fixture\Entity1;
 use Zenstruck\Document\Library\Tests\Bridge\Doctrine\HasORM;
 use Zenstruck\Document\Library\Tests\TestCase;

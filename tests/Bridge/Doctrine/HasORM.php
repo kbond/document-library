@@ -8,7 +8,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\ORMSetup;
 use Doctrine\ORM\Tools\SchemaTool;
 use Doctrine\Persistence\ManagerRegistry;
-use Zenstruck\Document\Bridge\Doctrine\DBAL\Types\DocumentType;
+use Zenstruck\Document\Library\Bridge\Doctrine\DBAL\Types\DocumentType;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>

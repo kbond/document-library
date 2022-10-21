@@ -1,12 +1,12 @@
 <?php
 
-namespace Zenstruck\Document\Bridge\Doctrine\DBAL\Types;
+namespace Zenstruck\Document\Library\Bridge\Doctrine\DBAL\Types;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\ConversionException;
 use Doctrine\DBAL\Types\JsonType;
 use Zenstruck\Document;
-use Zenstruck\Document\File\LazyFile;
+use Zenstruck\Document\LazyDocument;
 use Zenstruck\Document\SerializableDocument;
 
 /**
@@ -44,7 +44,7 @@ final class DocumentType extends JsonType
             throw ConversionException::conversionFailedFormat($value, Document::class, 'string|array|null');
         }
 
-        return new LazyFile(parent::convertToPHPValue($value, $platform));
+        return new LazyDocument(parent::convertToPHPValue($value, $platform));
     }
 
     public function getName(): string

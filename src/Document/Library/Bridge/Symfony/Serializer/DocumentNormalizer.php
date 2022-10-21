@@ -1,12 +1,12 @@
 <?php
 
-namespace Zenstruck\Document\Bridge\Symfony\Serializer;
+namespace Zenstruck\Document\Library\Bridge\Symfony\Serializer;
 
 use Symfony\Component\Serializer\Normalizer\CacheableSupportsMethodInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Zenstruck\Document;
-use Zenstruck\Document\File\LazyFile;
+use Zenstruck\Document\LazyDocument;
 use Zenstruck\Document\LibraryRegistry;
 use Zenstruck\Document\SerializableDocument;
 
@@ -44,7 +44,7 @@ final class DocumentNormalizer implements NormalizerInterface, DenormalizerInter
      */
     public function denormalize(mixed $data, string $type, ?string $format = null, array $context = []): Document
     {
-        $document = new LazyFile($data);
+        $document = new LazyDocument($data);
 
         if ($library = $context[self::LIBRARY] ?? null) {
             $document->setLibrary($this->registry->get($library));

@@ -2,7 +2,7 @@
 
 namespace Zenstruck\Document\Library\Tests\Bridge\Doctrine\DBAL\Type;
 
-use Zenstruck\Document\File\LazyFile;
+use Zenstruck\Document\LazyDocument;
 use Zenstruck\Document\Library\Tests\Bridge\Doctrine\Fixture\Entity1;
 use Zenstruck\Document\Library\Tests\Bridge\Doctrine\HasORM;
 use Zenstruck\Document\Library\Tests\TestCase;
@@ -45,7 +45,7 @@ final class DocumentTypeTest extends TestCase
 
         $entity = $this->em()->find(Entity1::class, 1);
 
-        $this->assertInstanceOf(LazyFile::class, $entity->document1);
+        $this->assertInstanceOf(LazyDocument::class, $entity->document1);
         $this->assertSame('some/file.txt', $entity->document1->path());
 
         $entity->document1 = self::inMemoryLibrary()->store('another/file.txt', 'content');
@@ -54,7 +54,7 @@ final class DocumentTypeTest extends TestCase
 
         $entity = $this->em()->find(Entity1::class, 1);
 
-        $this->assertInstanceOf(LazyFile::class, $entity->document1);
+        $this->assertInstanceOf(LazyDocument::class, $entity->document1);
         $this->assertSame('another/file.txt', $entity->document1->path());
 
         $entity->document1 = null;
@@ -82,7 +82,7 @@ final class DocumentTypeTest extends TestCase
 
         $entity = $this->em()->find(Entity1::class, 1);
 
-        $this->assertInstanceOf(LazyFile::class, $entity->document1);
+        $this->assertInstanceOf(LazyDocument::class, $entity->document1);
         $this->assertSame('some/file.txt', $entity->document1->path());
         $this->assertSame('text/plain', $entity->document1->mimeType());
         $this->assertSame(7, $entity->document1->size());
@@ -95,7 +95,7 @@ final class DocumentTypeTest extends TestCase
 
         $entity = $this->em()->find(Entity1::class, 1);
 
-        $this->assertInstanceOf(LazyFile::class, $entity->document1);
+        $this->assertInstanceOf(LazyDocument::class, $entity->document1);
         $this->assertSame('another/file.txt', $entity->document1->path());
         $this->assertSame('text/plain', $entity->document1->mimeType());
         $this->assertSame(11, $entity->document1->size());
