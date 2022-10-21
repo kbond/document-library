@@ -3,6 +3,7 @@
 namespace Zenstruck\Document\Library\Tests\Bridge\Doctrine\Fixture;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Context;
 use Zenstruck\Document;
 
 #[ORM\Entity]
@@ -18,4 +19,8 @@ class Entity1
 
     #[ORM\Column(type: Document::class, nullable: true, options: ['library' => 'memory'])]
     public ?Document $document1 = null;
+
+    #[Context(['library' => 'public'])]
+    #[ORM\Column(type: Document::class, nullable: true)]
+    public ?Document $document2 = null;
 }

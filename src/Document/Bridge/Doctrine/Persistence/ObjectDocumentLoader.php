@@ -9,7 +9,7 @@ use Zenstruck\Document\LibraryRegistry;
  */
 final class ObjectDocumentLoader
 {
-    public function __construct(private LibraryRegistry $registry, private MappingConfigProvider $config)
+    public function __construct(private LibraryRegistry $registry, private MappingProvider $config)
     {
     }
 
