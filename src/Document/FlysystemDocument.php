@@ -112,4 +112,9 @@ final class FlysystemDocument implements Document
 
         return $clone;
     }
+
+    public function tempFile(): \SplFileInfo
+    {
+        return TempFile::for($this);
+    }
 }

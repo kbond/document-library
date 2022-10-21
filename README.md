@@ -105,7 +105,7 @@ $json = $serializer->serialize($document, 'json'); // "path/to/document"
 
 $document = $serializer->deserialize($json, Document::class, 'json', [
     'library' => 'public', // library name IS REQUIRED when deserializing
-]); // \Zenstruck/Document
+]); // \Zenstruck\Document
 ```
 
 When a document is a property on an object you want to serialize/deserialize, use the `Context`

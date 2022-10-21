@@ -95,4 +95,9 @@ final class PendingDocument implements Document
 
         return clone $this;
     }
+
+    public function tempFile(): \SplFileInfo
+    {
+        return TempFile::for($this);
+    }
 }

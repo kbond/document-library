@@ -53,4 +53,10 @@ interface Document
      * @immutable
      */
     public function refresh(): static;
+
+    /**
+     * Create a temporary file for this document that is deleted at the
+     * end of the script.
+     */
+    public function tempFile(): \SplFileInfo;
 }

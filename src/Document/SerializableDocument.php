@@ -95,4 +95,9 @@ final class SerializableDocument implements Document
 
         return $clone;
     }
+
+    public function tempFile(): \SplFileInfo
+    {
+        return $this->document->tempFile();
+    }
 }

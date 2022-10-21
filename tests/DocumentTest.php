@@ -48,5 +48,15 @@ abstract class DocumentTest extends TestCase
         $this->assertNotSame($document, $document->refresh());
     }
 
+    /**
+     * @test
+     */
+    public function can_get_temp_file(): void
+    {
+        $document = $this->document('some/file.txt', new \SplFileInfo(__FILE__));
+
+        $this->assertFileEquals(__FILE__, $document->tempFile());
+    }
+
     abstract protected function document(string $path, \SplFileInfo $file): Document;
 }

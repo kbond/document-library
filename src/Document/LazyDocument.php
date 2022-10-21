@@ -105,6 +105,11 @@ final class LazyDocument implements Document
         return $clone;
     }
 
+    public function tempFile(): \SplFileInfo
+    {
+        return $this->document()->tempFile();
+    }
+
     private function document(): Document
     {
         $this->library ?? throw new \LogicException(); // todo
