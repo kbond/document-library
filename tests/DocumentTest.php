@@ -39,5 +39,15 @@ abstract class DocumentTest extends TestCase
         $this->assertSame('text/x-php', $document->mimeType());
     }
 
+    /**
+     * @test
+     */
+    public function refresh_is_immutable(): void
+    {
+        $document = $this->document('some/file.txt', new \SplFileInfo(__FILE__));
+
+        $this->assertNotSame($document, $document->refresh());
+    }
+
     abstract protected function document(string $path, \SplFileInfo $file): Document;
 }

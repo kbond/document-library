@@ -90,8 +90,9 @@ final class SerializableDocument implements Document
 
     public function refresh(): static
     {
-        $this->document = $this->document->refresh();
+        $clone = clone $this;
+        $clone->document = $this->document->refresh();
 
-        return $this;
+        return $clone;
     }
 }

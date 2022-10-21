@@ -100,10 +100,11 @@ final class LazyFile implements LazyDocument
 
     public function refresh(): static
     {
-        $this->document()->refresh();
-        $this->metadata = [];
+        $clone = clone $this;
+        $clone->document = $this->document()->refresh();
+        $clone->metadata = [];
 
-        return $this;
+        return $clone;
     }
 
     private function document(): Document

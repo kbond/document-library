@@ -48,7 +48,9 @@ interface Document
     public function mimeType(): string;
 
     /**
-     * Clear any cached metadata.
+     * Return a fresh instance from the library.
+     *
+     * @immutable
      */
     public function refresh(): static;
 }

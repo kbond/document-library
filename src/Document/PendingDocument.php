@@ -93,6 +93,6 @@ final class PendingDocument implements Document
     {
         \clearstatcache(false, $this->file);
 
-        return $this;
+        return clone $this;
     }
 }

@@ -106,9 +106,10 @@ final class FlysystemFile implements Document
 
     public function refresh(): static
     {
-        unset($this->size, $this->lastModified, $this->mimeType);
-        $this->checksum = $this->url = [];
+        $clone = clone $this;
+        unset($clone->size, $clone->lastModified, $clone->mimeType);
+        $clone->checksum = $clone->url = [];
 
-        return $this;
+        return $clone;
     }
 }
