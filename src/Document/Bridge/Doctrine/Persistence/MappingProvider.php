@@ -15,7 +15,7 @@ interface MappingProvider
     public function get(string $class): array;
 
     /**
-     * @return array<string,array<string,array<string,mixed>>>
+     * @return array<class-string,array<string,array<string,mixed>>>
      */
     public function all(): array;
 }
