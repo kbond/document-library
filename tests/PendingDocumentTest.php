@@ -2,7 +2,6 @@
 
 namespace Zenstruck\Document\Library\Tests;
 
-use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Zenstruck\Document;
 use Zenstruck\Document\PendingDocument;

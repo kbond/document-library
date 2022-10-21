@@ -2,7 +2,6 @@
 
 namespace Zenstruck\Document\Bridge\Symfony\Serializer;
 
-use Symfony\Component\Serializer\Exception\UnexpectedValueException;
 use Symfony\Component\Serializer\Normalizer\CacheableSupportsMethodInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
@@ -16,6 +15,7 @@ use Zenstruck\Document\LibraryRegistry;
 final class DocumentNormalizer implements NormalizerInterface, DenormalizerInterface, CacheableSupportsMethodInterface
 {
     public const LIBRARY = 'library';
+    public const METADATA = 'metadata';
 
     public function __construct(private LibraryRegistry $registry)
     {
@@ -24,9 +24,9 @@ final class DocumentNormalizer implements NormalizerInterface, DenormalizerInter
     /**
      * @param Document $object
      */
-    public function normalize(mixed $object, ?string $format = null, array $context = []): string
+    public function normalize(mixed $object, ?string $format = null, array $context = []): string|array
     {
-        return $object->path();
+        return LazyFile::serialize($object, $context[self::METADATA] ?? null);
     }
 
     public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
@@ -39,16 +39,18 @@ final class DocumentNormalizer implements NormalizerInterface, DenormalizerInter
      */
     public function denormalize(mixed $data, string $type, ?string $format = null, array $context = []): Document
     {
-        if (!$library = $context[self::LIBRARY]) {
-            throw new UnexpectedValueException('library context is required'); // todo
+        $document = new LazyFile($data);
+
+        if ($library = $context[self::LIBRARY] ?? null) {
+            $document->setLibrary($this->registry->get($library));
         }
 
-        return new LazyFile($data, $this->registry->get($library));
+        return $document;
     }
 
     public function supportsDenormalization(mixed $data, string $type, ?string $format = null, array $context = []): bool
     {
-        return \is_string($data) && Document::class === $type;
+        return Document::class === $type;
     }
 
     public function hasCacheableSupportsMethod(): bool
