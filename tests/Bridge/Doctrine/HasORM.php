@@ -9,7 +9,6 @@ use Doctrine\ORM\ORMSetup;
 use Doctrine\ORM\Tools\SchemaTool;
 use Doctrine\Persistence\ManagerRegistry;
 use Zenstruck\Document\Bridge\Doctrine\DBAL\Types\DocumentType;
-use Zenstruck\Document\Library\Tests\Bridge\Doctrine\Fixture\Entity1;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
@@ -22,6 +21,7 @@ trait HasORM
     {
         $doctrine = $this->createMock(ManagerRegistry::class);
         $doctrine->method('getManagerForClass')->withAnyParameters()->willReturn($this->em());
+        $doctrine->method('getManagers')->willReturn([$this->em()]);
 
         return $doctrine;
     }
@@ -38,13 +38,11 @@ trait HasORM
 
         self::$em = EntityManager::create(
             ['driver' => 'pdo_sqlite', 'memory' => true],
-            ORMSetup::createAttributeMetadataConfiguration([], true)
+            ORMSetup::createAttributeMetadataConfiguration([__DIR__.'/Fixture'], true)
         );
 
         $schemaTool = new SchemaTool(self::$em);
-        $schemaTool->createSchema([
-            self::$em->getClassMetadata(Entity1::class),
-        ]);
+        $schemaTool->createSchema(self::$em->getMetadataFactory()->getAllMetadata());
 
         return self::$em;
     }

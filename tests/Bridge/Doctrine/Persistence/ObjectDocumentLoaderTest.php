@@ -2,7 +2,7 @@
 
 namespace Zenstruck\Document\Library\Tests\Bridge\Doctrine\Persistence;
 
-use Zenstruck\Document\Bridge\Doctrine\Persistence\Mapping\ORMMappingProvider;
+use Zenstruck\Document\Bridge\Doctrine\Persistence\Mapping\ManagerRegistryMappingProvider;
 use Zenstruck\Document\Bridge\Doctrine\Persistence\ObjectDocumentLoader;
 use Zenstruck\Document\Library\Tests\Bridge\Doctrine\Fixture\Entity1;
 use Zenstruck\Document\Library\Tests\Bridge\Doctrine\HasORM;
@@ -21,7 +21,7 @@ final class ObjectDocumentLoaderTest extends TestCase
     public function can_load_documents_for_entity(): void
     {
         $registry = self::libraryRegistry();
-        $loader = new ObjectDocumentLoader($registry, new ORMMappingProvider($this->doctrine()));
+        $loader = new ObjectDocumentLoader($registry, new ManagerRegistryMappingProvider($this->doctrine()));
 
         $entity = new Entity1();
         $entity->document1 = $registry->get('memory')->store('some/file.txt', 'content');

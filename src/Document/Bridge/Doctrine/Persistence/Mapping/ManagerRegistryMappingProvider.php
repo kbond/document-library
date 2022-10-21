@@ -11,7 +11,7 @@ use Zenstruck\Document\Bridge\Doctrine\Persistence\MappingProvider;
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
  */
-final class ORMMappingProvider implements MappingProvider
+final class ManagerRegistryMappingProvider implements MappingProvider
 {
     public function __construct(private ManagerRegistry $registry)
     {
@@ -23,7 +23,7 @@ final class ORMMappingProvider implements MappingProvider
         $metadata = $this->registry->getManagerForClass($class)?->getClassMetadata($class);
 
         if (!$metadata instanceof ClassMetadata) {
-            throw new \LogicException(); // todo
+            return []; // todo support other object managers
         }
 
         $config = [];
@@ -47,6 +47,19 @@ final class ORMMappingProvider implements MappingProvider
         }
 
         return $config;
+    }
+
+    public function all(): array
+    {
+        $config = [];
+
+        foreach ($this->registry->getManagers() as $manager) {
+            foreach ($manager->getMetadataFactory()->getAllMetadata() as $metadata) {
+                $config[$metadata->getName()] = $this->get($metadata->getName());
+            }
+        }
+
+        return \array_filter($config);
     }
 
     private static function configFromAttribute(\ReflectionProperty $property): array
