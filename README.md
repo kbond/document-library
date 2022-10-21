@@ -25,6 +25,7 @@ $document->contents(); // string (file contents)
 $document->url(); // string (public url for document)
 $document->exists(); // bool (whether the document exists or not)
 $document->refresh(); // self (clears any cached metadata)
+$document->tempFile(); // \SplFileInfo (real, local file that's deleted at the end of the script)
 
 // Check if Document exists
 $library->has('some/file.txt'); // bool (whether the document exists or not)
@@ -40,6 +41,24 @@ $library->store('some/file.txt', $document); // \Zenstruck\Document
 
 // Delete Documents
 $library->delete('some/file.txt'); // self (fluent)
+```
+
+## `LibraryRegistry`
+
+This is a container for your app's libraries:
+
+```php
+use Zenstruck\Document\LibraryRegistry;
+
+/** @var \Zenstruck\Document\Library $publicLibary */
+/** @var \Zenstruck\Document\Library $privateLibrary */
+
+$registry = new LibraryRegistry([
+    'public' => $publicLibary,
+    'private' => $privateLibrary,
+]);
+
+$registry->get('public'); // $publicLibrary
 ```
 
 ## Symfony
@@ -93,7 +112,7 @@ $em->flush(); // profileImage document is deleted from the library
 
 ### Serializer
 
-Serialize/Unserialize document:
+Serialize/Deserialize document:
 
 ```php
 use Zenstruck\Document;
