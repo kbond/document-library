@@ -8,6 +8,7 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Zenstruck\Document;
 use Zenstruck\Document\File\LazyFile;
 use Zenstruck\Document\LibraryRegistry;
+use Zenstruck\Document\SerializableDocument;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
@@ -26,7 +27,11 @@ final class DocumentNormalizer implements NormalizerInterface, DenormalizerInter
      */
     public function normalize(mixed $object, ?string $format = null, array $context = []): string|array
     {
-        return LazyFile::serialize($object, $context[self::METADATA] ?? null);
+        if ($metadata = $context[self::METADATA] ?? null) {
+            return (new SerializableDocument($object, $metadata))->serialize();
+        }
+
+        return $object->path();
     }
 
     public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool

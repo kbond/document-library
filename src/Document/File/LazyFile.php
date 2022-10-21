@@ -23,25 +23,6 @@ final class LazyFile implements LazyDocument
         $this->metadata = $metadata;
     }
 
-    public static function serialize(Document $document, ?array $fields = null): string|array
-    {
-        if (!$fields) {
-            return $document->path();
-        }
-
-        $data = [];
-
-        foreach ($fields as $field) {
-            if (!\method_exists($document, $field)) {
-                throw new \LogicException(); // todo
-            }
-
-            $data[$field] = $document->{$field}();
-        }
-
-        return $data;
-    }
-
     public function setLibrary(Library $library): static
     {
         $this->library = $library;
