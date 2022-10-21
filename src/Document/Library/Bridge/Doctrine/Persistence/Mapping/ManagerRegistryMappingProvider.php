@@ -19,7 +19,6 @@ final class ManagerRegistryMappingProvider implements MappingProvider
 
     public function get(string $class): array
     {
-        // todo caching, warmup
         $metadata = $this->registry->getManagerForClass($class)?->getClassMetadata($class);
 
         if (!$metadata instanceof ClassMetadata) {

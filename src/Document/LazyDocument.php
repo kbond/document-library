@@ -114,6 +114,10 @@ final class LazyDocument implements Document
     {
         $this->library ?? throw new \LogicException(); // todo
 
-        return $this->document ??= $this->library->open($this->path());
+        try {
+            return $this->document ??= $this->library->open($this->path());
+        } finally {
+            $this->metadata = [];
+        }
     }
 }

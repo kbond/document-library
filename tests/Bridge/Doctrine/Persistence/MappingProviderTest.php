@@ -25,7 +25,8 @@ abstract class MappingProviderTest extends TestCase
                     'library' => 'memory',
                 ],
                 'document2' => [
-                    'library' => 'public',
+                    'library' => 'memory',
+                    'metadata' => ['path', 'size'],
                 ],
             ],
             $this->provider()->get(Entity1::class)
@@ -44,7 +45,8 @@ abstract class MappingProviderTest extends TestCase
                         'library' => 'memory',
                     ],
                     'document2' => [
-                        'library' => 'public',
+                        'library' => 'memory',
+                        'metadata' => ['path', 'size'],
                     ],
                 ],
             ],

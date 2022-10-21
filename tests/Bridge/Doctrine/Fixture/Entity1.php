@@ -20,7 +20,7 @@ class Entity1
     #[ORM\Column(type: Document::class, nullable: true, options: ['library' => 'memory'])]
     public ?Document $document1 = null;
 
-    #[Context(['library' => 'public'])]
+    #[Context(['library' => 'memory', 'metadata' => ['path', 'size']])]
     #[ORM\Column(type: Document::class, nullable: true)]
     public ?Document $document2 = null;
 }
