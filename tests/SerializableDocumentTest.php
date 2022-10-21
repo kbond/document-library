@@ -2,10 +2,7 @@
 
 namespace Zenstruck\Document\Library\Tests;
 
-use League\Flysystem\Filesystem;
-use League\Flysystem\InMemory\InMemoryFilesystemAdapter;
 use Zenstruck\Document;
-use Zenstruck\Document\Library\FlysystemLibrary;
 use Zenstruck\Document\SerializableDocument;
 
 /**
@@ -18,7 +15,7 @@ final class SerializableDocumentTest extends DocumentTest
      */
     public function can_serialize_with_fields(): void
     {
-        $library = new FlysystemLibrary(new Filesystem(new InMemoryFilesystemAdapter(), ['public_url' => '/']));
+        $library = self::inMemoryLibrary(['public_url' => '/']);
         $document = new SerializableDocument($library->store('the/path.txt', 'content'), [
             'path',
             'name',
@@ -49,8 +46,6 @@ final class SerializableDocumentTest extends DocumentTest
 
     protected function document(string $path, \SplFileInfo $file): Document
     {
-        $library = new FlysystemLibrary(new Filesystem(new InMemoryFilesystemAdapter()));
-
-        return new SerializableDocument($library->store($path, $file), []);
+        return new SerializableDocument(self::inMemoryLibrary()->store($path, $file), []);
     }
 }

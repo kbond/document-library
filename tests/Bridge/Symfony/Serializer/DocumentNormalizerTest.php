@@ -2,15 +2,12 @@
 
 namespace Zenstruck\Document\Library\Tests\Bridge\Symfony\Serializer;
 
-use League\Flysystem\Filesystem;
-use League\Flysystem\InMemory\InMemoryFilesystemAdapter;
-use PHPUnit\Framework\TestCase;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Serializer;
 use Zenstruck\Document;
 use Zenstruck\Document\Bridge\Symfony\Serializer\DocumentNormalizer;
 use Zenstruck\Document\File\LazyFile;
-use Zenstruck\Document\Library\FlysystemLibrary;
+use Zenstruck\Document\Library\Tests\TestCase;
 use Zenstruck\Document\LibraryRegistry;
 
 /**
@@ -25,7 +22,7 @@ final class DocumentNormalizerTest extends TestCase
      */
     public function can_serialize_and_unserialize_document(): void
     {
-        $document = self::registry()->get('default')->store('some/file.txt', 'content');
+        $document = self::registry()->get('memory')->store('some/file.txt', 'content');
         $serializer = self::serializer();
 
         $serialized = $serializer->serialize($document, 'json');
@@ -49,14 +46,14 @@ final class DocumentNormalizerTest extends TestCase
      */
     public function can_serialize_and_unserialize_document_and_set_library(): void
     {
-        $document = self::registry()->get('default')->store('some/file.txt', 'content');
+        $document = self::registry()->get('memory')->store('some/file.txt', 'content');
         $serializer = self::serializer();
 
         $serialized = $serializer->serialize($document, 'json');
 
         $this->assertSame(\json_encode('some/file.txt'), $serialized);
 
-        $deserialized = $serializer->deserialize($serialized, Document::class, 'json', ['library' => 'default']);
+        $deserialized = $serializer->deserialize($serialized, Document::class, 'json', ['library' => 'memory']);
 
         $this->assertInstanceOf(LazyFile::class, $deserialized);
         $this->assertSame('some/file.txt', $deserialized->path());
@@ -71,7 +68,7 @@ final class DocumentNormalizerTest extends TestCase
      */
     public function can_serialize_and_unserialize_document_with_metadata(): void
     {
-        $document = self::registry()->get('default')->store('some/file.txt', 'content');
+        $document = self::registry()->get('memory')->store('some/file.txt', 'content');
         $serializer = self::serializer();
 
         $serialized = $serializer->serialize($document, 'json', ['metadata' => ['path', 'mimeType', 'size']]);
@@ -97,14 +94,14 @@ final class DocumentNormalizerTest extends TestCase
      */
     public function can_serialize_and_unserialize_document_with_metadata_and_set_library(): void
     {
-        $document = self::registry()->get('default')->store('some/file.txt', 'content');
+        $document = self::registry()->get('memory')->store('some/file.txt', 'content');
         $serializer = self::serializer();
 
         $serialized = $serializer->serialize($document, 'json', ['metadata' => ['path', 'mimeType', 'size']]);
 
         $this->assertSame(\json_encode(['path' => 'some/file.txt', 'mimeType' => 'text/plain', 'size' => 7]), $serialized);
 
-        $deserialized = $serializer->deserialize($serialized, Document::class, 'json', ['library' => 'default']);
+        $deserialized = $serializer->deserialize($serialized, Document::class, 'json', ['library' => 'memory']);
 
         $this->assertInstanceOf(LazyFile::class, $deserialized);
         $this->assertSame('some/file.txt', $deserialized->path());
@@ -123,8 +120,6 @@ final class DocumentNormalizerTest extends TestCase
 
     private static function registry(): LibraryRegistry
     {
-        return self::$registry ??= new LibraryRegistry([
-            'default' => new FlysystemLibrary(new Filesystem(new InMemoryFilesystemAdapter())),
-        ]);
+        return self::$registry ??= self::libraryRegistry();
     }
 }

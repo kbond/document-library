@@ -2,11 +2,7 @@
 
 namespace Zenstruck\Document\Library\Tests;
 
-use League\Flysystem\Filesystem;
-use League\Flysystem\InMemory\InMemoryFilesystemAdapter;
-use PHPUnit\Framework\TestCase;
 use Zenstruck\Document\Library;
-use Zenstruck\Document\Library\FlysystemLibrary;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
@@ -43,7 +39,7 @@ abstract class LibraryTest extends TestCase
     {
         yield [\file_get_contents(__FILE__)];
         yield [new \SplFileInfo(__FILE__)];
-        yield [(new FlysystemLibrary(new Filesystem(new InMemoryFilesystemAdapter())))->store('temp.file', new \SplFileInfo(__FILE__))];
+        yield [self::inMemoryLibrary()->store('temp.file', new \SplFileInfo(__FILE__))];
     }
 
     /**

@@ -2,7 +2,6 @@
 
 namespace Zenstruck\Document\Library\Tests;
 
-use PHPUnit\Framework\TestCase;
 use Zenstruck\Document;
 
 /**
