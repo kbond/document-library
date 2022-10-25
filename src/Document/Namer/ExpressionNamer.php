@@ -2,7 +2,7 @@
 
 namespace Zenstruck\Document\Namer;
 
-use Symfony\Component\String\ByteString;
+use Symfony\Component\String\Slugger\SluggerInterface;
 use Zenstruck\Document;
 
 /**
@@ -10,6 +10,11 @@ use Zenstruck\Document;
  */
 final class ExpressionNamer extends BaseNamer
 {
+    public function __construct(private string $defaultExpression = '{name}-{checksum}{ext}', ?SluggerInterface $slugger = null)
+    {
+        parent::__construct($slugger);
+    }
+
     public function generateName(Document $document, array $context = []): string
     {
         return \preg_replace_callback(
@@ -23,12 +28,7 @@ final class ExpressionNamer extends BaseNamer
                     default => throw new \LogicException('Invalid match.'),
                 };
             },
-            $context['expression'] ?? '{name}-{rand}{ext}'
+            $context['expression'] ?? $this->defaultExpression
         );
-    }
-
-    private static function randomString(): string
-    {
-        return ByteString::fromRandom(6, '123456789abcdefghijkmnopqrstuvwxyz')->toString();
     }
 }
