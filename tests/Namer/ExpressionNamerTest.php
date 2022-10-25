@@ -98,7 +98,7 @@ final class ExpressionNamerTest extends TestCase
         $document = self::inMemoryLibrary()->store('some/pATh.txt', 'content');
 
         $this->assertSame(
-            'prefix/baz/value/string/1//prop1-value/6',
+            'prefix/baz/value/stRIng/1//prop1-valUe/6',
             $namer->generateName($document, [
                 'expression' => 'prefix/{foo.bar}/{[array][key]}/{object}/{[object].prop1}/{object.prop2}/{object.prop3}/{object.prop4}{object.prop5}',
                 'foo.bar' => 'baz',
@@ -106,6 +106,33 @@ final class ExpressionNamerTest extends TestCase
                 'object' => new ContextObject(),
             ])
         );
+    }
+
+    /**
+     * @test
+     */
+    public function can_access_raw_document_values(): void
+    {
+        $namer = new ExpressionNamer();
+        $document = self::inMemoryLibrary()->store('some/pATh.tXt', 'content');
+
+        $this->assertSame('prefix/9a0364b9e99bb480dd25e1f0284c8555-pATh.tXt', $namer->generateName($document, [
+            'expression' => 'prefix/{document.checksum}-{document.name}',
+        ]));
+    }
+
+    /**
+     * @test
+     */
+    public function can_use_variable_modifiers(): void
+    {
+        $namer = new ExpressionNamer();
+        $document = self::inMemoryLibrary()->store('some/pA Th.tXt', 'content');
+
+        $this->assertSame('prefix/string/prop1-value/pa-th--9a0364b.txt', $namer->generateName($document, [
+            'expression' => 'prefix/{object|slug}/{object.prop3|lower}/{document.nameWithoutExtension|slug}--{checksum:7|lower}{ext}',
+            'object' => new ContextObject(),
+        ]));
     }
 
     /**

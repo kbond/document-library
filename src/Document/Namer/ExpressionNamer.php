@@ -23,14 +23,20 @@ final class ExpressionNamer extends BaseNamer
     public function generateName(Document $document, array $context = []): string
     {
         return \preg_replace_callback(
-            '#{([\w.:\-\[\]]+)}#',
+            '#{([\w.:\-\[\]]+)(\|(slug|slugify|lower))?}#',
             function($matches) use ($document, $context) {
-                return match ($matches[1]) {
+                $value = match ($matches[1]) {
                     'name' => $this->slugify($document->nameWithoutExtension()),
                     'ext' => self::extensionWithDot($document),
                     'checksum' => $document->checksum(),
                     'rand' => self::randomString(),
                     default => $this->parseVariable($matches[1], $document, $context),
+                };
+
+                return match ($matches[3] ?? null) {
+                    'slug', 'slugify' => $this->slugify($value),
+                    'lower' => \mb_strtolower($value),
+                    default => $value,
                 };
             },
             $context['expression'] ?? $this->defaultExpression
@@ -47,17 +53,21 @@ final class ExpressionNamer extends BaseNamer
             };
         }
 
-        $value = $this->parseContextVariable($variable, $context);
+        $value = $this->parseVariableValue($document, $variable, $context);
 
         if (null === $value || \is_scalar($value) || $value instanceof \Stringable) {
-            return $this->slugify((string) $value);
+            return (string) $value;
         }
 
         throw new \LogicException(\sprintf('Unable to parse expression variable {%s}.', $variable));
     }
 
-    private function parseContextVariable(string $variable, array $context): mixed
+    private function parseVariableValue(Document $document, string $variable, array $context): mixed
     {
+        if (\str_starts_with($variable, 'document.')) {
+            return $this->propertyAccessor()->getValue($document, \mb_substr($variable, 9));
+        }
+
         if (\array_key_exists($variable, $context)) {
             return $context[$variable];
         }
