@@ -13,7 +13,7 @@ use Zenstruck\Document\LibraryRegistry;
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
  */
-final class DocumentNormalizerTest extends TestCase
+class DocumentNormalizerTest extends TestCase
 {
     private static LibraryRegistry $registry;
 
@@ -113,13 +113,18 @@ final class DocumentNormalizerTest extends TestCase
         $this->assertSame('9a0364b9e99bb480dd25e1f0284c8555', $deserialized->checksum());
     }
 
+    protected static function normalizer(): DocumentNormalizer
+    {
+        return new DocumentNormalizer(self::registry());
+    }
+
+    protected static function registry(): LibraryRegistry
+    {
+        return self::$registry ??= self::libraryRegistry();
+    }
+
     private static function serializer(): Serializer
     {
         return new Serializer([new DocumentNormalizer(self::registry())], [new JsonEncoder()]);
-    }
-
-    private static function registry(): LibraryRegistry
-    {
-        return self::$registry ??= self::libraryRegistry();
     }
 }

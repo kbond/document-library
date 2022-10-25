@@ -13,7 +13,7 @@ use Zenstruck\Document\SerializableDocument;
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
  */
-final class DocumentNormalizer implements NormalizerInterface, DenormalizerInterface, CacheableSupportsMethodInterface
+class DocumentNormalizer implements NormalizerInterface, DenormalizerInterface, CacheableSupportsMethodInterface
 {
     public const LIBRARY = 'library';
     public const METADATA = 'metadata';
@@ -25,7 +25,7 @@ final class DocumentNormalizer implements NormalizerInterface, DenormalizerInter
     /**
      * @param Document $object
      */
-    public function normalize(mixed $object, ?string $format = null, array $context = []): string|array
+    final public function normalize(mixed $object, ?string $format = null, array $context = []): string|array
     {
         if ($metadata = $context[self::METADATA] ?? null) {
             return (new SerializableDocument($object, $metadata))->serialize();
@@ -34,7 +34,7 @@ final class DocumentNormalizer implements NormalizerInterface, DenormalizerInter
         return $object->path();
     }
 
-    public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
+    final public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
     {
         return $data instanceof Document;
     }
@@ -42,24 +42,29 @@ final class DocumentNormalizer implements NormalizerInterface, DenormalizerInter
     /**
      * @param string $data
      */
-    public function denormalize(mixed $data, string $type, ?string $format = null, array $context = []): Document
+    final public function denormalize(mixed $data, string $type, ?string $format = null, array $context = []): Document
     {
         $document = new LazyDocument($data);
 
         if ($library = $context[self::LIBRARY] ?? null) {
-            $document->setLibrary($this->registry->get($library));
+            $document->setLibrary($this->registry()->get($library));
         }
 
         return $document;
     }
 
-    public function supportsDenormalization(mixed $data, string $type, ?string $format = null, array $context = []): bool
+    final public function supportsDenormalization(mixed $data, string $type, ?string $format = null, array $context = []): bool
     {
         return Document::class === $type;
     }
 
-    public function hasCacheableSupportsMethod(): bool
+    final public function hasCacheableSupportsMethod(): bool
     {
         return true;
+    }
+
+    protected function registry(): LibraryRegistry
+    {
+        return $this->registry;
     }
 }
