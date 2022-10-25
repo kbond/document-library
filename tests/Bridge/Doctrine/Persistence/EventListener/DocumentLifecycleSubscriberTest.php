@@ -13,7 +13,7 @@ use Zenstruck\Document\LibraryRegistry;
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
  */
-final class DocumentLifecycleSubscriberTest extends TestCase
+class DocumentLifecycleSubscriberTest extends TestCase
 {
     use HasORM;
 
@@ -171,9 +171,14 @@ final class DocumentLifecycleSubscriberTest extends TestCase
         $this->markTestIncomplete();
     }
 
+    protected function createSubscriber(LibraryRegistry $registry): DocumentLifecycleSubscriber
+    {
+        return new DocumentLifecycleSubscriber($registry, new ManagerRegistryMappingProvider($this->doctrine()));
+    }
+
     private function registerEventSubscriber(LibraryRegistry $registry, string ...$events): void
     {
-        $subscriber = new DocumentLifecycleSubscriber($registry, new ManagerRegistryMappingProvider($this->doctrine()));
+        $subscriber = $this->createSubscriber($registry);
         $events[] = Events::postFlush;
 
         foreach ($events as $event) {

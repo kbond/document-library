@@ -15,38 +15,38 @@ use Zenstruck\Document\SerializableDocument;
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
  */
-final class DocumentLifecycleSubscriber
+class DocumentLifecycleSubscriber
 {
     /** @var callable[] */
     private array $pendingOperations = [];
 
-    public function __construct(private LibraryRegistry $registry, private MappingProvider $mapping)
+    public function __construct(private LibraryRegistry $registry, private MappingProvider $mappingProvider)
     {
     }
 
     /**
      * @param LifecycleEventArgs<ObjectManager> $event
      */
-    public function postLoad(LifecycleEventArgs $event): void
+    final public function postLoad(LifecycleEventArgs $event): void
     {
         $object = $event->getObject();
 
-        if (!$mappings = $this->mapping->get($object::class)) {
+        if (!$mappings = $this->mappingProvider()->get($object::class)) {
             return;
         }
 
         // todo make properties that can be auto-loaded configurable in mapping
-        (new ObjectReflector($object, $mappings))->load($this->registry);
+        (new ObjectReflector($object, $mappings))->load($this->registry());
     }
 
     /**
      * @param LifecycleEventArgs<ObjectManager> $event
      */
-    public function postRemove(LifecycleEventArgs $event): void
+    final public function postRemove(LifecycleEventArgs $event): void
     {
         $object = $event->getObject();
 
-        if (!$mappings = $this->mapping->get($object::class)) {
+        if (!$mappings = $this->mappingProvider()->get($object::class)) {
             return;
         }
 
@@ -56,7 +56,7 @@ final class DocumentLifecycleSubscriber
             $document = $ref->get($property);
 
             if ($document instanceof Document) {
-                $this->registry->get($mapping['library'])->delete($document->path());
+                $this->registry()->get($mapping['library'])->delete($document->path());
             }
         }
     }
@@ -64,11 +64,11 @@ final class DocumentLifecycleSubscriber
     /**
      * @param LifecycleEventArgs<ObjectManager> $event
      */
-    public function prePersist(LifecycleEventArgs $event): void
+    final public function prePersist(LifecycleEventArgs $event): void
     {
         $object = $event->getObject();
 
-        if (!$mappings = $this->mapping->get($object::class)) {
+        if (!$mappings = $this->mappingProvider()->get($object::class)) {
             return;
         }
 
@@ -90,11 +90,11 @@ final class DocumentLifecycleSubscriber
     /**
      * @param PreUpdateEventArgs<ObjectManager>|ORMPreUpdateEventsArgs $event
      */
-    public function preUpdate(PreUpdateEventArgs|ORMPreUpdateEventsArgs $event): void
+    final public function preUpdate(PreUpdateEventArgs|ORMPreUpdateEventsArgs $event): void
     {
         $object = $event->getObject();
 
-        if (!$mappings = $this->mapping->get($object::class)) {
+        if (!$mappings = $this->mappingProvider()->get($object::class)) {
             return;
         }
 
@@ -114,17 +114,27 @@ final class DocumentLifecycleSubscriber
             if ($old instanceof Document && null === $new) {
                 // todo make configurable via mapping
                 // document was removed, delete from library
-                $this->pendingOperations[] = fn() => $this->registry->get($mapping['library'])->delete($old->path());
+                $this->pendingOperations[] = fn() => $this->registry()->get($mapping['library'])->delete($old->path());
             }
         }
     }
 
-    public function postFlush(): void
+    final public function postFlush(): void
     {
         foreach ($this->pendingOperations as $operation) {
             $operation();
         }
 
         $this->pendingOperations = [];
+    }
+
+    protected function registry(): LibraryRegistry
+    {
+        return $this->registry;
+    }
+
+    protected function mappingProvider(): MappingProvider
+    {
+        return $this->mappingProvider;
     }
 }
