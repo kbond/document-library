@@ -31,16 +31,16 @@ final class TempFile extends \SplFileInfo
     /**
      * @param resource|Document|string|\SplFileInfo $contents
      */
-    public static function for(mixed $contents): self
+    public static function for(mixed $contents, ?string $extension = null): self
     {
-        $file = new self();
+        $file = $extension ? self::withExtension($extension) : new self();
 
         if (\is_string($contents)) {
             if (false === \file_put_contents($file, $contents)) {
                 throw new \RuntimeException('Unable to write to file.');
             }
 
-            return $file;
+            return $file->refresh();
         }
 
         if ($contents instanceof \SplFileInfo) {
@@ -48,7 +48,7 @@ final class TempFile extends \SplFileInfo
                 throw new \RuntimeException('Unable to copy file.');
             }
 
-            return $file;
+            return $file->refresh();
         }
 
         $close = false;
@@ -80,7 +80,7 @@ final class TempFile extends \SplFileInfo
             \fclose($contents);
         }
 
-        return $file;
+        return $file->refresh();
     }
 
     public static function withExtension(string $extension): self

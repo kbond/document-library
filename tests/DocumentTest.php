@@ -41,11 +41,31 @@ abstract class DocumentTest extends TestCase
     /**
      * @test
      */
-    public function refresh_is_immutable(): void
+    public function refresh_resets_any_cached_metadata(): void
     {
         $document = $this->document('some/file.txt', new \SplFileInfo(__FILE__));
 
-        $this->assertNotSame($document, $document->refresh());
+        $this->assertIsInt($document->lastModified());
+        $this->assertSame(\filesize(__FILE__), $document->size());
+        $this->assertSame(\md5_file(__FILE__), $document->checksum());
+        $this->assertTrue($document->exists());
+        $this->assertSame('text/x-php', $document->mimeType());
+
+        $this->modifyDocument('some/file.txt', 'new content');
+
+        $this->assertIsInt($document->lastModified());
+        $this->assertSame(\filesize(__FILE__), $document->size());
+        $this->assertSame(\md5_file(__FILE__), $document->checksum());
+        $this->assertTrue($document->exists());
+        $this->assertSame('text/x-php', $document->mimeType());
+
+        $document->refresh();
+
+        $this->assertIsInt($document->lastModified());
+        $this->assertSame(11, $document->size());
+        $this->assertSame('96c15c2bb2921193bf290df8cd85e2ba', $document->checksum());
+        $this->assertTrue($document->exists());
+        $this->assertSame('text/plain', $document->mimeType());
     }
 
     /**
@@ -58,5 +78,17 @@ abstract class DocumentTest extends TestCase
         $this->assertFileEquals(__FILE__, $document->tempFile());
     }
 
+    /**
+     * @test
+     */
+    public function refresh_is_mutable(): void
+    {
+        $document = $this->document('some/file.txt', new \SplFileInfo(__FILE__));
+
+        $this->assertSame($document, $document->refresh());
+    }
+
     abstract protected function document(string $path, \SplFileInfo $file): Document;
+
+    abstract protected function modifyDocument(string $path, string $content): void;
 }

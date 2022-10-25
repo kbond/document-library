@@ -3,6 +3,7 @@
 namespace Zenstruck\Document\Library\Tests;
 
 use Zenstruck\Document;
+use Zenstruck\Document\Library;
 use Zenstruck\Document\SerializableDocument;
 
 /**
@@ -10,6 +11,13 @@ use Zenstruck\Document\SerializableDocument;
  */
 final class SerializableDocumentTest extends DocumentTest
 {
+    private Library $library;
+
+    protected function setUp(): void
+    {
+        $this->library = self::inMemoryLibrary();
+    }
+
     /**
      * @test
      */
@@ -46,6 +54,11 @@ final class SerializableDocumentTest extends DocumentTest
 
     protected function document(string $path, \SplFileInfo $file): Document
     {
-        return new SerializableDocument(self::inMemoryLibrary()->store($path, $file), []);
+        return new SerializableDocument($this->library->store($path, $file), []);
+    }
+
+    protected function modifyDocument(string $path, string $content): void
+    {
+        $this->library->store($path, $content);
     }
 }

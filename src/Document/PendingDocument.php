@@ -93,7 +93,7 @@ final class PendingDocument implements Document
     {
         \clearstatcache(false, $this->file);
 
-        return clone $this;
+        return $this;
     }
 
     public function tempFile(): \SplFileInfo

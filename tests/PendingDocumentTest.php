@@ -5,6 +5,7 @@ namespace Zenstruck\Document\Library\Tests;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Zenstruck\Document;
 use Zenstruck\Document\PendingDocument;
+use Zenstruck\Document\TempFile;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
@@ -44,8 +45,37 @@ final class PendingDocumentTest extends DocumentTest
         $this->assertTrue($document->exists());
     }
 
+    /**
+     * @test
+     */
+    public function refresh_resets_any_cached_metadata(): void
+    {
+        $document = new PendingDocument($tempFile = TempFile::for(new \SplFileInfo(__FILE__), 'txt'));
+
+        $this->assertIsInt($document->lastModified());
+        $this->assertSame(\filesize(__FILE__), $document->size());
+        $this->assertSame(\md5_file(__FILE__), $document->checksum());
+        $this->assertTrue($document->exists());
+        $this->assertSame('text/x-php', $document->mimeType());
+
+        \file_put_contents($tempFile, 'new content');
+
+        $document->refresh();
+
+        $this->assertIsInt($document->lastModified());
+        $this->assertSame(11, $document->size());
+        $this->assertSame('96c15c2bb2921193bf290df8cd85e2ba', $document->checksum());
+        $this->assertTrue($document->exists());
+        $this->assertSame('text/plain', $document->mimeType());
+    }
+
     protected function document(string $path, \SplFileInfo $file): Document
     {
         return new PendingDocument($file);
+    }
+
+    protected function modifyDocument(string $path, string $content): void
+    {
+        throw new \BadMethodCallException();
     }
 }

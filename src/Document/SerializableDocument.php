@@ -90,10 +90,9 @@ final class SerializableDocument implements Document
 
     public function refresh(): static
     {
-        $clone = clone $this;
-        $clone->document = $this->document->refresh();
+        $this->document = $this->document->refresh();
 
-        return $clone;
+        return $this;
     }
 
     public function tempFile(): \SplFileInfo

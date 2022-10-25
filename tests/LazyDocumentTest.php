@@ -4,12 +4,20 @@ namespace Zenstruck\Document\Library\Tests;
 
 use Zenstruck\Document;
 use Zenstruck\Document\LazyDocument;
+use Zenstruck\Document\Library;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
  */
 final class LazyDocumentTest extends DocumentTest
 {
+    private Library $library;
+
+    protected function setUp(): void
+    {
+        $this->library = self::inMemoryLibrary();
+    }
+
     /**
      * @test
      */
@@ -40,9 +48,13 @@ final class LazyDocumentTest extends DocumentTest
 
     protected function document(string $path, \SplFileInfo $file): Document
     {
-        $library = self::inMemoryLibrary();
-        $library->store($path, $file);
+        $this->library->store($path, $file);
 
-        return (new LazyDocument($path))->setLibrary($library);
+        return (new LazyDocument($path))->setLibrary($this->library);
+    }
+
+    protected function modifyDocument(string $path, string $content): void
+    {
+        $this->library->store($path, $content);
     }
 }

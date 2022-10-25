@@ -98,11 +98,10 @@ final class LazyDocument implements Document
 
     public function refresh(): static
     {
-        $clone = clone $this;
-        $clone->document = $this->document()->refresh();
-        $clone->metadata = [];
+        $this->document()->refresh();
+        $this->metadata = [];
 
-        return $clone;
+        return $this;
     }
 
     public function tempFile(): \SplFileInfo

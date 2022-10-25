@@ -100,7 +100,7 @@ final class DocumentLifecycleSubscriberTest extends TestCase
 
         $library->store('some/file.txt', 'new content');
 
-        $entity->document2 = $entity->document2->refresh();
+        $entity->document2 = clone $entity->document2->refresh(); // NOTE: clone is required
         $this->em()->flush();
         $this->em()->clear();
 
