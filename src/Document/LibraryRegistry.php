@@ -16,7 +16,7 @@ final class LibraryRegistry
     /**
      * @param array<string,Library> $libraries
      */
-    public function __construct(private ContainerInterface|array $libraries = [])
+    public function __construct(private ContainerInterface|array $libraries)
     {
     }
 
