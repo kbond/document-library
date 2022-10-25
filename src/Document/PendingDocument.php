@@ -15,15 +15,27 @@ use Zenstruck\Document;
 final class PendingDocument implements Document
 {
     private \SplFileInfo $file;
+    private string $path;
 
     public function __construct(\SplFileInfo|string $file)
     {
         $this->file = \is_string($file) ? new \SplFileInfo($file) : $file;
     }
 
+    /**
+     * @immutable
+     */
+    public function withPath(string $path): self
+    {
+        $clone = clone $this;
+        $clone->path = $path;
+
+        return $clone;
+    }
+
     public function path(): string
     {
-        return $this->file;
+        return $this->path ?? (string) $this->file;
     }
 
     public function name(): string

@@ -8,6 +8,8 @@ use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\EventListener\LazyDoc
 use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\Mapping\ManagerRegistryMappingProvider;
 use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\MappingProvider;
 use Zenstruck\Document\LibraryRegistry;
+use Zenstruck\Document\Namer;
+use Zenstruck\Document\Namer\MultiNamer;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
@@ -19,6 +21,7 @@ final class LazyDocumentLifecycleSubscriberTest extends DocumentLifecycleSubscri
         return new LazyDocumentLifecycleSubscriber(new ServiceLocator([
             LibraryRegistry::class => fn() => $registry,
             MappingProvider::class => fn() => new ManagerRegistryMappingProvider($this->doctrine()),
+            Namer::class => fn() => new MultiNamer(),
         ]));
     }
 }

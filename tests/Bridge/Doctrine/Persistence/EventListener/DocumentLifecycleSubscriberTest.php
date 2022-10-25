@@ -9,6 +9,9 @@ use Zenstruck\Document\Library\Tests\Bridge\Doctrine\Fixture\Entity1;
 use Zenstruck\Document\Library\Tests\Bridge\Doctrine\HasORM;
 use Zenstruck\Document\Library\Tests\TestCase;
 use Zenstruck\Document\LibraryRegistry;
+use Zenstruck\Document\Namer\MultiNamer;
+use Zenstruck\Document\PendingDocument;
+use Zenstruck\Document\TempFile;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
@@ -23,7 +26,7 @@ class DocumentLifecycleSubscriberTest extends TestCase
     public function can_auto_load_documents(): void
     {
         $registry = self::libraryRegistry();
-        $this->registerEventSubscriber($registry, Events::postLoad);
+        $this->registerEventSubscriber($registry);
 
         $entity = new Entity1();
         $entity->document1 = $registry->get('memory')->store('some/file.txt', 'content');
@@ -45,7 +48,7 @@ class DocumentLifecycleSubscriberTest extends TestCase
     {
         $registry = self::libraryRegistry();
         $library = $registry->get('memory');
-        $this->registerEventSubscriber($registry, Events::prePersist, Events::preUpdate, Events::postLoad);
+        $this->registerEventSubscriber($registry);
 
         $entity = new Entity1();
         $entity->document2 = $library->store('some/file.txt', 'content');
@@ -87,7 +90,7 @@ class DocumentLifecycleSubscriberTest extends TestCase
     {
         $registry = self::libraryRegistry();
         $library = $registry->get('memory');
-        $this->registerEventSubscriber($registry, Events::prePersist, Events::preUpdate, Events::postLoad);
+        $this->registerEventSubscriber($registry);
 
         $entity = new Entity1();
         $entity->document2 = $library->store('some/file.txt', 'content');
@@ -118,7 +121,7 @@ class DocumentLifecycleSubscriberTest extends TestCase
     {
         $registry = self::libraryRegistry();
         $library = $registry->get('memory');
-        $this->registerEventSubscriber($registry, Events::preUpdate);
+        $this->registerEventSubscriber($registry);
 
         $entity = new Entity1();
         $entity->document1 = $library->store('some/file.txt', 'content');
@@ -140,7 +143,7 @@ class DocumentLifecycleSubscriberTest extends TestCase
     {
         $registry = self::libraryRegistry();
         $library = $registry->get('memory');
-        $this->registerEventSubscriber($registry, Events::postRemove);
+        $this->registerEventSubscriber($registry);
 
         $entity = new Entity1();
         $entity->document1 = $library->store('some/file.txt', 'content');
@@ -158,28 +161,55 @@ class DocumentLifecycleSubscriberTest extends TestCase
     /**
      * @test
      */
-    public function can_persist_pending_file(): void
+    public function can_persist_and_update_with_pending_file(): void
     {
-        $this->markTestIncomplete();
-    }
+        $registry = self::libraryRegistry();
+        $library = $registry->get('memory');
+        $this->registerEventSubscriber($registry);
 
-    /**
-     * @test
-     */
-    public function can_update_with_pending_file(): void
-    {
-        $this->markTestIncomplete();
+        $entity = new Entity1();
+        $entity->name = 'Foo BaR';
+        $entity->document1 = new PendingDocument(__FILE__);
+        $this->em()->persist($entity);
+        $this->em()->flush();
+        $this->em()->clear();
+
+        $this->assertTrue($library->has($expectedPath = \sprintf('prefix/foo-bar-%s.php', \mb_substr(\md5_file(__FILE__), 0, 7))));
+
+        $entity = $this->em()->find(Entity1::class, 1);
+
+        $this->assertTrue($entity->document1->exists());
+        $this->assertSame($expectedPath, $entity->document1->path());
+        $this->assertSame(\file_get_contents(__FILE__), $entity->document1->contents());
+
+        $entity->document1 = new PendingDocument(TempFile::for('content'));
+        $entity->name = 'new name';
+        $this->em()->flush();
+        $this->em()->clear();
+
+        $entity = $this->em()->find(Entity1::class, 1);
+
+        $this->assertFalse($library->has($expectedPath));
+        $this->assertTrue($library->has($expectedPath = 'prefix/new-name-9a0364b'));
+
+        $this->assertTrue($entity->document1->exists());
+        $this->assertSame($expectedPath, $entity->document1->path());
+        $this->assertSame('content', $entity->document1->contents());
     }
 
     protected function createSubscriber(LibraryRegistry $registry): DocumentLifecycleSubscriber
     {
-        return new DocumentLifecycleSubscriber($registry, new ManagerRegistryMappingProvider($this->doctrine()));
+        return new DocumentLifecycleSubscriber(
+            $registry,
+            new ManagerRegistryMappingProvider($this->doctrine()),
+            new MultiNamer(),
+        );
     }
 
     private function registerEventSubscriber(LibraryRegistry $registry, string ...$events): void
     {
         $subscriber = $this->createSubscriber($registry);
-        $events[] = Events::postFlush;
+        $events = $events ?: [Events::postFlush, Events::prePersist, Events::preUpdate, Events::postRemove, Events::postLoad];
 
         foreach ($events as $event) {
             $this->em()->getEventManager()->addEventListener($event, $subscriber);

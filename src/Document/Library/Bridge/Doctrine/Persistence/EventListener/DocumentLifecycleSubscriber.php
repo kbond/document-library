@@ -10,6 +10,8 @@ use Zenstruck\Document;
 use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\MappingProvider;
 use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\ObjectReflector;
 use Zenstruck\Document\LibraryRegistry;
+use Zenstruck\Document\Namer;
+use Zenstruck\Document\PendingDocument;
 use Zenstruck\Document\SerializableDocument;
 
 /**
@@ -20,8 +22,11 @@ class DocumentLifecycleSubscriber
     /** @var callable[] */
     private array $pendingOperations = [];
 
-    public function __construct(private LibraryRegistry $registry, private MappingProvider $mappingProvider)
-    {
+    public function __construct(
+        private LibraryRegistry $registry,
+        private MappingProvider $mappingProvider,
+        private Namer $namer,
+    ) {
     }
 
     /**
@@ -80,6 +85,18 @@ class DocumentLifecycleSubscriber
                 continue;
             }
 
+            if ($document instanceof PendingDocument) {
+                $document = $document->withPath($this->namer()->generateName($document, \array_merge($mapping, [
+                    'this' => $object,
+                ])));
+
+                $this->pendingOperations[] = function() use ($document, $mapping) {
+                    $this->registry()->get($mapping['library'])->store($document->path(), $document);
+                };
+
+                $ref->set($property, $document);
+            }
+
             if (!$document instanceof SerializableDocument && $metadata = $mapping['metadata'] ?? null) {
                 // save with metadata
                 $ref->set($property, new SerializableDocument($document, $metadata));
@@ -105,6 +122,24 @@ class DocumentLifecycleSubscriber
 
             $old = $event->getOldValue($property);
             $new = $event->getNewValue($property);
+
+            if ($new instanceof PendingDocument) {
+                $new = $new->withPath($this->namer()->generateName($new, \array_merge($mapping, [
+                    'this' => $object,
+                ])));
+
+                $this->pendingOperations[] = function() use ($new, $mapping) {
+                    $this->registry()->get($mapping['library'])->store($new->path(), $new);
+                };
+
+                $event->setNewValue($property, $new);
+            }
+
+            if ($new instanceof Document && $old instanceof Document && $new->path() !== $old->path()) {
+                // todo make configurable via mapping
+                // document was changed, delete old from library
+                $this->pendingOperations[] = fn() => $this->registry()->get($mapping['library'])->delete($old->path());
+            }
 
             if ($new instanceof Document && !$new instanceof SerializableDocument && $metadata = $mapping['metadata'] ?? null) {
                 // save with metadata
@@ -136,5 +171,10 @@ class DocumentLifecycleSubscriber
     protected function mappingProvider(): MappingProvider
     {
         return $this->mappingProvider;
+    }
+
+    protected function namer(): Namer
+    {
+        return $this->namer;
     }
 }

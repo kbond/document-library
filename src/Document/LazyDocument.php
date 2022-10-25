@@ -30,7 +30,7 @@ final class LazyDocument implements Document
 
     public function path(): string
     {
-        return $this->metadata[__FUNCTION__] ?? throw new \LogicException(); // todo use namer
+        return $this->metadata[__FUNCTION__] ??= $this->document()->path();
     }
 
     public function name(): string

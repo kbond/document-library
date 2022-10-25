@@ -17,7 +17,10 @@ class Entity1
     #[ORM\Column(nullable: true)]
     public ?string $name = null;
 
-    #[ORM\Column(type: Document::class, nullable: true, options: ['library' => 'memory'])]
+    #[ORM\Column(type: Document::class, nullable: true, options: [
+        'library' => 'memory',
+        'expression' => 'prefix/{this.name|slug}-{checksum:7}{ext}',
+    ])]
     public ?Document $document1 = null;
 
     #[Context(['library' => 'memory', 'metadata' => ['path', 'size']])]
