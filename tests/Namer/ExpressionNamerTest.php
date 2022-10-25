@@ -2,6 +2,7 @@
 
 namespace Zenstruck\Document\Library\Tests\Namer;
 
+use Symfony\Component\PropertyAccess\Exception\NoSuchPropertyException;
 use Zenstruck\Document\Library\Tests\TestCase;
 use Zenstruck\Document\Namer\ExpressionNamer;
 
@@ -91,14 +92,61 @@ final class ExpressionNamerTest extends TestCase
     /**
      * @test
      */
+    public function can_use_context_as_expression_variables(): void
+    {
+        $namer = new ExpressionNamer();
+        $document = self::inMemoryLibrary()->store('some/pATh.txt', 'content');
+
+        $this->assertSame(
+            'prefix/baz/value/string/1//prop1-value/6',
+            $namer->generateName($document, [
+                'expression' => 'prefix/{foo.bar}/{[array][key]}/{object}/{[object].prop1}/{object.prop2}/{object.prop3}/{object.prop4}{object.prop5}',
+                'foo.bar' => 'baz',
+                'array' => ['key' => 'value'],
+                'object' => new ContextObject(),
+            ])
+        );
+    }
+
+    /**
+     * @test
+     */
     public function invalid_expression_variable(): void
     {
         $namer = new ExpressionNamer();
         $document = self::inMemoryLibrary()->store('some/pATh.txt', 'content');
 
-        $this->expectException(\LogicException::class);
-        $this->expectDeprecationMessage('Unable to parse expression variable {invalid}.');
+        $this->expectException(NoSuchPropertyException::class);
 
         $namer->generateName($document, ['expression' => 'prefix/{invalid}']);
+    }
+}
+
+class ContextObject
+{
+    public $prop1 = true;
+    public $prop2 = false;
+    private $prop3 = 'prop1-valUe';
+    private $prop4 = 6;
+    private $prop5;
+
+    public function __toString(): string
+    {
+        return 'stRIng';
+    }
+
+    public function getProp3(): string
+    {
+        return $this->prop3;
+    }
+
+    public function getProp4(): int
+    {
+        return $this->prop4;
+    }
+
+    public function getProp5()
+    {
+        return $this->prop5;
     }
 }

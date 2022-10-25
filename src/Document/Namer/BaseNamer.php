@@ -12,6 +12,8 @@ use Zenstruck\Document\Namer;
  */
 abstract class BaseNamer implements Namer
 {
+    private const ALPHABET = '123456789abcdefghijkmnopqrstuvwxyz';
+
     public function __construct(private ?SluggerInterface $slugger = null)
     {
     }
@@ -22,10 +24,10 @@ abstract class BaseNamer implements Namer
             /**
              * @source https://stackoverflow.com/a/13212994
              */
-            return \mb_substr(\str_shuffle(\str_repeat($x = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', (int) \ceil($length / \mb_strlen($x)))), 1, $length);
+            return \mb_substr(\str_shuffle(\str_repeat(self::ALPHABET, (int) \ceil($length / \mb_strlen(self::ALPHABET)))), 1, $length);
         }
 
-        return ByteString::fromRandom($length, '123456789abcdefghijkmnopqrstuvwxyz')->toString();
+        return ByteString::fromRandom($length, self::ALPHABET)->toString();
     }
 
     final protected static function extensionWithDot(Document $document): string
