@@ -13,7 +13,7 @@ use Zenstruck\Document;
 final class ExpressionNamer extends BaseNamer
 {
     public function __construct(
-        private string $defaultExpression = '{name}-{checksum}{ext}',
+        private string $defaultExpression = '{name}-{rand}{ext}',
         ?SluggerInterface $slugger = null,
         private ?PropertyAccessorInterface $accessor = null,
     ) {

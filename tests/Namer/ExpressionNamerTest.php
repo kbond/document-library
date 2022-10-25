@@ -19,9 +19,8 @@ final class ExpressionNamerTest extends TestCase
         $namer = new ExpressionNamer();
         $library = self::inMemoryLibrary();
 
-        $this->assertSame('foo-bar-9a0364b9e99bb480dd25e1f0284c8555', $namer->generateName($library->store('some/FoO BaR', 'content')));
-        $this->assertSame('foo-bar-9a0364b9e99bb480dd25e1f0284c8555.txt', $namer->generateName($library->store('some/FoO BaR.txt', 'content')));
-        $this->assertSame('foo-bar-9a0364b9e99bb480dd25e1f0284c8555.txt', $namer->generateName($library->store('some/FoO BaR.tXt', 'content')));
+        $this->assertMatchesRegularExpression('#^foo-bar-[0-9a-z]{6}$#', $namer->generateName($library->store('some/FoO BaR', 'content')));
+        $this->assertMatchesRegularExpression('#^foo-bar-[0-9a-z]{6}\.txt$#', $namer->generateName($library->store('some/FoO BaR.TxT', 'content')));
     }
 
     /**
