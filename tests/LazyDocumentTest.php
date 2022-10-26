@@ -5,6 +5,7 @@ namespace Zenstruck\Document\Library\Tests;
 use Zenstruck\Document;
 use Zenstruck\Document\LazyDocument;
 use Zenstruck\Document\Library;
+use Zenstruck\Document\Namer\ExpressionNamer;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
@@ -44,6 +45,46 @@ final class LazyDocumentTest extends DocumentTest
         $this->assertSame('7', $document->checksum());
         $this->assertSame('8', $document->url());
         $this->assertSame('9', $document->mimeType());
+    }
+
+    /**
+     * @test
+     */
+    public function can_check_if_namer_is_required(): void
+    {
+        $document1 = new LazyDocument('some/path.txt');
+        $document2 = new LazyDocument(['checksum' => 'foo']);
+        $document3 = (new LazyDocument('some/path'))->setLibrary(self::inMemoryLibrary())->refresh();
+
+        $this->assertFalse($document1->isNamerRequired());
+        $this->assertTrue($document2->isNamerRequired());
+        $this->assertFalse($document3->isNamerRequired());
+    }
+
+    /**
+     * @test
+     */
+    public function can_lazily_generate_path_with_namer(): void
+    {
+        $document = (new LazyDocument(['checksum' => 'foo']))->setNamer(new ExpressionNamer(), [
+            'expression' => 'prefix/{checksum}-{bar}.pdf',
+            'bar' => 'baz',
+        ]);
+
+        $this->assertSame('prefix/foo-baz.pdf', $document->path());
+    }
+
+    /**
+     * @test
+     */
+    public function namer_is_required_to_generate_name(): void
+    {
+        $document = (new LazyDocument(['checksum' => 'foo']));
+
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('A namer is required to generate the path from metadata.');
+
+        $document->path();
     }
 
     protected function document(string $path, \SplFileInfo $file): Document

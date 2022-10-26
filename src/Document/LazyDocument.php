@@ -6,13 +6,18 @@ use Zenstruck\Document;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
+ *
+ * @internal
  */
 final class LazyDocument implements Document
 {
     private array $metadata;
+    private Library $library;
     private Document $document;
+    private Namer $namer;
+    private array $namerContext;
 
-    public function __construct(string|array $metadata, private ?Library $library = null)
+    public function __construct(string|array $metadata)
     {
         if (\is_string($metadata)) {
             $metadata = ['path' => $metadata];
@@ -28,9 +33,34 @@ final class LazyDocument implements Document
         return $this;
     }
 
+    public function isNamerRequired(): bool
+    {
+        return !isset($this->document) && !isset($this->metadata['path']);
+    }
+
+    public function setNamer(Namer $namer, array $context): static
+    {
+        $this->namer = $namer;
+        $this->namerContext = $context;
+
+        return $this;
+    }
+
     public function path(): string
     {
-        return $this->metadata[__FUNCTION__] ??= $this->document()->path();
+        if (isset($this->metadata[__FUNCTION__])) {
+            return $this->metadata[__FUNCTION__];
+        }
+
+        if (isset($this->document)) {
+            return $this->document->path();
+        }
+
+        if (!isset($this->namer)) {
+            throw new \LogicException('A namer is required to generate the path from metadata.');
+        }
+
+        return $this->metadata[__FUNCTION__] = $this->namer->generateName($this, $this->namerContext);
     }
 
     public function name(): string
