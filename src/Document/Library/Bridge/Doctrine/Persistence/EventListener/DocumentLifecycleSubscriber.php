@@ -41,7 +41,13 @@ class DocumentLifecycleSubscriber
         }
 
         // todo make properties that can be auto-loaded configurable in mapping
-        (new ObjectReflector($object, $mappings))->load($this->registry());
+        foreach ((new ObjectReflector($object, $mappings))->documents() as $property => $document) {
+            $document->setLibrary($this->registry()->get($mappings[$property]['library']));
+
+            if ($document->isNamerRequired()) {
+                $document->setNamer($this->namer(), self::namerContext($mappings[$property], $object));
+            }
+        }
     }
 
     /**
@@ -86,9 +92,9 @@ class DocumentLifecycleSubscriber
             }
 
             if ($document instanceof PendingDocument) {
-                $document = $document->withPath($this->namer()->generateName($document, \array_merge($mapping, [
-                    'this' => $object,
-                ])));
+                $document = $document->withPath(
+                    $this->namer()->generateName($document, self::namerContext($mapping, $object))
+                );
 
                 $this->pendingOperations[] = function() use ($document, $mapping) {
                     $this->registry()->get($mapping['library'])->store($document->path(), $document);
@@ -124,9 +130,9 @@ class DocumentLifecycleSubscriber
             $new = $event->getNewValue($property);
 
             if ($new instanceof PendingDocument) {
-                $new = $new->withPath($this->namer()->generateName($new, \array_merge($mapping, [
-                    'this' => $object,
-                ])));
+                $new = $new->withPath(
+                    $this->namer()->generateName($new, self::namerContext($mapping, $object))
+                );
 
                 $this->pendingOperations[] = function() use ($new, $mapping) {
                     $this->registry()->get($mapping['library'])->store($new->path(), $new);
@@ -176,5 +182,10 @@ class DocumentLifecycleSubscriber
     protected function namer(): Namer
     {
         return $this->namer;
+    }
+
+    private static function namerContext(array $mapping, object $object): array
+    {
+        return \array_merge($mapping, ['this' => $object]);
     }
 }

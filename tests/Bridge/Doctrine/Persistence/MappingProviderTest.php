@@ -24,6 +24,11 @@ abstract class MappingProviderTest extends TestCase
                 'library' => 'memory',
                 'metadata' => ['path', 'size'],
             ],
+            'document3' => [
+                'library' => 'memory',
+                'metadata' => ['checksum', 'extension'],
+                'expression' => 'prefix/{this.name|slug}-{checksum:7}{ext}',
+            ],
         ],
     ];
 

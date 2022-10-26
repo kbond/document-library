@@ -197,6 +197,30 @@ class DocumentLifecycleSubscriberTest extends TestCase
         $this->assertSame('content', $entity->document1->contents());
     }
 
+    /**
+     * @test
+     */
+    public function can_lazily_load_with_name(): void
+    {
+        $registry = self::libraryRegistry();
+        $library = $registry->get('memory');
+        $this->registerEventSubscriber($registry);
+
+        $entity = new Entity1();
+        $entity->name = 'Foo BaR';
+        $entity->document3 = new PendingDocument(__FILE__);
+        $this->em()->persist($entity);
+        $this->em()->flush();
+        $this->em()->clear();
+
+        $this->assertTrue($library->has($expectedPath = \sprintf('prefix/foo-bar-%s.php', \mb_substr(\md5_file(__FILE__), 0, 7))));
+
+        $entity = $this->em()->find(Entity1::class, 1);
+
+        $this->assertSame($expectedPath, $entity->document3->path());
+        $this->assertSame(\file_get_contents(__FILE__), $entity->document3->contents());
+    }
+
     protected function createSubscriber(LibraryRegistry $registry): DocumentLifecycleSubscriber
     {
         return new DocumentLifecycleSubscriber(

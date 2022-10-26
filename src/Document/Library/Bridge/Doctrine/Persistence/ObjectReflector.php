@@ -4,10 +4,11 @@ namespace Zenstruck\Document\Library\Bridge\Doctrine\Persistence;
 
 use Zenstruck\Document;
 use Zenstruck\Document\LazyDocument;
-use Zenstruck\Document\LibraryRegistry;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
+ *
+ * @internal
  */
 final class ObjectReflector
 {
@@ -21,7 +22,10 @@ final class ObjectReflector
         $this->ref = new \ReflectionObject($object);
     }
 
-    public function load(LibraryRegistry $registry, string ...$properties): void
+    /**
+     * @return LazyDocument[]
+     */
+    public function documents(string ...$properties): iterable
     {
         $properties = $properties ?: \array_keys($this->config);
 
@@ -32,7 +36,7 @@ final class ObjectReflector
                 continue;
             }
 
-            $document->setLibrary($registry->get($this->config[$property]['library']));
+            yield $property => $document;
         }
     }
 
