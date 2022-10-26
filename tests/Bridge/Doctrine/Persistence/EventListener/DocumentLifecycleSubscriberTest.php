@@ -221,6 +221,33 @@ class DocumentLifecycleSubscriberTest extends TestCase
         $this->assertSame(\file_get_contents(__FILE__), $entity->document3->contents());
     }
 
+    /**
+     * @test
+     */
+    public function can_load_lazy_documents(): void
+    {
+        $registry = self::libraryRegistry();
+        $library = $registry->get('memory');
+        $this->registerEventSubscriber($registry);
+
+        $library->store($expectedPath = 'prefix/foo-bar.txt', 'content');
+
+        $entity = new Entity1();
+        $entity->name = 'Foo Bar';
+        $this->assertNull($entity->document4());
+
+        $this->em()->persist($entity);
+        $this->em()->flush();
+
+        $this->assertSame($expectedPath, $entity->document4()?->path());
+
+        $this->em()->clear();
+
+        $entity = $this->em()->find(Entity1::class, 1);
+
+        $this->assertSame($expectedPath, $entity->document4()?->path());
+    }
+
     protected function createSubscriber(LibraryRegistry $registry): DocumentLifecycleSubscriber
     {
         return new DocumentLifecycleSubscriber(

@@ -8,6 +8,7 @@ use Doctrine\Persistence\Event\PreUpdateEventArgs;
 use Doctrine\Persistence\ObjectManager;
 use Zenstruck\Document;
 use Zenstruck\Document\Attribute\Mapping;
+use Zenstruck\Document\LazyDocument;
 use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\MappingProvider;
 use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\ObjectReflector;
 use Zenstruck\Document\LibraryRegistry;
@@ -67,7 +68,7 @@ class DocumentLifecycleSubscriber
             $ref ??= new ObjectReflector($object, $mappings);
             $document = $ref->get($property);
 
-            if ($document instanceof Document) {
+            if ($document instanceof Document && $document->exists()) {
                 $this->registry()->get($mapping->library)->delete($document->path());
             }
         }
@@ -86,6 +87,17 @@ class DocumentLifecycleSubscriber
 
         foreach ($mappings as $property => $mapping) {
             $ref ??= new ObjectReflector($object, $mappings);
+
+            if ($mapping->extra['_virtual'] ?? false) {
+                // set virtual document
+                $ref->set($property, (new LazyDocument([]))
+                    ->setLibrary($this->registry()->get($mapping->library))
+                    ->setNamer($this->namer(), self::namerContext($mapping, $object))
+                );
+
+                continue;
+            }
+
             $document = $ref->get($property);
 
             if (!$document instanceof Document) {

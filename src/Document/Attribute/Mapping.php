@@ -15,6 +15,7 @@ final class Mapping
         public ?string $namer = null,
         public ?string $expression = null,
         public array $metadata = [],
+        public array $extra = [],
     ) {
     }
 
@@ -36,6 +37,7 @@ final class Mapping
             $mapping['namer'] ?? null,
             $mapping['expression'] ?? null,
             $mapping['metadata'] ?? [],
+            \array_diff_key($mapping, \array_flip(['library', 'namer', 'expression', 'metadata'])),
         );
     }
 
@@ -44,11 +46,11 @@ final class Mapping
      */
     public function toArray(): array
     {
-        return \array_filter([
+        return \array_filter(\array_merge($this->extra, [
             'library' => $this->library,
             'namer' => $this->namer,
             'expression' => $this->expression,
             'metadata' => $this->metadata,
-        ]);
+        ]));
     }
 }

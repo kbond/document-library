@@ -3,6 +3,7 @@
 namespace Zenstruck\Document\Library\Bridge\Doctrine\Persistence;
 
 use Zenstruck\Document;
+use Zenstruck\Document\Attribute\Mapping;
 use Zenstruck\Document\LazyDocument;
 
 /**
@@ -17,6 +18,9 @@ final class ObjectReflector
     /** @var array<string,\ReflectionProperty> */
     private array $properties = [];
 
+    /**
+     * @param array<string,Mapping> $config
+     */
     public function __construct(private object $object, private array $config)
     {
         $this->ref = new \ReflectionObject($object);
@@ -30,6 +34,14 @@ final class ObjectReflector
         $properties = $properties ?: \array_keys($this->config);
 
         foreach ($properties as $property) {
+            if ($this->config[$property]->extra['_virtual'] ?? false) {
+                $this->set($property, $document = new LazyDocument([]));
+
+                yield $property => $document;
+
+                continue;
+            }
+
             $document = $this->get($property);
 
             if (!$document instanceof LazyDocument) {

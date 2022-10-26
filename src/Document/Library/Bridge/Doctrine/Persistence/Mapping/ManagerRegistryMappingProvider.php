@@ -39,6 +39,19 @@ final class ManagerRegistryMappingProvider implements MappingProvider
             );
         }
 
+        // configure virtual documents
+        foreach ($metadata->reflClass->getProperties() as $property) {
+            if (isset($config[$property->name])) {
+                // already configured
+                continue;
+            }
+
+            if ($attribute = $property->getAttributes(Mapping::class)[0] ?? null) {
+                $config[$property->name] = $attribute->newInstance();
+                $config[$property->name]->extra['_virtual'] = true;
+            }
+        }
+
         return $config;
     }
 

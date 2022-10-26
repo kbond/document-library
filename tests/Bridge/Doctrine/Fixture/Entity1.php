@@ -5,6 +5,7 @@ namespace Zenstruck\Document\Library\Tests\Bridge\Doctrine\Fixture;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Context;
 use Zenstruck\Document;
+use Zenstruck\Document\NullDocument;
 
 #[ORM\Entity]
 class Entity1
@@ -34,4 +35,20 @@ class Entity1
     )]
     #[ORM\Column(type: Document::class, nullable: true)]
     public ?Document $document3 = null;
+
+    #[Document\Attribute\Mapping(
+        library: 'memory',
+        expression: 'prefix/{this.name|slug}.txt',
+    )]
+    private Document $document4;
+
+    public function __construct()
+    {
+        $this->document4 = new NullDocument();
+    }
+
+    public function document4(): ?Document
+    {
+        return $this->document4->exists() ? $this->document4 : null;
+    }
 }
