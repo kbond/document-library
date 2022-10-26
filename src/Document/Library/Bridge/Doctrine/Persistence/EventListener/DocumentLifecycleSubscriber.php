@@ -7,6 +7,7 @@ use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\Persistence\Event\PreUpdateEventArgs;
 use Doctrine\Persistence\ObjectManager;
 use Zenstruck\Document;
+use Zenstruck\Document\Attribute\Mapping;
 use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\MappingProvider;
 use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\ObjectReflector;
 use Zenstruck\Document\LibraryRegistry;
@@ -42,7 +43,7 @@ class DocumentLifecycleSubscriber
 
         // todo make properties that can be auto-loaded configurable in mapping
         foreach ((new ObjectReflector($object, $mappings))->documents() as $property => $document) {
-            $document->setLibrary($this->registry()->get($mappings[$property]['library']));
+            $document->setLibrary($this->registry()->get($mappings[$property]->library));
 
             if ($document->isNamerRequired()) {
                 $document->setNamer($this->namer(), self::namerContext($mappings[$property], $object));
@@ -67,7 +68,7 @@ class DocumentLifecycleSubscriber
             $document = $ref->get($property);
 
             if ($document instanceof Document) {
-                $this->registry()->get($mapping['library'])->delete($document->path());
+                $this->registry()->get($mapping->library)->delete($document->path());
             }
         }
     }
@@ -97,15 +98,15 @@ class DocumentLifecycleSubscriber
                 );
 
                 $this->pendingOperations[] = function() use ($document, $mapping) {
-                    $this->registry()->get($mapping['library'])->store($document->path(), $document);
+                    $this->registry()->get($mapping->library)->store($document->path(), $document);
                 };
 
                 $ref->set($property, $document);
             }
 
-            if (!$document instanceof SerializableDocument && $metadata = $mapping['metadata'] ?? null) {
+            if (!$document instanceof SerializableDocument && $mapping->metadata) {
                 // save with metadata
-                $ref->set($property, new SerializableDocument($document, $metadata));
+                $ref->set($property, new SerializableDocument($document, $mapping->metadata));
             }
         }
     }
@@ -135,7 +136,7 @@ class DocumentLifecycleSubscriber
                 );
 
                 $this->pendingOperations[] = function() use ($new, $mapping) {
-                    $this->registry()->get($mapping['library'])->store($new->path(), $new);
+                    $this->registry()->get($mapping->library)->store($new->path(), $new);
                 };
 
                 $event->setNewValue($property, $new);
@@ -144,18 +145,18 @@ class DocumentLifecycleSubscriber
             if ($new instanceof Document && $old instanceof Document && $new->path() !== $old->path()) {
                 // todo make configurable via mapping
                 // document was changed, delete old from library
-                $this->pendingOperations[] = fn() => $this->registry()->get($mapping['library'])->delete($old->path());
+                $this->pendingOperations[] = fn() => $this->registry()->get($mapping->library)->delete($old->path());
             }
 
-            if ($new instanceof Document && !$new instanceof SerializableDocument && $metadata = $mapping['metadata'] ?? null) {
+            if ($new instanceof Document && !$new instanceof SerializableDocument && $mapping->metadata) {
                 // save with metadata
-                $event->setNewValue($property, new SerializableDocument($new, $metadata));
+                $event->setNewValue($property, new SerializableDocument($new, $mapping->metadata));
             }
 
             if ($old instanceof Document && null === $new) {
                 // todo make configurable via mapping
                 // document was removed, delete from library
-                $this->pendingOperations[] = fn() => $this->registry()->get($mapping['library'])->delete($old->path());
+                $this->pendingOperations[] = fn() => $this->registry()->get($mapping->library)->delete($old->path());
             }
         }
     }
@@ -184,8 +185,8 @@ class DocumentLifecycleSubscriber
         return $this->namer;
     }
 
-    private static function namerContext(array $mapping, object $object): array
+    private static function namerContext(Mapping $mapping, object $object): array
     {
-        return \array_merge($mapping, ['this' => $object]);
+        return \array_merge($mapping->toArray(), ['this' => $object]);
     }
 }

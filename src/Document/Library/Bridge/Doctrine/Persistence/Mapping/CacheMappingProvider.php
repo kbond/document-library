@@ -3,6 +3,7 @@
 namespace Zenstruck\Document\Library\Bridge\Doctrine\Persistence\Mapping;
 
 use Symfony\Contracts\Cache\CacheInterface;
+use Zenstruck\Document\Attribute\Mapping;
 use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\MappingProvider;
 
 /**
@@ -10,7 +11,7 @@ use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\MappingProvider;
  */
 final class CacheMappingProvider implements MappingProvider
 {
-    /** @var array<class-string,array<string,array<string,mixed>>> */
+    /** @var array<class-string,array<string,Mapping>> */
     private array $memoryCache = [];
 
     public function __construct(private CacheInterface $cache, private MappingProvider $inner)
@@ -29,8 +30,8 @@ final class CacheMappingProvider implements MappingProvider
 
     public function warm(): void
     {
-        foreach ($this->all() as $class => $config) {
-            $this->cache->get(self::createKey($class), fn() => $config, \INF);
+        foreach ($this->all() as $class => $mapping) {
+            $this->cache->get(self::createKey($class), fn() => $mapping, \INF);
         }
     }
 

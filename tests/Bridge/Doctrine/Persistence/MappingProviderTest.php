@@ -2,6 +2,7 @@
 
 namespace Zenstruck\Document\Library\Tests\Bridge\Doctrine\Persistence;
 
+use Zenstruck\Document\Attribute\Mapping;
 use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\MappingProvider;
 use Zenstruck\Document\Library\Tests\Bridge\Doctrine\Fixture\Entity1;
 use Zenstruck\Document\Library\Tests\Bridge\Doctrine\HasORM;
@@ -37,7 +38,10 @@ abstract class MappingProviderTest extends TestCase
      */
     public function can_get_mapping_for_class(): void
     {
-        $this->assertSame(self::MAPPINGS[Entity1::class], $this->provider()->get(Entity1::class));
+        $this->assertSame(
+            self::MAPPINGS[Entity1::class],
+            \array_map(fn(Mapping $mapping) => $mapping->toArray(), $this->provider()->get(Entity1::class))
+        );
     }
 
     /**
@@ -45,7 +49,13 @@ abstract class MappingProviderTest extends TestCase
      */
     public function can_get_all_mappings(): void
     {
-        $this->assertSame(self::MAPPINGS, $this->provider()->all());
+        $this->assertSame(
+            self::MAPPINGS,
+            \array_map(
+                fn(array $v) => \array_map(fn(Mapping $m) => $m->toArray(), $v),
+                $this->provider()->all()
+            )
+        );
     }
 
     abstract protected function provider(): MappingProvider;

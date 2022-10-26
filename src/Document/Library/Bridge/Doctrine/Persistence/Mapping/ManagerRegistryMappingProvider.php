@@ -36,7 +36,7 @@ final class ManagerRegistryMappingProvider implements MappingProvider
             $config[$mapping['fieldName']] = Mapping::fromProperty(
                 $metadata->getReflectionProperty($mapping['fieldName']),
                 $mapping['options'] ?? [],
-            )->toArray();
+            );
         }
 
         return $config;
