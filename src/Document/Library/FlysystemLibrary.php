@@ -35,7 +35,7 @@ final class FlysystemLibrary implements Library
         }
 
         if (false === $stream = $document instanceof Document ? $document->read() : \fopen($document, 'r')) {
-            throw new \RuntimeException(); // todo
+            throw new \RuntimeException(\sprintf('Unable to read "%s".', $document instanceof Document ? $document->path() : $document));
         }
 
         $this->filesystem->writeStream($path, $stream, $config);

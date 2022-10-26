@@ -111,7 +111,7 @@ final class LazyDocument implements Document
 
     private function document(): Document
     {
-        $this->library ?? throw new \LogicException(); // todo
+        $this->library ?? throw new \LogicException('A library has not been set for this document.');
 
         try {
             return $this->document ??= $this->library->open($this->path());

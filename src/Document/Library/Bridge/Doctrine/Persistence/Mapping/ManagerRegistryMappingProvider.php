@@ -39,7 +39,7 @@ final class ManagerRegistryMappingProvider implements MappingProvider
             );
 
             if (!isset($options['library'])) {
-                throw new \LogicException('library not configured'); // todo
+                throw new \LogicException(\sprintf('A library is not configured for %s::$%s.', $metadata->name, $mapping['fieldName']));
             }
 
             $config[$mapping['fieldName']] = $options;

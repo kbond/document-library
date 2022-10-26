@@ -53,6 +53,6 @@ final class LazyLibrary implements Library
             return $this->library = ($this->library)();
         }
 
-        throw new \LogicException(); // todo
+        throw new \LogicException('A library has not been properly configured');
     }
 }

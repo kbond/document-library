@@ -66,22 +66,22 @@ final class PendingDocument implements Document
     public function checksum(array $config = []): string
     {
         // todo support other algorithms
-        return \md5_file($this->file) ?: throw new \RuntimeException(); // todo
+        return \md5_file($this->file) ?: throw new \RuntimeException(\sprintf('Unable to calculate checksum for "%s".', $this->file));
     }
 
     public function contents(): string
     {
-        return \file_get_contents($this->file) ?: throw new \RuntimeException(); // todo
+        return \file_get_contents($this->file) ?: throw new \RuntimeException(\sprintf('Unable to get contents for "%s".', $this->file));
     }
 
     public function read()
     {
-        return \fopen($this->file, 'r') ?: throw new \RuntimeException(); // todo
+        return \fopen($this->file, 'r') ?: throw new \RuntimeException(\sprintf('Unable to read "%s".', $this->file));
     }
 
     public function url(array $config = []): string
     {
-        throw new \BadMethodCallException(); // todo
+        throw new \BadMethodCallException(\sprintf('Url is not available for "%s".', static::class));
     }
 
     public function exists(): bool

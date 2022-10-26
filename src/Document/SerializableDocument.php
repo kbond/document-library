@@ -19,7 +19,7 @@ final class SerializableDocument implements Document
 
         foreach ($this->fields as $field) {
             if (!\method_exists($this->document, $field)) {
-                throw new \LogicException(); // todo
+                throw new \LogicException(\sprintf('Method %d::%s() does not exist.', static::class, $field));
             }
 
             $data[$field] = $this->document->{$field}();

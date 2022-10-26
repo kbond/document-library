@@ -24,7 +24,7 @@ final class FlysystemDocument implements Document
     public function __construct(private FilesystemOperator $filesystem, string $path)
     {
         if ('' === $this->path = \ltrim($path, '/')) {
-            throw new \InvalidArgumentException(); // todo
+            throw new \InvalidArgumentException('Path cannot be empty.');
         }
     }
 
@@ -65,7 +65,7 @@ final class FlysystemDocument implements Document
         }
 
         if (!\method_exists($this->filesystem, 'checksum')) {
-            throw new \LogicException(); // todo
+            throw new \LogicException('Checksum is not available for this filesystem.');
         }
 
         return $this->checksum[$serialized] = $this->filesystem->checksum($this->path, $config);
@@ -88,7 +88,7 @@ final class FlysystemDocument implements Document
         }
 
         if (!\method_exists($this->filesystem, 'publicUrl')) {
-            throw new \LogicException(); // todo
+            throw new \LogicException('A publicUrl is not available for this filesystem.');
         }
 
         return $this->url[$serialized] = $this->filesystem->publicUrl($this->path, $config);
