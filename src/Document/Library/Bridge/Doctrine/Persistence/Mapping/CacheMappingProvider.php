@@ -3,7 +3,7 @@
 namespace Zenstruck\Document\Library\Bridge\Doctrine\Persistence\Mapping;
 
 use Symfony\Contracts\Cache\CacheInterface;
-use Zenstruck\Document\Attribute\Mapping;
+use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\Mapping;
 use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\MappingProvider;
 
 /**

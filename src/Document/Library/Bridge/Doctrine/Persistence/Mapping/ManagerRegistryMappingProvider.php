@@ -4,8 +4,8 @@ namespace Zenstruck\Document\Library\Bridge\Doctrine\Persistence\Mapping;
 
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\Persistence\ManagerRegistry;
-use Zenstruck\Document\Attribute\Mapping;
 use Zenstruck\Document\Library\Bridge\Doctrine\DBAL\Types\DocumentType;
+use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\Mapping;
 use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\MappingProvider;
 
 /**
@@ -40,7 +40,7 @@ final class ManagerRegistryMappingProvider implements MappingProvider
         }
 
         // configure virtual documents
-        foreach ($metadata->reflClass->getProperties() as $property) {
+        foreach ($metadata->reflClass?->getProperties() ?: [] as $property) {
             if (isset($config[$property->name])) {
                 // already configured
                 continue;
@@ -48,7 +48,7 @@ final class ManagerRegistryMappingProvider implements MappingProvider
 
             if ($attribute = $property->getAttributes(Mapping::class)[0] ?? null) {
                 $config[$property->name] = $attribute->newInstance();
-                $config[$property->name]->extra['_virtual'] = true;
+                $config[$property->name]->virtual = true;
             }
         }
 

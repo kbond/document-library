@@ -7,8 +7,8 @@ use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\Persistence\Event\PreUpdateEventArgs;
 use Doctrine\Persistence\ObjectManager;
 use Zenstruck\Document;
-use Zenstruck\Document\Attribute\Mapping;
 use Zenstruck\Document\LazyDocument;
+use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\Mapping;
 use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\MappingProvider;
 use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\ObjectReflector;
 use Zenstruck\Document\LibraryRegistry;
@@ -43,7 +43,7 @@ class DocumentLifecycleSubscriber
         }
 
         // todo make properties that can be auto-loaded configurable in mapping
-        foreach ((new ObjectReflector($object, $mappings))->documents() as $property => $document) {
+        foreach ((new ObjectReflector($object))->documents($mappings) as $property => $document) {
             $document->setLibrary($this->registry()->get($mappings[$property]->library));
 
             if ($document->isNamerRequired()) {
@@ -65,7 +65,7 @@ class DocumentLifecycleSubscriber
 
         foreach ($mappings as $property => $mapping) {
             // todo make properties that can be auto-removed configurable in mapping
-            $ref ??= new ObjectReflector($object, $mappings);
+            $ref ??= new ObjectReflector($object);
             $document = $ref->get($property);
 
             if ($document instanceof Document && $document->exists()) {
@@ -86,9 +86,9 @@ class DocumentLifecycleSubscriber
         }
 
         foreach ($mappings as $property => $mapping) {
-            $ref ??= new ObjectReflector($object, $mappings);
+            $ref ??= new ObjectReflector($object);
 
-            if ($mapping->extra['_virtual'] ?? false) {
+            if ($mapping->virtual) {
                 // set virtual document
                 $ref->set($property, (new LazyDocument([]))
                     ->setLibrary($this->registry()->get($mapping->library))

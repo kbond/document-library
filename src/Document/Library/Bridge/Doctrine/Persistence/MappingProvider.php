@@ -2,8 +2,6 @@
 
 namespace Zenstruck\Document\Library\Bridge\Doctrine\Persistence;
 
-use Zenstruck\Document\Attribute\Mapping;
-
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
  */

@@ -1,6 +1,6 @@
 <?php
 
-namespace Zenstruck\Document\Attribute;
+namespace Zenstruck\Document\Library\Bridge\Doctrine\Persistence;
 
 use Symfony\Component\Serializer\Annotation\Context;
 
@@ -10,6 +10,9 @@ use Symfony\Component\Serializer\Annotation\Context;
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
 final class Mapping
 {
+    /** @internal */
+    public bool $virtual = false;
+
     public function __construct(
         public string $library,
         public ?string $namer = null,

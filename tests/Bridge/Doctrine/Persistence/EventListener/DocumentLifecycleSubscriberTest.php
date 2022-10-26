@@ -232,6 +232,8 @@ class DocumentLifecycleSubscriberTest extends TestCase
 
         $library->store($expectedPath = 'prefix/foo-bar.txt', 'content');
 
+        $this->assertTrue($library->has($expectedPath));
+
         $entity = new Entity1();
         $entity->name = 'Foo Bar';
         $this->assertNull($entity->document4());
@@ -246,6 +248,11 @@ class DocumentLifecycleSubscriberTest extends TestCase
         $entity = $this->em()->find(Entity1::class, 1);
 
         $this->assertSame($expectedPath, $entity->document4()?->path());
+
+        $this->em()->remove($entity);
+        $this->em()->flush();
+
+        $this->assertFalse($library->has($expectedPath));
     }
 
     protected function createSubscriber(LibraryRegistry $registry): DocumentLifecycleSubscriber

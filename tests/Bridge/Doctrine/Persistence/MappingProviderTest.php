@@ -2,7 +2,7 @@
 
 namespace Zenstruck\Document\Library\Tests\Bridge\Doctrine\Persistence;
 
-use Zenstruck\Document\Attribute\Mapping;
+use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\Mapping;
 use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\MappingProvider;
 use Zenstruck\Document\Library\Tests\Bridge\Doctrine\Fixture\Entity1;
 use Zenstruck\Document\Library\Tests\Bridge\Doctrine\HasORM;
@@ -31,7 +31,6 @@ abstract class MappingProviderTest extends TestCase
                 'metadata' => ['checksum', 'extension'],
             ],
             'document4' => [
-                '_virtual' => true,
                 'library' => 'memory',
                 'expression' => 'prefix/{this.name|slug}.txt',
             ],
