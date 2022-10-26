@@ -18,6 +18,9 @@ final class Mapping
         public ?string $namer = null,
         public ?string $expression = null,
         public array $metadata = [],
+        public bool $autoload = true,
+        public bool $deleteOnRemove = true,
+        public bool $deleteOnChange = true,
         public array $extra = [],
     ) {
     }
@@ -40,7 +43,12 @@ final class Mapping
             $mapping['namer'] ?? null,
             $mapping['expression'] ?? null,
             $mapping['metadata'] ?? [],
-            \array_diff_key($mapping, \array_flip(['library', 'namer', 'expression', 'metadata'])),
+            $mapping['autoload'] ?? true,
+            $mapping['deleteOnRemove'] ?? true,
+            $mapping['deleteOnChange'] ?? true,
+            \array_diff_key($mapping, \array_flip([
+                'library', 'namer', 'expression', 'metadata', 'autoload', 'deleteOnRemove', 'deleteOnChange',
+            ])),
         );
     }
 

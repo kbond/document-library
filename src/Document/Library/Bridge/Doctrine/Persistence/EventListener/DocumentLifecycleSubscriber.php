@@ -38,11 +38,10 @@ class DocumentLifecycleSubscriber
     {
         $object = $event->getObject();
 
-        if (!$mappings = $this->mappingProvider()->get($object::class)) {
+        if (!$mappings = \array_filter($this->mappingProvider()->get($object::class), static fn(Mapping $m) => $m->autoload)) {
             return;
         }
 
-        // todo make properties that can be auto-loaded configurable in mapping
         foreach ((new ObjectReflector($object))->documents($mappings) as $property => $document) {
             $document->setLibrary($this->registry()->get($mappings[$property]->library));
 
@@ -59,12 +58,11 @@ class DocumentLifecycleSubscriber
     {
         $object = $event->getObject();
 
-        if (!$mappings = $this->mappingProvider()->get($object::class)) {
+        if (!$mappings = \array_filter($this->mappingProvider()->get($object::class), static fn(Mapping $m) => $m->deleteOnRemove)) {
             return;
         }
 
         foreach ($mappings as $property => $mapping) {
-            // todo make properties that can be auto-removed configurable in mapping
             $ref ??= new ObjectReflector($object);
             $document = $ref->get($property);
 
@@ -154,8 +152,7 @@ class DocumentLifecycleSubscriber
                 $event->setNewValue($property, $new);
             }
 
-            if ($new instanceof Document && $old instanceof Document && $new->path() !== $old->path()) {
-                // todo make configurable via mapping
+            if ($mapping->deleteOnChange && $new instanceof Document && $old instanceof Document && $new->path() !== $old->path()) {
                 // document was changed, delete old from library
                 $this->pendingOperations[] = fn() => $this->registry()->get($mapping->library)->delete($old->path());
             }
@@ -165,8 +162,7 @@ class DocumentLifecycleSubscriber
                 $event->setNewValue($property, new SerializableDocument($new, $mapping->metadata));
             }
 
-            if ($old instanceof Document && null === $new) {
-                // todo make configurable via mapping
+            if ($mapping->deleteOnChange && $old instanceof Document && null === $new) {
                 // document was removed, delete from library
                 $this->pendingOperations[] = fn() => $this->registry()->get($mapping->library)->delete($old->path());
             }
