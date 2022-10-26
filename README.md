@@ -2,31 +2,24 @@
 
 ## Basic Usage
 
+Create a `Library` from any [Flysystem](https://flysystem.thephpleague.com/) filesystem
+instance:
+
 ```php
 use Zenstruck\Document\Library\FlysystemLibrary;
 
 /** @var \League\Flysystem\FilesystemOperator $filesystem */
 
 $library = new FlysystemLibrary($filesystem);
+```
+
+### Library API
+
+```php
+/** @var \Zenstruck\Document\Library $library */
 
 // "Open" Documents
 $document = $library->open('path/to/file.txt'); // \Zenstruck\Document
-
-$document->path(); // "path/to/file.txt"
-$document->name(); // "file.txt"
-$document->extension(); // "txt"
-$document->nameWithoutExtension(); // "file"
-$document->lastModified(); // int (timestamp)
-$document->size(); // int (bytes)
-$document->mimeType(); // "text/plain"
-$document->checksum(); // "string" (uses default checksum algorithm for flysystem provider)
-$document->checksum('sha1'); // "string" (specify checksum algorithm)
-$document->read(); // resource (file contents as stream)
-$document->contents(); // string (file contents)
-$document->url(); // string (public url for document)
-$document->exists(); // bool (whether the document exists or not)
-$document->refresh(); // self (clears any cached metadata)
-$document->tempFile(); // \SplFileInfo (real, local file that's deleted at the end of the script)
 
 // Check if Document exists
 $library->has('some/file.txt'); // bool (whether the document exists or not)
@@ -44,41 +37,169 @@ $library->store('some/file.txt', $document); // \Zenstruck\Document
 $library->delete('some/file.txt'); // self (fluent)
 ```
 
-## `LibraryRegistry`
-
-This is a container for your app's libraries:
+### Document API
 
 ```php
-use Zenstruck\Document\LibraryRegistry;
+/** @var \Zenstruck\Document $document */
 
-/** @var \Zenstruck\Document\Library $publicLibary */
-/** @var \Zenstruck\Document\Library $privateLibrary */
+$document->path(); // "path/to/file.txt"
+$document->name(); // "file.txt"
+$document->extension(); // "txt"
+$document->nameWithoutExtension(); // "file"
+$document->lastModified(); // int (timestamp)
+$document->size(); // int (bytes)
+$document->mimeType(); // "text/plain"
+$document->checksum(); // string (uses default checksum algorithm for flysystem provider)
+$document->checksum('sha1'); // "string" (specify checksum algorithm)
+$document->read(); // resource (file contents as stream)
+$document->contents(); // string (file contents)
+$document->url(); // string (public url for document)
+$document->exists(); // bool (whether the document exists or not)
+$document->refresh(); // self (clears any cached metadata)
+$document->tempFile(); // \SplFileInfo (real, local file that's deleted at the end of the script)
+```
 
-$registry = new LibraryRegistry([
-    'public' => $publicLibary,
-    'private' => $privateLibrary,
-]);
+### `PendingDocument`
 
-$registry->get('public'); // $publicLibrary
+A `Zenstruck\Document` implementation that wraps a real, local file.
+
+```php
+use Zenstruck\Document\PendingDocument;
+
+$document = new PendingDocument('/path/to/some/file.txt');
+$document->path(); "/path/to/some/file.txt"
+// ...
+```
+
+A `PendingDocument` can be created with a `Symfony\Component\HttpFoundation\File\UploadedFile`:
+
+```php
+use Zenstruck\Document\PendingDocument;
+
+/** @var \Symfony\Component\HttpFoundation\File\UploadedFile $file */
+
+$document = new PendingDocument($file);
+$document->name(); // string - UploadedFile::getClientOriginalName()
+$document->extension(); // string - UploadedFile::getClientOriginalExtension()
+$document->mimeType(); // string - UploadedFile::getClientMimeType()
+// ...
+```
+
+## Namers
+
+Namer's can be used to generate the path for a document before saving. They are handy
+when used in conjunction with [`PendingDocument`](#pendingdocument).
+
+### `ChecksumNamer`
+
+```php
+/** @var \Zenstruck\Document\Library $library */
+/** @var \Zenstruck\Document\PendingDocument $document */
+
+$namer = new \Zenstruck\Document\Namer\ChecksumNamer();
+
+$library->store($namer->generateName($document), $document); // stored as "<document checksum>.<extension>"
+
+// customize the checksum algorithm
+$library->store($namer->generateName($document, ['alg' => 'sha1']), $document); // stored as "<document sha1 checksum>.<extension>"
+
+// customize the checksum length (first x characters)
+$library->store($namer->generateName($document, ['length' => 7]), $document); // stored as "<first 7 chars of document checksum>.<extension>"
+```
+
+### `SlugifyNamer`
+
+```php
+/** @var \Zenstruck\Document\Library $library */
+/** @var \Zenstruck\Document\PendingDocument $document */
+
+$namer = new \Zenstruck\Document\Namer\ChecksumNamer();
+
+$library->store($namer->generateName($document), $document); // stored as "<slugified filename>"
+```
+
+### `ExpressionNamer`
+
+```php
+/** @var \Zenstruck\Document\Library $library */
+/** @var \Zenstruck\Document\PendingDocument $document */
+
+$namer = new \Zenstruck\Document\Namer\ExpressionNamer();
+
+// Default expression
+$path = $namer->generateName($document); // "<slugified name>-<random 6 chars>.<extension>"
+
+// Customize expression
+$path = $namer->generateName($document, [
+    'expression' => 'some/prefix/{name}-{checksum:7}{ext}',
+]); // "some/prefix/<slugified name>-<first 7 chars of checksum>.<extension>"
+
+// Complex expression
+$path = $namer->generateName($document, [
+    'expression' => 'profile-images/{user.username|lower}{ext}',
+    'user' => $userObject,
+]); // "profile-images/<username (lowercased)>.<extension>"
+
+$library->store($path, $document); // stored as "<slugified filename>"
+```
+
+#### Available Variables
+
+- `{name}`: slugified document filename without extension.
+- `{ext}`: document extension _with dot_ (ie `.txt` or _empty string_ if no extension).
+- `{checksum}`: document checksum.
+- `{checksum:n}`: first `n` characters of document checksum.
+- `{rand}`: random `6` character string.
+- `{rand:n}`: random `n` character string.
+- `{document.*}`: any raw document method (ie `{document.lastModified}`).
+- `{x}`: any passed `$context` value (must be _stringable_).
+- `{x.y}`: if passed context value `x` is an object, call method `y` (requires `symfony/property-access`).
+
+#### Available Modifiers
+
+- `{variable|lower}`: lowercase `{variable}`.
+- `{variable|slug}`: slugify `{variable}`.
+
+### `MultiNamer`
+
+```php
+/** @var \Zenstruck\Document\PendingDocument $document */
+
+$namer = new \Zenstruck\Document\Namer\MultiNamer(); // defaults to above namers
+
+// defaults to ExpressionNamer (with it's default expression)
+$path = $namer->generateName($document); // "<slugified name>-<random 6 chars>.<extension>"
+
+// use the checksum namer
+$path = $namer->generateName($document, ['namer' => 'checksum']); // "<document checksum>.<extension>"
 ```
 
 ## Symfony
 
 ### Doctrine ORM Integration
 
-Add/map a document to your entity. Library-specific config is added to `Column::$options`:
+A custom DBAL type is provided to map `Document` instances to a json column and back. Add
+a document property to your entity (using `Zenstruck\Document` as the _column type_ and
+property typehint) and map the filesystem using the `Mapping` attribute:
 
 ```php
 use Doctrine\ORM\Mapping as ORM;
 use Zenstruck\Document;
+use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\Mapping;
 
 class User
 {
     // ...
 
-    #[ORM\Column(type: Document::class, nullable: true, options: ['library' => 'public'])]
-    public ?Document $profileImage = null;
+    #[Mapping(library: 'public')]
+    #[ORM\Column(type: Document::class, nullable: true)]
+    public ?Document $image = null;
 
+    /**
+     * Alternatively, map with column options:
+     */
+    #[ORM\Column(type: Document::class, nullable: true, options: ['library' => 'public'])]
+    public ?Document $image = null;
     // ...
 }
 ```
@@ -86,29 +207,192 @@ class User
 Usage:
 
 ```php
-use Zenstruck\Document\PendingDocument;
-
+/** @var \Zenstruck\Document\Library $library */
 /** @var \Doctrine\ORM\EntityManagerInterface $em */
-/** @var \SplFileInfo|\Symfony\Component\HttpFoundation\File\UploadedFile $file */
 
-// create
+// persist
 $user = new User();
-$user->profileImage = new PendingDocument($file);
-
+$user->image = $library->open('first/image.png');
 $em->persist($user);
-$em->flush(); // PendingDocument is saved to the library
+$em->flush(); // "first/image.png" is saved to the "user" db's "image" column
 
-// retrieve
+// autoload
 $user = $em->find(User::class, 1);
-$user->profileImage->name(); // call any Document method
+$user->image->contents(); // call any Document method (lazily loads from library)
 
 // update
-$user->profileImage = new PendingDocument($newFile);
-$em->flush(); // PendingDocument is saved to the library and old file deleted
+$user->image = $library->open('second/image.png');
+$em->flush(); // "second/image.png" is saved and "first/image.png" is deleted from the library
 
 // delete
 $em->remove($user);
-$em->flush(); // profileImage document is deleted from the library
+$em->flush(); // "second/image.png" is deleted from the library
+```
+
+#### Persist/Update with `PendingDocument`
+
+You can set [`PendingDocument`](#pendingdocument)'s to your entity's `Document` properties.
+These are automatically named (on persist and update) using the [Namer system](#namers)
+and configured by your `Mapping`.
+
+```php
+use Doctrine\ORM\Mapping as ORM;
+use Zenstruck\Document;
+use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\Mapping;
+
+class User
+{
+    #[ORM\Column]
+    public string $username;
+
+    /**
+     * PendingDocument's set on this property will be automatically named
+     * using the "checksum" namer.
+     */
+    #[Mapping(library: 'public', namer: 'checksum')]
+    #[ORM\Column(type: Document::class, nullable: true)]
+    public ?Document $image = null;
+
+    /**
+     * PendingDocument's set on this property will be automatically named
+     * using the "expression" namer with the configured "expression.
+     *
+     * Note the {this.username} syntax. "this" is the current instance of the entity.
+     */
+    #[Mapping(
+        library: 'public',
+        namer: 'expression', // use the expression namer
+        expression: 'user/{this.username}-{checksum}{ext}' // saved to library as "user/<username><checksum>.<extension>"
+    )]
+    #[ORM\Column(type: Document::class, nullable: true)]
+    public ?Document $image = null;
+
+    // equivalent to above (the default namer is "expression")
+    #[Mapping(library: 'public', expression: 'user/{this.username}-{checksum}{ext}')]
+    #[ORM\Column(type: Document::class, nullable: true)]
+    public ?Document $image = null;
+}
+```
+
+> *Note*: If no `namer` or `expression` is configured, defaults to the `ExpressionNamer`
+> with it's configured default expression.
+
+#### Store Additional Document Metadata
+
+You can choose to store additional document metadata in the database column
+(since it is a json type). This is useful to avoid retrieving this data
+lazily from the filesystem.
+
+Configure the fields to save to the db:
+
+```php
+use Doctrine\ORM\Mapping as ORM;
+use Zenstruck\Document;
+use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\Mapping;
+
+class User
+{
+    #[Mapping(library: 'public', metadata: ['path', 'url', 'lastModified'])]
+    #[ORM\Column(type: Document::class, nullable: true)]
+    public ?Document $image = null;
+}
+```
+
+Usage:
+
+```php
+/** @var \Zenstruck\Document\Library $library */
+/** @var \Doctrine\ORM\EntityManagerInterface $em */
+
+// persist
+$user = new User();
+$user->image = $library->open('first/image.png');
+$em->persist($user);
+$em->flush(); // json object with "path", "url" and "lastModified" saved to "user" db's "image" column
+
+// autoload
+$user = $em->find(User::class, 1);
+$user->image->url(); // loads from json object (does not load from library)
+$user->image->lastModified(); // loads from json object (does not load from library)
+$user->image->read(); // will load document from filesystem
+
+// update metadata stored in the database
+$user->image = clone $user->image; // note the clone (this is required for doctrine to see the update)
+$em->flush(); // metadata recalculated and saved
+```
+
+#### Post-Load Namer
+
+When [storing additional metadata](#store-additional-document-metadata), if you don't configure
+`path` in your `metadata` array, this triggers lazily generating the document's `path` after
+loading the entity. This can be useful if your backend filesystem structure can change. Since
+the path isn't stored in the database, you only have to update the mapping in your to _mass-change_
+all document's location.
+
+```php
+use Doctrine\ORM\Mapping as ORM;
+use Zenstruck\Document;
+use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\Mapping;
+
+class User
+{
+    #[ORM\Column]
+    public string $username;
+
+    #[Mapping(
+        library: 'public',
+        metadata: ['checksum', 'size', 'extension'], // just store the checksum, size and file extension in the db
+        namer: 'expression',
+        expression: 'images/{this.username}-{checksum:7}{ext}'
+    )]
+    #[ORM\Column(type: Document::class, nullable: true)]
+    public ?Document $image = null;
+}
+```
+
+Now, when you load the entity, the `path` will be calculated (with the namer) when
+first accessing a document method that requires it (ie `Document::contents()`).
+
+Note in the above example, the expression is `images/{this.username}-{checksum:7}{ext}`.
+Say you've renamed the `images` directory on your filesystem to `profile-images`. You
+need only update the mapping's expression to `profile-images/{this.username}-{checksum:7}{ext}`.
+The next time the document is loaded, it will point to the new directory.
+
+#### Virtual Document Properties
+
+You can also create `Document` properties on your entity's that aren't mapped to the
+database. They are always lazily named post-load. This can be useful if you have
+documents that an entity has access to, but are managed elsewhere (_readonly_ in the
+context of the entity). As long as they are named in a consistent manner, you
+can map to them:
+
+```php
+use Doctrine\ORM\Mapping as ORM;
+use Zenstruck\Document;
+use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\Mapping;
+
+class Part
+{
+    #[ORM\Column]
+    public string $number;
+
+    #[Mapping(
+        library: 'public',
+        namer: 'expression',
+        expression: '/part/spec-sheets/{this.number}.pdf'
+    )]
+    public Document $specSheet;
+}
+```
+
+Note, if it's possible the document may not exist for every entity, add a setter that
+checks for existence before returning:
+
+```php
+public function getSpecSheet(): ?Document
+{
+    return $this->specSheet->exists() ? $this->specSheet : null;
+}
 ```
 
 ### Serializer
@@ -142,7 +426,22 @@ class User
 }
 ```
 
-### Doctrine/Serializer Mapping
+#### Serialize Additional Metadata
+
+You can optionally serialize with additional document metadata:
+
+```php
+use Zenstruck\Document;
+
+/** @var \Symfony\Component\Serializer\Serializer $serializer */
+/** @var Document $document */
+
+$json = $serializer->serialize($document, 'json', [
+    'metadata' => ['path', 'size', 'lastModified']
+]); // {"path": "path/to/document", "size": 54588, "lastModified": 1666818035}
+```
+
+#### Doctrine/Serializer Mapping
 
 If you have an entity with a document that also can be serialized, you can configure
 the doctrine mapping and serializer context with just the `Context` attribute to avoid

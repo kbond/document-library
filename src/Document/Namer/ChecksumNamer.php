@@ -20,7 +20,7 @@ final class ChecksumNamer extends BaseNamer
         $checksum = $document->checksum($context['alg'] ?? []);
 
         if (isset($context['length'])) {
-            $checksum = \substr($checksum, 0, $context['length']);
+            $checksum = \mb_substr($checksum, 0, $context['length']);
         }
 
         return $checksum.self::extensionWithDot($document);
