@@ -4,7 +4,7 @@ namespace Zenstruck\Document\Library\Bridge\Doctrine\Persistence\Mapping;
 
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\Persistence\ManagerRegistry;
-use Symfony\Component\Serializer\Annotation\Context;
+use Zenstruck\Document\Attribute\Mapping;
 use Zenstruck\Document\Library\Bridge\Doctrine\DBAL\Types\DocumentType;
 use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\MappingProvider;
 
@@ -33,16 +33,10 @@ final class ManagerRegistryMappingProvider implements MappingProvider
                 continue;
             }
 
-            $options = \array_merge(
-                self::configFromAttribute($metadata->getReflectionProperty($mapping['fieldName'])),
+            $config[$mapping['fieldName']] = Mapping::fromProperty(
+                $metadata->getReflectionProperty($mapping['fieldName']),
                 $mapping['options'] ?? [],
-            );
-
-            if (!isset($options['library'])) {
-                throw new \LogicException(\sprintf('A library is not configured for %s::$%s.', $metadata->name, $mapping['fieldName']));
-            }
-
-            $config[$mapping['fieldName']] = $options;
+            )->toArray();
         }
 
         return $config;
@@ -59,18 +53,5 @@ final class ManagerRegistryMappingProvider implements MappingProvider
         }
 
         return \array_filter($config);
-    }
-
-    private static function configFromAttribute(\ReflectionProperty $property): array
-    {
-        if (!\class_exists(Context::class)) {
-            return [];
-        }
-
-        if (!$context = ($property->getAttributes(Context::class)[0] ?? null)?->newInstance()) {
-            return [];
-        }
-
-        return $context->getContext();
     }
 }

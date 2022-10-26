@@ -27,10 +27,11 @@ class Entity1
     #[ORM\Column(type: Document::class, nullable: true)]
     public ?Document $document2 = null;
 
-    #[ORM\Column(type: Document::class, nullable: true, options: [
-        'library' => 'memory',
-        'metadata' => ['checksum', 'extension'],
-        'expression' => 'prefix/{this.name|slug}-{checksum:7}{ext}',
-    ])]
+    #[Document\Attribute\Mapping(
+        library: 'memory',
+        expression: 'prefix/{this.name|slug}-{checksum:7}{ext}',
+        metadata: ['checksum', 'extension'],
+    )]
+    #[ORM\Column(type: Document::class, nullable: true)]
     public ?Document $document3 = null;
 }
