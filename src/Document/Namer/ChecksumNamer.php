@@ -9,9 +9,20 @@ use Zenstruck\Document;
  */
 final class ChecksumNamer extends BaseNamer
 {
+    /**
+     * @param array{
+     *     alg? :string,
+     *     length?: int
+     * } $context
+     */
     public function generateName(Document $document, array $context = []): string
     {
-        // todo customize algorithm
-        return $document->checksum().self::extensionWithDot($document);
+        $checksum = $document->checksum($context['alg'] ?? []);
+
+        if (isset($context['length'])) {
+            $checksum = \substr($checksum, 0, $context['length']);
+        }
+
+        return $checksum.self::extensionWithDot($document);
     }
 }
