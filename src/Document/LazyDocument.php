@@ -88,7 +88,7 @@ final class LazyDocument implements Document
         return $this->metadata[__FUNCTION__] ??= $this->document()->size();
     }
 
-    public function checksum(array $config = []): string
+    public function checksum(array|string $config = []): string
     {
         if ($config) {
             return $this->document()->checksum($config);

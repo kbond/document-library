@@ -29,7 +29,7 @@ interface Document
 
     public function size(): int;
 
-    public function checksum(array $config = []): string;
+    public function checksum(array|string $config = []): string;
 
     public function contents(): string;
 

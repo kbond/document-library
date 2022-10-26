@@ -58,8 +58,12 @@ final class FlysystemDocument implements Document
         return $this->size ??= $this->filesystem->fileSize($this->path);
     }
 
-    public function checksum(array $config = []): string
+    public function checksum(array|string $config = []): string
     {
+        if (\is_string($config)) {
+            $config = ['checksum_algo' => $config];
+        }
+
         if (isset($this->checksum[$serialized = \serialize($config)])) {
             return $this->checksum[$serialized];
         }

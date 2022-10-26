@@ -32,6 +32,7 @@ abstract class DocumentTest extends TestCase
         $this->assertIsInt($document->lastModified());
         $this->assertSame(\filesize(__FILE__), $document->size());
         $this->assertSame(\md5_file(__FILE__), $document->checksum());
+        $this->assertSame(\sha1_file(__FILE__), $document->checksum('sha1'));
         $this->assertStringEqualsFile(__FILE__, $document->contents());
         $this->assertStringEqualsFile(__FILE__, \stream_get_contents($document->read()));
         $this->assertTrue($document->exists());

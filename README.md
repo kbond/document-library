@@ -19,7 +19,8 @@ $document->nameWithoutExtension(); // "file"
 $document->lastModified(); // int (timestamp)
 $document->size(); // int (bytes)
 $document->mimeType(); // "text/plain"
-$document->checksum(); // "string"
+$document->checksum(); // "string" (uses default checksum algorithm for flysystem provider)
+$document->checksum('sha1'); // "string" (specify checksum algorithm)
 $document->read(); // resource (file contents as stream)
 $document->contents(); // string (file contents)
 $document->url(); // string (public url for document)

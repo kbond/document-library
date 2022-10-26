@@ -2,6 +2,8 @@
 
 namespace Zenstruck\Document;
 
+use League\Flysystem\CalculateChecksumFromStream;
+use League\Flysystem\Config;
 use League\Flysystem\Local\FallbackMimeTypeDetector;
 use League\MimeTypeDetection\FinfoMimeTypeDetector;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -14,6 +16,8 @@ use Zenstruck\Document;
  */
 final class PendingDocument implements Document
 {
+    use CalculateChecksumFromStream { readStream as private readStream; }
+
     private \SplFileInfo $file;
     private string $path;
 
@@ -63,10 +67,13 @@ final class PendingDocument implements Document
         return $this->file->getSize();
     }
 
-    public function checksum(array $config = []): string
+    public function checksum(array|string $config = []): string
     {
-        // todo support other algorithms
-        return \md5_file($this->file) ?: throw new \RuntimeException(\sprintf('Unable to calculate checksum for "%s".', $this->file));
+        if (\is_string($config)) {
+            $config = ['checksum_algo' => $config];
+        }
+
+        return $this->calculateChecksumFromStream($this->file, new Config($config));
     }
 
     public function contents(): string
@@ -111,5 +118,10 @@ final class PendingDocument implements Document
     public function tempFile(): \SplFileInfo
     {
         return TempFile::for($this);
+    }
+
+    private function readStream(string $path) // @phpstan-ignore-line
+    {
+        return $this->read();
     }
 }

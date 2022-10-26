@@ -39,7 +39,7 @@ final class NullDocument implements Document
         throw new \BadMethodCallException(\sprintf('%s() is not available.', __METHOD__));
     }
 
-    public function checksum(array $config = []): string
+    public function checksum(array|string $config = []): string
     {
         throw new \BadMethodCallException(\sprintf('%s() is not available.', __METHOD__));
     }

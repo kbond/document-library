@@ -58,9 +58,9 @@ final class SerializableDocument implements Document
         return $this->document->size();
     }
 
-    public function checksum(array $config = []): string
+    public function checksum(array|string $config = []): string
     {
-        return $this->document->checksum();
+        return $this->document->checksum($config);
     }
 
     public function contents(): string
