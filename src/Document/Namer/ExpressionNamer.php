@@ -17,7 +17,7 @@ final class ExpressionNamer extends BaseNamer
     public function __construct(
         ?SluggerInterface $slugger = null,
         private ?PropertyAccessorInterface $accessor = null,
-        array $defaultContext = ['expression' => self::DEFAULT_EXPRESSION]
+        array $defaultContext = []
     ) {
         parent::__construct($slugger, $defaultContext);
     }

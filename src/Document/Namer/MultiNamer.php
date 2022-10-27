@@ -11,19 +11,22 @@ use Zenstruck\Document\Namer;
  */
 final class MultiNamer implements Namer
 {
+    private const DEFAULT_NAMER = 'expression';
+
     /** @var array<string,Namer> */
     private array $defaultNamers = [];
 
     /**
      * @param array<string,Namer> $namers
      */
-    public function __construct(private ContainerInterface|array $namers = [], private string $defaultNamer = 'expression')
+    public function __construct(private ContainerInterface|array $namers = [], private array $defaultContext = [])
     {
     }
 
     public function generateName(Document $document, array $context = []): string
     {
-        $namer = $context['namer'] ?? $this->defaultNamer;
+        $context = \array_merge($this->defaultContext, $context);
+        $namer = $context['namer'] ?? self::DEFAULT_NAMER;
 
         if (\is_callable($namer)) {
             return $namer($document, $context);

@@ -121,10 +121,12 @@ $library->store($namer->generateName($document), $document); // stored as "<slug
 ### `ExpressionNamer`
 
 ```php
+use Zenstruck\Document\Namer\ExpressionNamer;
+
 /** @var \Zenstruck\Document\Library $library */
 /** @var \Zenstruck\Document\PendingDocument $document */
 
-$namer = new \Zenstruck\Document\Namer\ExpressionNamer();
+$namer = new ExpressionNamer();
 
 // Default expression
 $path = $namer->generateName($document); // "<slugified name>-<random 6 chars>.<extension>"
@@ -181,7 +183,7 @@ $path = $namer->generateName($document, ['namer' => 'expression', 'expression' =
 $path = $namer->generateName($document, ['expression' => '{name}{ext}']); // equivalent to above (because "expression" is the default)
 
 // Customize the default namer
-$namer = new MultiNamer(defaultNamer: 'checksum');
+$namer = new MultiNamer(defaultContext: ['namer' => 'checksum']);
 
 $path = $namer->generateName($document); // "<checksum>.<extension>"
 ```
@@ -212,7 +214,7 @@ use Zenstruck\Document\Namer\MultiNamer;
 
 $namer = new MultiNamer(
     namers: ['custom1' => $customNamer1, 'custom2' => $customNamer2],
-    defaultNamer: 'custom1',
+    defaultContext: ['namer' => 'custom1'],
 );
 
 $path = $namer->generateName($document); // use the custom1 namer as it's the default

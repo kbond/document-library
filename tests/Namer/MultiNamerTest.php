@@ -28,7 +28,7 @@ final class MultiNamerTest extends TestCase
      */
     public function can_define_default_namer(): void
     {
-        $namer = new MultiNamer(defaultNamer: 'checksum');
+        $namer = new MultiNamer(defaultContext: ['namer' => 'checksum']);
         $library = self::inMemoryLibrary();
 
         $this->assertSame('9a0364b9e99bb480dd25e1f0284c8555.txt', $namer->generateName($library->store('foo/bar.txt', 'content')));
