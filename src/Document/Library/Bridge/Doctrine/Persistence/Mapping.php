@@ -22,6 +22,9 @@ final class Mapping
         public bool $deleteOnChange = true,
         public array $extra = [],
     ) {
+        if (\is_array($this->metadata) && !$this->metadata) {
+            throw new \InvalidArgumentException('$metadata cannot be empty.');
+        }
     }
 
     /**
