@@ -5,6 +5,7 @@ namespace Zenstruck\Document\Library\Tests\Bridge\Doctrine\Fixture;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Context;
 use Zenstruck\Document;
+use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\Mapping;
 use Zenstruck\Document\NullDocument;
 
 #[ORM\Entity]
@@ -28,7 +29,7 @@ class Entity1
     #[ORM\Column(type: Document::class, nullable: true)]
     public ?Document $document2 = null;
 
-    #[Document\Library\Bridge\Doctrine\Persistence\Mapping(
+    #[Mapping(
         library: 'memory',
         expression: 'prefix/{this.name|slug}-{checksum:7}{ext}',
         metadata: ['checksum', 'extension'],
@@ -36,7 +37,14 @@ class Entity1
     #[ORM\Column(type: Document::class, nullable: true)]
     public ?Document $document3 = null;
 
-    #[Document\Library\Bridge\Doctrine\Persistence\Mapping(
+    #[Mapping(
+        library: 'memory',
+        metadata: true,
+    )]
+    #[ORM\Column(type: Document::class, nullable: true)]
+    public ?Document $document5 = null;
+
+    #[Mapping(
         library: 'memory',
         expression: 'prefix/{this.name|slug}.txt',
     )]

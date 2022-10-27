@@ -320,8 +320,6 @@ You can choose to store additional document metadata in the database column
 (since it is a json type). This is useful to avoid retrieving this data
 lazily from the filesystem.
 
-Configure the fields to save to the db:
-
 ```php
 use Doctrine\ORM\Mapping as ORM;
 use Zenstruck\Document;
@@ -329,7 +327,12 @@ use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\Mapping;
 
 class User
 {
-    #[Mapping(library: 'public', metadata: ['path', 'url', 'lastModified'])]
+    #[Mapping(library: 'public', metadata: true)] // will store path, lastModified, size, checksum, mimeType and url
+    #[ORM\Column(type: Document::class, nullable: true)]
+    public ?Document $image = null;
+
+    // customize the saved metadata
+    #[Mapping(library: 'public', metadata: ['path', 'url', 'lastModified'])] // will store just path, url, lastModified
     #[ORM\Column(type: Document::class, nullable: true)]
     public ?Document $image = null;
 }
@@ -475,8 +478,13 @@ use Zenstruck\Document;
 /** @var Document $document */
 
 $json = $serializer->serialize($document, 'json', [
+    'metadata' => true,
+]); // {"path": "...", "lastModified": ..., "size": ..., "checksum": "...", "mimeType": "...", "url": "..."}
+
+// customize the metadata stored
+$json = $serializer->serialize($document, 'json', [
     'metadata' => ['path', 'size', 'lastModified']
-]); // {"path": "path/to/document", "size": 54588, "lastModified": 1666818035}
+]); // {"path": "...", "size": ..., "lastModified": ...}
 ```
 
 #### Post-Deserialize Namer

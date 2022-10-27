@@ -3,6 +3,7 @@
 namespace Zenstruck\Document\Library\Tests\Bridge\Doctrine\Persistence\EventListener;
 
 use Doctrine\ORM\Events;
+use League\Flysystem\UnableToReadFile;
 use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\EventListener\DocumentLifecycleSubscriber;
 use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\Mapping\ManagerRegistryMappingProvider;
 use Zenstruck\Document\Library\Tests\Bridge\Doctrine\Fixture\Entity1;
@@ -81,6 +82,39 @@ class DocumentLifecycleSubscriberTest extends TestCase
         $this->assertSame(14, $entity->document2->size()); // was cached in db
         $this->assertSame('something else again', $entity->document2->contents());
         $this->assertSame(20, $entity->document2->size()); // should be refreshed when accessing contents
+    }
+
+    /**
+     * @test
+     */
+    public function documents_can_be_saved_with_all_metadata(): void
+    {
+        $registry = self::libraryRegistry();
+        $library = $registry->get('memory');
+        $this->registerEventSubscriber($registry);
+
+        $entity = new Entity1();
+        $entity->document5 = $library->store('some/file.txt', 'content');
+        $this->em()->persist($entity);
+        $this->em()->flush();
+        $this->em()->clear();
+
+        $library->delete('some/file.txt');
+
+        $lastModified = $entity->document5->lastModified();
+        $entity = $this->em()->find(Entity1::class, 1);
+
+        $this->assertSame('some/file.txt', $entity->document5->path());
+        $this->assertSame('file.txt', $entity->document5->name());
+        $this->assertSame('file', $entity->document5->nameWithoutExtension());
+        $this->assertSame('txt', $entity->document5->extension());
+        $this->assertSame($lastModified, $entity->document5->lastModified());
+        $this->assertSame(7, $entity->document5->size());
+        $this->assertSame('9a0364b9e99bb480dd25e1f0284c8555', $entity->document5->checksum());
+        $this->assertSame('text/plain', $entity->document5->mimeType());
+
+        $this->expectException(UnableToReadFile::class);
+        $entity->document5->contents();
     }
 
     /**

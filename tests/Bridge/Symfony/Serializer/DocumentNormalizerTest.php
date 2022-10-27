@@ -117,6 +117,33 @@ class DocumentNormalizerTest extends TestCase
     /**
      * @test
      */
+    public function can_serialize_all_metadata(): void
+    {
+        $document = self::registry()->get('memory')->store('some/file.txt', 'content');
+        $serializer = self::serializer();
+
+        $serialized = $serializer->serialize($document, 'json', ['metadata' => true]);
+        $decoded = \json_decode($serialized, true);
+
+        $this->assertArrayHasKey('lastModified', $decoded);
+        $this->assertIsInt($decoded['lastModified']);
+
+        unset($decoded['lastModified']);
+
+        $this->assertSame(
+            [
+                'path' => 'some/file.txt',
+                'size' => 7,
+                'checksum' => '9a0364b9e99bb480dd25e1f0284c8555',
+                'mimeType' => 'text/plain',
+            ],
+            $decoded
+        );
+    }
+
+    /**
+     * @test
+     */
     public function can_serialize_metadata_without_path_and_names_during_deserialize(): void
     {
         $document = self::registry()->get('memory')->store($expected = '9a0364b9e99bb480dd25e1f0284c8555.txt', 'content');

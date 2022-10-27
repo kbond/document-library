@@ -2,15 +2,31 @@
 
 namespace Zenstruck\Document;
 
+use League\Flysystem\UnableToGeneratePublicUrl;
 use Zenstruck\Document;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
+ *
+ * @internal
  */
 final class SerializableDocument implements Document
 {
-    public function __construct(private Document $document, private array $fields)
+    private const ALL_METADATA_FIELDS = ['path', 'lastModified', 'size', 'checksum', 'mimeType', 'url'];
+
+    private array $fields;
+
+    public function __construct(private Document $document, array|bool $fields)
     {
+        if (false === $fields) {
+            throw new \InvalidArgumentException('$fields cannot be false.');
+        }
+
+        if (true === $fields) {
+            $fields = self::ALL_METADATA_FIELDS;
+        }
+
+        $this->fields = $fields;
     }
 
     public function serialize(): array
@@ -22,7 +38,11 @@ final class SerializableDocument implements Document
                 throw new \LogicException(\sprintf('Method %d::%s() does not exist.', static::class, $field));
             }
 
-            $data[$field] = $this->document->{$field}();
+            try {
+                $data[$field] = $this->document->{$field}();
+            } catch (UnableToGeneratePublicUrl) {
+                // url not available, skip
+            }
         }
 
         return $data;
