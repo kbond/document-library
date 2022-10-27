@@ -33,11 +33,6 @@ final class LazyDocument implements Document
         return $this;
     }
 
-    public function isNamerRequired(): bool
-    {
-        return !isset($this->document) && !isset($this->metadata['path']);
-    }
-
     public function setNamer(Namer $namer, array $context): static
     {
         $this->namer = $namer;

@@ -555,7 +555,7 @@ $json = $serializer->serialize($document, 'json', [
 ]); // {"path": "...", "size": ..., "lastModified": ...}
 ```
 
-#### Post-Deserialize Namer
+#### Name on Deserialize
 
 When [serializing with additional metadata](#serialize-additional-metadata), if you don't configure
 `path` in your `metadata` array, this triggers lazily generating the document's `path` after
@@ -572,6 +572,20 @@ $document = $serializer->deserialize($json, Document::class, 'json', [
 ]); // \Zenstruck\Document
 
 $document->path(); // generated via the namer and the serialized data
+```
+
+You can force this behaviour even if the `path` is serialized:
+
+```php
+$json = $serializer->serialize($document, 'json', ['metadata' => ['path', 'checksum', 'extension']]); // includes path
+
+$document = $serializer->deserialize($json, Document::class, 'json', [
+    'library' => 'public',
+    'namer' => 'checksum',
+    'rename' => true, // trigger the rename
+]); // \Zenstruck\Document
+
+$document->path(); // always generated via the namer
 ```
 
 #### Doctrine/Serializer Mapping

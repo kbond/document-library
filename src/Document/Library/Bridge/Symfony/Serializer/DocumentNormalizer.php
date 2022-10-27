@@ -18,6 +18,7 @@ class DocumentNormalizer implements NormalizerInterface, DenormalizerInterface, 
 {
     public const LIBRARY = 'library';
     public const METADATA = 'metadata';
+    public const RENAME = 'rename';
 
     public function __construct(private LibraryRegistry $registry, private Namer $namer)
     {
@@ -41,18 +42,25 @@ class DocumentNormalizer implements NormalizerInterface, DenormalizerInterface, 
     }
 
     /**
-     * @param string $data
+     * @param string|array $data
      */
     final public function denormalize(mixed $data, string $type, ?string $format = null, array $context = []): Document
     {
-        // todo force "name on deserialize"
+        if (\is_string($data)) {
+            $data = ['path' => $data];
+        }
+
+        if ($context[self::RENAME] ?? false) {
+            unset($data['path']);
+        }
+
         $document = new LazyDocument($data);
 
         if ($library = $context[self::LIBRARY] ?? null) {
             $document->setLibrary($this->registry()->get($library));
         }
 
-        if ($document->isNamerRequired()) {
+        if (!isset($data['path'])) {
             $document->setNamer($this->namer(), $context);
         }
 

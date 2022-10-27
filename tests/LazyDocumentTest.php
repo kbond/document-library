@@ -50,20 +50,6 @@ final class LazyDocumentTest extends DocumentTest
     /**
      * @test
      */
-    public function can_check_if_namer_is_required(): void
-    {
-        $document1 = new LazyDocument('some/path.txt');
-        $document2 = new LazyDocument(['checksum' => 'foo']);
-        $document3 = (new LazyDocument('some/path'))->setLibrary(self::inMemoryLibrary())->refresh();
-
-        $this->assertFalse($document1->isNamerRequired());
-        $this->assertTrue($document2->isNamerRequired());
-        $this->assertFalse($document3->isNamerRequired());
-    }
-
-    /**
-     * @test
-     */
     public function can_lazily_generate_path_with_namer(): void
     {
         $document = (new LazyDocument(['checksum' => 'foo']))->setNamer(new ExpressionNamer(), [
