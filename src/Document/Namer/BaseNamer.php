@@ -14,11 +14,18 @@ abstract class BaseNamer implements Namer
 {
     private const ALPHABET = '123456789abcdefghijkmnopqrstuvwxyz';
 
-    public function __construct(private ?SluggerInterface $slugger = null)
+    public function __construct(private ?SluggerInterface $slugger = null, private array $defaultContext = [])
     {
     }
 
-    final public static function randomString(int $length = 6): string
+    final public function generateName(Document $document, array $context = []): string
+    {
+        return $this->generate($document, \array_merge($this->defaultContext, $context));
+    }
+
+    abstract protected function generate(Document $document, array $context): string;
+
+    final protected static function randomString(int $length = 6): string
     {
         if (!\class_exists(ByteString::class)) {
             /**
@@ -33,6 +40,13 @@ abstract class BaseNamer implements Namer
     final protected static function extensionWithDot(Document $document): string
     {
         return '' === ($ext = $document->extension()) ? '' : '.'.\mb_strtolower($ext);
+    }
+
+    final protected static function checksum(Document $document, ?string $algorithm, ?int $length): string
+    {
+        $checksum = $document->checksum($algorithm ?? []);
+
+        return $length ? \mb_substr($checksum, 0, $length) : $checksum;
     }
 
     final protected function slugify(string $value): string

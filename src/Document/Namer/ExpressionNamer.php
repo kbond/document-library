@@ -12,15 +12,17 @@ use Zenstruck\Document;
  */
 final class ExpressionNamer extends BaseNamer
 {
+    private const DEFAULT_EXPRESSION = '{name}-{rand}{ext}';
+
     public function __construct(
-        private string $defaultExpression = '{name}-{rand}{ext}',
         ?SluggerInterface $slugger = null,
         private ?PropertyAccessorInterface $accessor = null,
+        array $defaultContext = ['expression' => self::DEFAULT_EXPRESSION]
     ) {
-        parent::__construct($slugger);
+        parent::__construct($slugger, $defaultContext);
     }
 
-    public function generateName(Document $document, array $context = []): string
+    protected function generate(Document $document, array $context = []): string
     {
         return \preg_replace_callback(
             '#{([\w.:\-\[\]]+)(\|(slug|slugify|lower))?}#',
@@ -39,7 +41,7 @@ final class ExpressionNamer extends BaseNamer
                     default => $value,
                 };
             },
-            $context['expression'] ?? $this->defaultExpression
+            $context['expression'] ?? self::DEFAULT_EXPRESSION
         );
     }
 
@@ -106,8 +108,6 @@ final class ExpressionNamer extends BaseNamer
             };
         }
 
-        $checksum = $document->checksum($algorithm ?? []);
-
-        return isset($length) ? \mb_substr($checksum, 0, $length) : $checksum;
+        return self::checksum($document, $algorithm ?? null, $length ?? null);
     }
 }

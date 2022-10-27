@@ -28,12 +28,23 @@ final class ExpressionNamerTest extends TestCase
      */
     public function can_customize_default_expression(): void
     {
-        $namer = new ExpressionNamer('{name}{ext}');
+        $namer = new ExpressionNamer(defaultContext: ['expression' => '{name}{ext}']);
         $library = self::inMemoryLibrary();
 
         $this->assertSame('foo-bar', $namer->generateName($library->store('some/FoO BaR', 'content')));
         $this->assertSame('foo-bar.txt', $namer->generateName($library->store('some/FoO BaR.txt', 'content')));
         $this->assertSame('foo-bar.txt', $namer->generateName($library->store('some/FoO BaR.tXt', 'content')));
+    }
+
+    /**
+     * @test
+     */
+    public function failing_to_set_the_default_expression_adds_default(): void
+    {
+        $namer = new ExpressionNamer(defaultContext: []);
+        $library = self::inMemoryLibrary();
+
+        $this->assertMatchesRegularExpression('#^foo-bar-[0-9a-z]{6}\.txt$#', $namer->generateName($library->store('some/FoO BaR.TxT', 'content')));
     }
 
     /**
