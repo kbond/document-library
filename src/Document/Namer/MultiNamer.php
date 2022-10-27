@@ -32,6 +32,11 @@ final class MultiNamer implements Namer
             return $namer($document, $context);
         }
 
+        if (\str_starts_with($namer, 'expression:')) {
+            $context['expression'] = \mb_substr($namer, 11);
+            $context['namer'] = $namer = 'expression';
+        }
+
         return $this->get($namer)->generateName($document, $context);
     }
 

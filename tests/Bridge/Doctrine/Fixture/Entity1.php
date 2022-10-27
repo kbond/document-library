@@ -21,7 +21,7 @@ class Entity1
 
     #[ORM\Column(type: Document::class, nullable: true, options: [
         'library' => 'memory',
-        'expression' => 'prefix/{this.name|slug}-{checksum:7}{ext}',
+        'namer' => 'expression:prefix/{this.name|slug}-{checksum:7}{ext}',
     ])]
     public ?Document $document1 = null;
 
@@ -31,7 +31,7 @@ class Entity1
 
     #[Mapping(
         library: 'memory',
-        expression: 'prefix/{this.name|slug}-{checksum:7}{ext}',
+        namer: 'expression:prefix/{this.name|slug}-{checksum:7}{ext}',
         metadata: ['checksum', 'extension'],
     )]
     #[ORM\Column(type: Document::class, nullable: true)]
@@ -46,7 +46,7 @@ class Entity1
 
     #[Mapping(
         library: 'memory',
-        expression: 'prefix/{this.name|slug}.txt',
+        namer: 'expression:prefix/{this.name|slug}.txt',
     )]
     private Document $document4;
 

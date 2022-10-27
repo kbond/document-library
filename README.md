@@ -169,6 +169,7 @@ $library->store($path, $document); // stored as "<slugified filename>"
 
 ```php
 use Zenstruck\Document\Namer\MultiNamer;
+use Zenstruck\Document\Namer\Expression;
 
 /** @var \Zenstruck\Document\PendingDocument $document */
 
@@ -180,7 +181,8 @@ $path = $namer->generateName($document); // "<slugified name>-<random 6 chars>.<
 $path = $namer->generateName($document, ['namer' => 'checksum']); // use the checksum namer
 $path = $namer->generateName($document, ['namer' => 'slugify']); // use the slugify namer
 $path = $namer->generateName($document, ['namer' => 'expression', 'expression' => '{name}{ext}']); // use the expression namer
-$path = $namer->generateName($document, ['expression' => '{name}{ext}']); // equivalent to above (because "expression" is the default)
+$path = $namer->generateName($document, ['namer' => new Expression('{name}{ext}')]); // equivalent to above
+$path = $namer->generateName($document, ['namer' => 'expression:{name}{ext}']); // equivalent to above
 
 // Customize the default namer
 $namer = new MultiNamer(defaultContext: ['namer' => 'checksum']);
@@ -291,6 +293,7 @@ and configured by your `Mapping`.
 use Doctrine\ORM\Mapping as ORM;
 use Zenstruck\Document;
 use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\Mapping;
+use Zenstruck\Document\Namer\Expression;
 
 class User
 {
@@ -307,27 +310,24 @@ class User
 
     /**
      * PendingDocument's set on this property will be automatically named
-     * using the "expression" namer with the configured "expression.
+     * using the "expression" namer with the configured "expression".
      *
      * Note the {this.username} syntax. "this" is the current instance of the entity.
      */
     #[Mapping(
         library: 'public',
-        namer: 'expression', // use the expression namer
-        expression: 'user/{this.username}-{checksum}{ext}' // saved to library as "user/<username><checksum>.<extension>"
+        namer: new Expression('user/{this.username}-{checksum}{ext}'), // saved to library as "user/<username><checksum>.<extension>"
     )]
-    #[ORM\Column(type: Document::class, nullable: true)]
-    public ?Document $image = null;
-
-    // equivalent to above (the default namer is "expression")
-    #[Mapping(library: 'public', expression: 'user/{this.username}-{checksum}{ext}')]
     #[ORM\Column(type: Document::class, nullable: true)]
     public ?Document $image = null;
 }
 ```
 
-> **Note**: If no `namer` or `expression` is configured, defaults to the `ExpressionNamer`
-> with its configured default expression.
+> **Note**: If not on PHP 8.1+, the `namer: new Expression()` syntax above is invalid. Use
+> `namer: 'expression:user/{this.username}-{checksum}{ext}'` instead.
+
+> **Note**: If no `namer` is configured, defaults to the `ExpressionNamer` with its configured
+> default expression.
 
 #### Store Additional Document Metadata
 
@@ -388,6 +388,7 @@ _mass-change_ all document's location.
 use Doctrine\ORM\Mapping as ORM;
 use Zenstruck\Document;
 use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\Mapping;
+use Zenstruck\Document\Namer\Expression;
 
 class User
 {
@@ -397,8 +398,7 @@ class User
     #[Mapping(
         library: 'public',
         metadata: ['checksum', 'size', 'extension'], // just store the checksum, size and file extension in the db
-        namer: 'expression',
-        expression: 'images/{this.username}-{checksum:7}{ext}'
+        namer: new Expression('images/{this.username}-{checksum:7}{ext}'), // use "namer: 'expression:images/{this.username}-{checksum:7}{ext}'" on PHP 8.0
     )]
     #[ORM\Column(type: Document::class, nullable: true)]
     public ?Document $image = null;
@@ -426,6 +426,7 @@ manner, you can map to them:
 use Doctrine\ORM\Mapping as ORM;
 use Zenstruck\Document;
 use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\Mapping;
+use Zenstruck\Document\Namer\Expression;
 
 class Part
 {
@@ -434,8 +435,7 @@ class Part
 
     #[Mapping(
         library: 'public',
-        namer: 'expression',
-        expression: '/part/spec-sheets/{this.number}.pdf'
+        namer: new Expression('/part/spec-sheets/{this.number}.pdf'), // use "namer: 'expression:/part/spec-sheets/{this.number}.pdf'" on PHP 8.0
     )]
     public Document $specSheet;
 }

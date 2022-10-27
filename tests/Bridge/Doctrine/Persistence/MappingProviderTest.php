@@ -19,7 +19,7 @@ abstract class MappingProviderTest extends TestCase
         Entity1::class => [
             'document1' => [
                 'library' => 'memory',
-                'expression' => 'prefix/{this.name|slug}-{checksum:7}{ext}',
+                'namer' => 'expression:prefix/{this.name|slug}-{checksum:7}{ext}',
             ],
             'document2' => [
                 'library' => 'memory',
@@ -27,7 +27,7 @@ abstract class MappingProviderTest extends TestCase
             ],
             'document3' => [
                 'library' => 'memory',
-                'expression' => 'prefix/{this.name|slug}-{checksum:7}{ext}',
+                'namer' => 'expression:prefix/{this.name|slug}-{checksum:7}{ext}',
                 'metadata' => ['checksum', 'extension'],
             ],
             'document5' => [
@@ -36,7 +36,7 @@ abstract class MappingProviderTest extends TestCase
             ],
             'document4' => [
                 'library' => 'memory',
-                'expression' => 'prefix/{this.name|slug}.txt',
+                'namer' => 'expression:prefix/{this.name|slug}.txt',
             ],
         ],
     ];

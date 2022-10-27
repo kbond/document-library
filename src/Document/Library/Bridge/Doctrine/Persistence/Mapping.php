@@ -16,7 +16,6 @@ final class Mapping
     public function __construct(
         public string $library,
         public ?string $namer = null,
-        public ?string $expression = null,
         public array|bool $metadata = false,
         public bool $autoload = true,
         public bool $deleteOnRemove = true,
@@ -41,13 +40,12 @@ final class Mapping
         return new self(
             $mapping['library'] ?? throw new \LogicException(\sprintf('A library is not configured for %s::$%s.', $property->class, $property->name)),
             $mapping['namer'] ?? null,
-            $mapping['expression'] ?? null,
             $mapping['metadata'] ?? false,
             $mapping['autoload'] ?? true,
             $mapping['deleteOnRemove'] ?? true,
             $mapping['deleteOnChange'] ?? true,
             \array_diff_key($mapping, \array_flip([
-                'library', 'namer', 'expression', 'metadata', 'autoload', 'deleteOnRemove', 'deleteOnChange',
+                'library', 'namer', 'metadata', 'autoload', 'deleteOnRemove', 'deleteOnChange',
             ])),
         );
     }
@@ -60,7 +58,6 @@ final class Mapping
         return \array_filter(\array_merge($this->extra, [
             'library' => $this->library,
             'namer' => $this->namer,
-            'expression' => $this->expression,
             'metadata' => $this->metadata,
         ]));
     }

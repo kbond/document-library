@@ -4,6 +4,7 @@ namespace Zenstruck\Document\Library\Tests\Namer;
 
 use Zenstruck\Document;
 use Zenstruck\Document\Library\Tests\TestCase;
+use Zenstruck\Document\Namer\Expression;
 use Zenstruck\Document\Namer\MultiNamer;
 
 /**
@@ -60,6 +61,22 @@ final class MultiNamerTest extends TestCase
 
         $this->assertSame('foo-bar.txt', $namer->generateName($library->store('some/FoO BaR.txt', ''), [
             'namer' => 'slugify',
+        ]));
+    }
+
+    /**
+     * @test
+     */
+    public function expression_namer(): void
+    {
+        $namer = new MultiNamer();
+        $library = self::inMemoryLibrary();
+
+        $this->assertSame('foo-bar.txt', $namer->generateName($library->store('some/FoO BaR.txt', ''), [
+            'namer' => 'expression:{name}{ext}',
+        ]));
+        $this->assertSame('foo-bar.txt', $namer->generateName($library->store('some/FoO BaR.txt', ''), [
+            'namer' => new Expression('{name}{ext}'),
         ]));
     }
 
