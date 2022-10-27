@@ -186,6 +186,19 @@ $namer = new MultiNamer(defaultNamer: 'checksum');
 $path = $namer->generateName($document); // "<checksum>.<extension>"
 ```
 
+The `MultiNamer` can also use a `callable` for the `namer`:
+
+```php
+use Zenstruck\Document;
+
+/** @var \Zenstruck\Document\Namer\MultiNamer $namer */
+/** @var Document $document */
+
+$path = $namer->generateName($document, ['namer' => function(Document $document, array $context):string {
+    // return string
+}]);
+```
+
 ### Custom Namer
 
 You can create your own namer by having an object implement the `Zenstruck\Document\Namer`
