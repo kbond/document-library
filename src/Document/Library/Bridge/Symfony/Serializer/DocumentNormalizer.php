@@ -45,6 +45,7 @@ class DocumentNormalizer implements NormalizerInterface, DenormalizerInterface, 
      */
     final public function denormalize(mixed $data, string $type, ?string $format = null, array $context = []): Document
     {
+        // todo force "name on deserialize"
         $document = new LazyDocument($data);
 
         if ($library = $context[self::LIBRARY] ?? null) {

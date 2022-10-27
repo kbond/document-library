@@ -20,11 +20,24 @@ final class Mapping
         public bool $autoload = true,
         public bool $deleteOnRemove = true,
         public bool $deleteOnChange = true,
+        private bool $nameOnLoad = false,
         public array $extra = [],
     ) {
         if (\is_array($this->metadata) && !$this->metadata) {
             throw new \InvalidArgumentException('$metadata cannot be empty.');
         }
+
+        if (\is_array($this->metadata) && !\in_array('path', $this->metadata, true)) {
+            $this->nameOnLoad = true;
+        }
+    }
+
+    /**
+     * @internal
+     */
+    public function nameOnLoad(): bool
+    {
+        return $this->nameOnLoad || $this->virtual;
     }
 
     /**
@@ -47,8 +60,9 @@ final class Mapping
             $mapping['autoload'] ?? true,
             $mapping['deleteOnRemove'] ?? true,
             $mapping['deleteOnChange'] ?? true,
+            $mapping['nameOnLoad'] ?? false,
             \array_diff_key($mapping, \array_flip([
-                'library', 'namer', 'metadata', 'autoload', 'deleteOnRemove', 'deleteOnChange',
+                'library', 'namer', 'metadata', 'autoload', 'deleteOnRemove', 'deleteOnChange', 'nameOnLoad',
             ])),
         );
     }

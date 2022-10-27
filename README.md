@@ -370,13 +370,18 @@ $user = $em->find(User::class, 1);
 $user->image->url(); // loads from json object (does not load from library)
 $user->image->lastModified(); // loads from json object (does not load from library)
 $user->image->read(); // will load document from filesystem
+```
 
-// update metadata stored in the database
+#### Update Metadata
+
+The following method is required to update the metadata stored in the database:
+
+```php
 $user->image = clone $user->image; // note the clone (this is required for doctrine to see the update)
 $em->flush(); // metadata recalculated and saved
 ```
 
-#### Post-Load Namer
+#### Name on Load
 
 When [storing additional metadata](#store-additional-document-metadata), if you don't configure
 `path` in your `metadata` array, this triggers lazily generating the document's `path` after
@@ -412,6 +417,27 @@ Note in the above example, the expression is `images/{this.username}-{checksum:7
 Say you've renamed the `images` directory on your filesystem to `profile-images`. You
 need only update the mapping's expression to `profile-images/{this.username}-{checksum:7}{ext}`.
 The next time the document is loaded, it will point to the new directory.
+
+You can force this behaviour even if the `path` is stored in the database:
+
+```php
+use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\Mapping;
+
+class User
+{
+    #[Mapping(
+        library: 'public',
+        metadata: ['checksum', 'size', 'extension'],
+        namer: new Expression('images/{this.username}-{checksum:7}{ext}'),
+        nameOnLoad: true, // force naming on load
+    )]
+    #[ORM\Column(type: Document::class, nullable: true)]
+    public ?Document $image = null;
+}
+```
+
+> **Note**: this doesn't update the database automatically, see [Updating Metadata](#update-metadata)
+> to see how to do this.
 
 #### Virtual Document Properties
 

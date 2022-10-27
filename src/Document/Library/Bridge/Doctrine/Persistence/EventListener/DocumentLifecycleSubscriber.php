@@ -45,7 +45,7 @@ class DocumentLifecycleSubscriber
         foreach ((new ObjectReflector($object))->documents($mappings) as $property => $document) {
             $document->setLibrary($this->registry()->get($mappings[$property]->library));
 
-            if ($document->isNamerRequired()) {
+            if ($mappings[$property]->nameOnLoad()) {
                 $document->setNamer($this->namer(), self::namerContext($mappings[$property], $object));
             }
         }
