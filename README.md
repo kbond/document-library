@@ -204,6 +204,10 @@ class User
 }
 ```
 
+> **Warning**: It's important that the typehint is the `Zenstruck\Document` interface and
+> not a concrete document object. Behind the scenes, it is populated with different
+> implementations of this interface.
+
 Usage:
 
 ```php
@@ -231,7 +235,7 @@ $em->flush(); // "second/image.png" is deleted from the library
 
 #### Persist/Update with `PendingDocument`
 
-You can set [`PendingDocument`](#pendingdocument)'s to your entity's `Document` properties.
+You can set [`PendingDocument`](#pendingdocument)'s to your entities `Document` properties.
 These are automatically named (on persist and update) using the [Namer system](#namers)
 and configured by your `Mapping`.
 
@@ -274,7 +278,7 @@ class User
 }
 ```
 
-> *Note*: If no `namer` or `expression` is configured, defaults to the `ExpressionNamer`
+> **Note**: If no `namer` or `expression` is configured, defaults to the `ExpressionNamer`
 > with it's configured default expression.
 
 #### Store Additional Document Metadata
@@ -360,11 +364,12 @@ The next time the document is loaded, it will point to the new directory.
 
 #### Virtual Document Properties
 
-You can also create `Document` properties on your entity's that aren't mapped to the
-database. They are always lazily named post-load. This can be useful if you have
-documents that an entity has access to, but are managed elsewhere (_readonly_ in the
-context of the entity). As long as they are named in a consistent manner, you
-can map to them:
+You can also create `Document` properties on your entities that aren't mapped to the
+database. In this case, when you access the property, the `namer` will be called to
+generate the path, which will then be loaded from the library. This can be useful
+if you have documents that an entity has access to, but are managed elsewhere
+(_readonly_ in the context of the entity). As long as they are named in a consistent
+manner, you can map to them:
 
 ```php
 use Doctrine\ORM\Mapping as ORM;
