@@ -166,15 +166,45 @@ $library->store($path, $document); // stored as "<slugified filename>"
 ### `MultiNamer`
 
 ```php
+use Zenstruck\Document\Namer\MultiNamer;
+
 /** @var \Zenstruck\Document\PendingDocument $document */
 
-$namer = new \Zenstruck\Document\Namer\MultiNamer(); // defaults to above namers
+$namer = new MultiNamer(); // defaults to containing above namers, with "expression" as the default
 
 // defaults to ExpressionNamer (with its default expression)
 $path = $namer->generateName($document); // "<slugified name>-<random 6 chars>.<extension>"
 
-// use the checksum namer
-$path = $namer->generateName($document, ['namer' => 'checksum']); // "<document checksum>.<extension>"
+$path = $namer->generateName($document, ['namer' => 'checksum']); // use the checksum namer
+$path = $namer->generateName($document, ['namer' => 'slugify']); // use the slugify namer
+$path = $namer->generateName($document, ['namer' => 'expression', 'expression' => '{name}{ext}']); // use the expression namer
+$path = $namer->generateName($document, ['expression' => '{name}{ext}']); // equivalent to above (because "expression" is the default)
+
+// Customize the default namer
+$namer = new MultiNamer(defaultNamer: 'checksum');
+
+$path = $namer->generateName($document); // "<checksum>.<extension>"
+```
+
+### Custom Namer
+
+You can create your own namer by having an object implement the `Zenstruck\Document\Namer`
+interface and register it with the [`MultiNamer`](#multinamer):
+
+```php
+use Zenstruck\Document\Namer\MultiNamer;
+
+/** @var \Zenstruck\Document\Namer $customNamer1 */
+/** @var \Zenstruck\Document\Namer $customNamer2 */
+
+$namer = new MultiNamer(
+    namers: ['custom1' => $customNamer1, 'custom2' => $customNamer2],
+    defaultNamer: 'custom1',
+);
+
+$path = $namer->generateName($document); // use the custom1 namer as it's the default
+$path = $namer->generateName($document, ['namer' => 'custom2']); // use the custom2 namer
+$path = $namer->generateName($document, ['namer' => 'checksum']); // default namers are still available
 ```
 
 ## Symfony

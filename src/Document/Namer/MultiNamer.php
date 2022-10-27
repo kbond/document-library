@@ -11,18 +11,14 @@ use Zenstruck\Document\Namer;
  */
 final class MultiNamer implements Namer
 {
-    private ContainerInterface|array $namers;
+    /** @var array<string,Namer> */
+    private array $defaultNamers = [];
 
     /**
      * @param array<string,Namer> $namers
      */
-    public function __construct(ContainerInterface|array $namers = [], private string $defaultNamer = 'expression')
+    public function __construct(private ContainerInterface|array $namers = [], private string $defaultNamer = 'expression')
     {
-        $this->namers = $namers ?: [
-            'expression' => new ExpressionNamer(),
-            'checksum' => new ChecksumNamer(),
-            'slugify' => new SlugifyNamer(),
-        ];
     }
 
     public function generateName(Document $document, array $context = []): string
@@ -38,10 +34,23 @@ final class MultiNamer implements Namer
 
     private function get(string $name): Namer
     {
-        if ($this->namers instanceof ContainerInterface) {
+        if (isset($this->defaultNamers[$name])) {
+            return $this->defaultNamers[$name];
+        }
+
+        if (\is_array($this->namers) && isset($this->namers[$name])) {
+            return $this->namers[$name];
+        }
+
+        if ($this->namers instanceof ContainerInterface && $this->namers->has($name)) {
             return $this->namers->get($name);
         }
 
-        return $this->namers[$name] ?? throw new \InvalidArgumentException(\sprintf('Namer "%s" is not registered.', $name));
+        return $this->defaultNamers[$name] = match ($name) {
+            'expression' => new ExpressionNamer(),
+            'checksum' => new ChecksumNamer(),
+            'slugify' => new SlugifyNamer(),
+            default => throw new \InvalidArgumentException(\sprintf('Namer "%s" is not registered.', $name)),
+        };
     }
 }
