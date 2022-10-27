@@ -45,9 +45,9 @@ final class ExpressionNamer extends BaseNamer
 
     private function parseVariable(string $variable, Document $document, array $context): string
     {
-        if (2 === \count($parts = \explode(':', $variable))) {
+        if (\count($parts = \explode(':', $variable)) > 1) {
             return match (\mb_strtolower($parts[0])) {
-                'checksum' => \mb_substr($document->checksum(), 0, (int) $parts[1]),
+                'checksum' => self::parseChecksum($document, $parts),
                 'rand' => self::randomString((int) $parts[1]),
                 default => throw new \LogicException(\sprintf('Unable to parse expression variable {%s}.', $variable)),
             };
@@ -93,5 +93,21 @@ final class ExpressionNamer extends BaseNamer
         }
 
         return $this->accessor = new PropertyAccessor();
+    }
+
+    private static function parseChecksum(Document $document, array $parts): string
+    {
+        unset($parts[0]); // removes "checksum"
+
+        foreach ($parts as $part) {
+            match (true) {
+                \is_numeric($part) => $length = (int) $part,
+                default => $algorithm = $part,
+            };
+        }
+
+        $checksum = $document->checksum($algorithm ?? []);
+
+        return isset($length) ? \mb_substr($checksum, 0, $length) : $checksum;
     }
 }

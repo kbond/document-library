@@ -147,13 +147,16 @@ $library->store($path, $document); // stored as "<slugified filename>"
 
 - `{name}`: slugified document filename without extension.
 - `{ext}`: document extension _with dot_ (ie `.txt` or _empty string_ if no extension).
-- `{checksum}`: document checksum.
-- `{checksum:n}`: first `n` characters of document checksum.
+- `{checksum}`: document checksum (uses default algorithm for flysystem provider).
+- `{checksum:alg}`: document checksum using `alg` as the algorithm (ie `{checksum:sha1}`).
+- `{checksum:n}`: first `n` characters of document checksum (ie `{checksum:7}`).
+- `{checksum:alg:n}`: first `n` characters of document checksum using `alg` as the algorithm (ie `{checksum:sha1:7}`).
 - `{rand}`: random `6` character string.
 - `{rand:n}`: random `n` character string.
-- `{document.*}`: any raw document method (ie `{document.lastModified}`).
-- `{x}`: any passed `$context` value (must be _stringable_).
-- `{x.y}`: if passed context value `x` is an object, call method `y` (requires `symfony/property-access`).
+- `{document.*}`: any raw document method (ie `{document.lastModified}`) - requires `symfony/property-access`.
+- `{x}`: any passed `$context` key, the value must be _stringable_.
+- `{x.y}`: if passed `$context` value for key `x` is an object, call method `y` on it, the return
+  value must be _stringable_ - requires `symfony/property-access`.
 
 #### Available Modifiers
 
@@ -167,7 +170,7 @@ $library->store($path, $document); // stored as "<slugified filename>"
 
 $namer = new \Zenstruck\Document\Namer\MultiNamer(); // defaults to above namers
 
-// defaults to ExpressionNamer (with it's default expression)
+// defaults to ExpressionNamer (with its default expression)
 $path = $namer->generateName($document); // "<slugified name>-<random 6 chars>.<extension>"
 
 // use the checksum namer
@@ -279,7 +282,7 @@ class User
 ```
 
 > **Note**: If no `namer` or `expression` is configured, defaults to the `ExpressionNamer`
-> with it's configured default expression.
+> with its configured default expression.
 
 #### Store Additional Document Metadata
 

@@ -52,6 +52,18 @@ final class ExpressionNamerTest extends TestCase
             'a/prefix/path--9a0364b.txt',
             $namer->generateName($document, ['expression' => 'a/prefix/{name}--{checksum:7}{ext}'])
         );
+        $this->assertSame(
+            'a/prefix/path--040f06fd774092478d450774f5ba30c5da78acc8.txt',
+            $namer->generateName($document, ['expression' => 'a/prefix/{name}--{checksum:sha1}{ext}'])
+        );
+        $this->assertSame(
+            'a/prefix/path--040f06f.txt',
+            $namer->generateName($document, ['expression' => 'a/prefix/{name}--{checksum:7:sha1}{ext}'])
+        );
+        $this->assertSame(
+            'a/prefix/path--040f06f.txt',
+            $namer->generateName($document, ['expression' => 'a/prefix/{name}--{checksum:sha1:7}{ext}'])
+        );
     }
 
     /**
