@@ -8,6 +8,7 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Zenstruck\Document;
 use Zenstruck\Document\LazyDocument;
 use Zenstruck\Document\LibraryRegistry;
+use Zenstruck\Document\Namer;
 use Zenstruck\Document\SerializableDocument;
 
 /**
@@ -18,7 +19,7 @@ class DocumentNormalizer implements NormalizerInterface, DenormalizerInterface, 
     public const LIBRARY = 'library';
     public const METADATA = 'metadata';
 
-    public function __construct(private LibraryRegistry $registry)
+    public function __construct(private LibraryRegistry $registry, private Namer $namer)
     {
     }
 
@@ -50,6 +51,10 @@ class DocumentNormalizer implements NormalizerInterface, DenormalizerInterface, 
             $document->setLibrary($this->registry()->get($library));
         }
 
+        if ($document->isNamerRequired()) {
+            $document->setNamer($this->namer(), $context);
+        }
+
         return $document;
     }
 
@@ -66,5 +71,10 @@ class DocumentNormalizer implements NormalizerInterface, DenormalizerInterface, 
     protected function registry(): LibraryRegistry
     {
         return $this->registry;
+    }
+
+    protected function namer(): Namer
+    {
+        return $this->namer;
     }
 }

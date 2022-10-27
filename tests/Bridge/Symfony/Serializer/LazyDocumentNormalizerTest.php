@@ -6,6 +6,8 @@ use Symfony\Component\DependencyInjection\ServiceLocator;
 use Zenstruck\Document\Library\Bridge\Symfony\Serializer\DocumentNormalizer;
 use Zenstruck\Document\Library\Bridge\Symfony\Serializer\LazyDocumentNormalizer;
 use Zenstruck\Document\LibraryRegistry;
+use Zenstruck\Document\Namer;
+use Zenstruck\Document\Namer\MultiNamer;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
@@ -16,6 +18,7 @@ final class LazyDocumentNormalizerTest extends DocumentNormalizerTest
     {
         return new LazyDocumentNormalizer(new ServiceLocator([
             LibraryRegistry::class => self::registry(),
+            Namer::class => new MultiNamer(),
         ]));
     }
 }

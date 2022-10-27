@@ -4,6 +4,7 @@ namespace Zenstruck\Document\Library\Bridge\Symfony\Serializer;
 
 use Psr\Container\ContainerInterface;
 use Zenstruck\Document\LibraryRegistry;
+use Zenstruck\Document\Namer;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
@@ -17,5 +18,10 @@ final class LazyDocumentNormalizer extends DocumentNormalizer
     protected function registry(): LibraryRegistry
     {
         return $this->container->get(LibraryRegistry::class);
+    }
+
+    protected function namer(): Namer
+    {
+        return $this->container->get(Namer::class);
     }
 }

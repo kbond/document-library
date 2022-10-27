@@ -60,7 +60,10 @@ final class LazyDocument implements Document
             throw new \LogicException('A namer is required to generate the path from metadata.');
         }
 
-        return $this->metadata[__FUNCTION__] = $this->namer->generateName($this, $this->namerContext);
+        $clone = clone $this;
+        $clone->metadata[__FUNCTION__] = ''; // prevents infinite recursion
+
+        return $this->metadata[__FUNCTION__] = $this->namer->generateName($clone, $this->namerContext);
     }
 
     public function name(): string

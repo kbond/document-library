@@ -363,8 +363,8 @@ $em->flush(); // metadata recalculated and saved
 When [storing additional metadata](#store-additional-document-metadata), if you don't configure
 `path` in your `metadata` array, this triggers lazily generating the document's `path` after
 loading the entity. This can be useful if your backend filesystem structure can change. Since
-the path isn't stored in the database, you only have to update the mapping in your to _mass-change_
-all document's location.
+the path isn't stored in the database, you only have to update the mapping in your entity to
+_mass-change_ all document's location.
 
 ```php
 use Doctrine\ORM\Mapping as ORM;
@@ -477,6 +477,25 @@ use Zenstruck\Document;
 $json = $serializer->serialize($document, 'json', [
     'metadata' => ['path', 'size', 'lastModified']
 ]); // {"path": "path/to/document", "size": 54588, "lastModified": 1666818035}
+```
+
+#### Post-Deserialize Namer
+
+When [serializing with additional metadata](#serialize-additional-metadata), if you don't configure
+`path` in your `metadata` array, this triggers lazily generating the document's `path` after
+deserializing the document. This can be useful if your backend filesystem structure can change. Since
+the path isn't stored in the database, you only have to update the context to _mass-change_
+all serialized document's location.
+
+```php
+$json = $serializer->serialize($document, 'json', ['metadata' => ['checksum', 'extension']]); // no "path"
+
+$document = $serializer->deserialize($json, Document::class, 'json', [
+    'library' => 'public',
+    'namer' => 'checksum',
+]); // \Zenstruck\Document
+
+$document->path(); // generated via the namer and the serialized data
 ```
 
 #### Doctrine/Serializer Mapping

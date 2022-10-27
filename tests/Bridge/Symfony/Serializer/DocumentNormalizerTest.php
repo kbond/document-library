@@ -9,6 +9,7 @@ use Zenstruck\Document\LazyDocument;
 use Zenstruck\Document\Library\Bridge\Symfony\Serializer\DocumentNormalizer;
 use Zenstruck\Document\Library\Tests\TestCase;
 use Zenstruck\Document\LibraryRegistry;
+use Zenstruck\Document\Namer\MultiNamer;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
@@ -20,7 +21,7 @@ class DocumentNormalizerTest extends TestCase
     /**
      * @test
      */
-    public function can_serialize_and_unserialize_document(): void
+    public function can_serialize_and_deserialize_document(): void
     {
         $document = self::registry()->get('memory')->store('some/file.txt', 'content');
         $serializer = self::serializer();
@@ -44,7 +45,7 @@ class DocumentNormalizerTest extends TestCase
     /**
      * @test
      */
-    public function can_serialize_and_unserialize_document_and_set_library(): void
+    public function can_serialize_and_deserialize_document_and_set_library(): void
     {
         $document = self::registry()->get('memory')->store('some/file.txt', 'content');
         $serializer = self::serializer();
@@ -66,7 +67,7 @@ class DocumentNormalizerTest extends TestCase
     /**
      * @test
      */
-    public function can_serialize_and_unserialize_document_with_metadata(): void
+    public function can_serialize_and_deserialize_document_with_metadata(): void
     {
         $document = self::registry()->get('memory')->store('some/file.txt', 'content');
         $serializer = self::serializer();
@@ -92,7 +93,7 @@ class DocumentNormalizerTest extends TestCase
     /**
      * @test
      */
-    public function can_serialize_and_unserialize_document_with_metadata_and_set_library(): void
+    public function can_serialize_and_deserialize_document_with_metadata_and_set_library(): void
     {
         $document = self::registry()->get('memory')->store('some/file.txt', 'content');
         $serializer = self::serializer();
@@ -113,9 +114,28 @@ class DocumentNormalizerTest extends TestCase
         $this->assertSame('9a0364b9e99bb480dd25e1f0284c8555', $deserialized->checksum());
     }
 
+    /**
+     * @test
+     */
+    public function can_serialize_metadata_without_path_and_names_during_deserialize(): void
+    {
+        $document = self::registry()->get('memory')->store($expected = '9a0364b9e99bb480dd25e1f0284c8555.txt', 'content');
+        $serializer = self::serializer();
+
+        $serialized = $serializer->serialize($document, 'json', ['metadata' => ['checksum', 'extension']]);
+
+        $this->assertSame(\json_encode(['checksum' => '9a0364b9e99bb480dd25e1f0284c8555', 'extension' => 'txt']), $serialized);
+
+        $document = $serializer->deserialize($serialized, Document::class, 'json', ['library' => 'memory', 'namer' => 'checksum']);
+
+        $this->assertSame('9a0364b9e99bb480dd25e1f0284c8555', $document->checksum());
+        $this->assertSame($expected, $document->path());
+        $this->assertSame('text/plain', $document->mimeType());
+    }
+
     protected static function normalizer(): DocumentNormalizer
     {
-        return new DocumentNormalizer(self::registry());
+        return new DocumentNormalizer(self::registry(), new MultiNamer());
     }
 
     protected static function registry(): LibraryRegistry
@@ -125,6 +145,6 @@ class DocumentNormalizerTest extends TestCase
 
     private static function serializer(): Serializer
     {
-        return new Serializer([new DocumentNormalizer(self::registry())], [new JsonEncoder()]);
+        return new Serializer([self::normalizer()], [new JsonEncoder()]);
     }
 }
