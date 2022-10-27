@@ -44,6 +44,10 @@ class Entity1
     #[ORM\Column(type: Document::class, nullable: true)]
     public ?Document $document5 = null;
 
+    #[Mapping(library: 'memory')]
+    #[ORM\Column(type: 'document_string', nullable: true)]
+    public ?Document $document6 = null;
+
     #[Mapping(
         library: 'memory',
         namer: 'expression:prefix/{this.name|slug}.txt',

@@ -34,6 +34,9 @@ abstract class MappingProviderTest extends TestCase
                 'library' => 'memory',
                 'metadata' => true,
             ],
+            'document6' => [
+                'library' => 'memory',
+            ],
             'document4' => [
                 'library' => 'memory',
                 'namer' => 'expression:prefix/{this.name|slug}.txt',
@@ -64,6 +67,16 @@ abstract class MappingProviderTest extends TestCase
                 $this->provider()->all()
             )
         );
+    }
+
+    /**
+     * @test
+     */
+    public function can_get_virtual_mapping(): void
+    {
+        $this->assertFalse($this->provider()->get(Entity1::class)['document1']->virtual);
+        $this->assertTrue($this->provider()->get(Entity1::class)['document4']->virtual);
+        $this->assertFalse($this->provider()->get(Entity1::class)['document6']->virtual);
     }
 
     abstract protected function provider(): MappingProvider;

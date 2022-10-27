@@ -4,7 +4,8 @@ namespace Zenstruck\Document\Library\Bridge\Doctrine\Persistence\Mapping;
 
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\Persistence\ManagerRegistry;
-use Zenstruck\Document\Library\Bridge\Doctrine\DBAL\Types\DocumentType;
+use Zenstruck\Document\Library\Bridge\Doctrine\DBAL\Types\DocumentJsonType;
+use Zenstruck\Document\Library\Bridge\Doctrine\DBAL\Types\DocumentStringType;
 use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\Mapping;
 use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\MappingProvider;
 
@@ -13,6 +14,9 @@ use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\MappingProvider;
  */
 final class ManagerRegistryMappingProvider implements MappingProvider
 {
+    private const MAPPING_TYPES = [DocumentJsonType::NAME, DocumentStringType::NAME];
+    private const STRING_MAPPING_TYPES = [DocumentStringType::NAME];
+
     public function __construct(private ManagerRegistry $registry)
     {
     }
@@ -27,16 +31,22 @@ final class ManagerRegistryMappingProvider implements MappingProvider
 
         $config = [];
 
-        foreach ($metadata->fieldMappings as $mapping) {
+        foreach ($metadata->fieldMappings as $field) {
             // todo embedded
-            if (DocumentType::NAME !== $mapping['type']) {
+            if (!\in_array($field['type'], self::MAPPING_TYPES, true)) {
                 continue;
             }
 
-            $config[$mapping['fieldName']] = Mapping::fromProperty(
-                $metadata->getReflectionProperty($mapping['fieldName']),
-                $mapping['options'] ?? [],
+            $mapping = Mapping::fromProperty(
+                $metadata->getReflectionProperty($field['fieldName']),
+                $field['options'] ?? [],
             );
+
+            if ($mapping->metadata && \in_array($field['type'], self::STRING_MAPPING_TYPES, true)) {
+                throw new \LogicException(\sprintf('Cannot use "%s" with metadata (%s::$%s).', $field['type'], $metadata->name, $field['fieldName']));
+            }
+
+            $config[$field['fieldName']] = $mapping;
         }
 
         // configure virtual documents

@@ -451,6 +451,33 @@ public function getSpecSheet(): ?Document
 }
 ```
 
+### Document Column as String
+
+The `Zenstruck\Document` DBAL type stores the document as JSON - even if just storing the
+path. This is the most flexible as it allows storing additional metadata later without
+needing to migrate the column. If you know you will only ever store the path, you can
+use the `document_string` DBAL type. This uses a string column instead of a JSON column.
+
+```php
+use Doctrine\ORM\Mapping as ORM;
+use Zenstruck\Document;
+use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\Mapping;
+
+class User
+{
+    // ...
+
+    #[Mapping(library: 'public')]
+    #[ORM\Column(type: 'document_string', nullable: true)]
+    public ?Document $image = null;
+
+    // ...
+}
+```
+
+> **Warning**: If you ever want to store additional metadata, you will need to run a database
+> migration to convert the column from string to JSON.
+
 ### Serializer
 
 Serialize/Deserialize document:

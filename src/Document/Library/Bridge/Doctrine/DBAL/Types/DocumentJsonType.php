@@ -11,10 +11,8 @@ use Zenstruck\Document\SerializableDocument;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
- *
- * @internal
  */
-final class DocumentType extends JsonType
+final class DocumentJsonType extends JsonType
 {
     public const NAME = Document::class;
 

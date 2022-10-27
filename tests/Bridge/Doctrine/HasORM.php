@@ -8,7 +8,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\ORMSetup;
 use Doctrine\ORM\Tools\SchemaTool;
 use Doctrine\Persistence\ManagerRegistry;
-use Zenstruck\Document\Library\Bridge\Doctrine\DBAL\Types\DocumentType;
+use Zenstruck\Document\Library\Bridge\Doctrine\DBAL\Types\DocumentJsonType;
+use Zenstruck\Document\Library\Bridge\Doctrine\DBAL\Types\DocumentStringType;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
@@ -32,8 +33,12 @@ trait HasORM
             return self::$em;
         }
 
-        if (!Type::hasType(DocumentType::NAME)) {
-            Type::addType(DocumentType::NAME, DocumentType::class);
+        if (!Type::hasType(DocumentJsonType::NAME)) {
+            Type::addType(DocumentJsonType::NAME, DocumentJsonType::class);
+        }
+
+        if (!Type::hasType(DocumentStringType::NAME)) {
+            Type::addType(DocumentStringType::NAME, DocumentStringType::class);
         }
 
         self::$em = EntityManager::create(
