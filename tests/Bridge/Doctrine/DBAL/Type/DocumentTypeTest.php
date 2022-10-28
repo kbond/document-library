@@ -36,7 +36,7 @@ abstract class DocumentTypeTest extends TestCase
     public function can_persist_update_and_remove_document(): void
     {
         $entity = new Entity1();
-        $entity->{$this->documentProperty()} = self::inMemoryLibrary()->store('some/file.txt', 'content');
+        $entity->{$this->documentProperty()} = self::$library->store('some/file.txt', 'content');
 
         $this->em()->persist($entity);
         $this->em()->flush();
@@ -47,7 +47,7 @@ abstract class DocumentTypeTest extends TestCase
         $this->assertInstanceOf(LazyDocument::class, $entity->{$this->documentProperty()});
         $this->assertSame('some/file.txt', $entity->{$this->documentProperty()}->path());
 
-        $entity->{$this->documentProperty()} = self::inMemoryLibrary()->store('another/file.txt', 'content');
+        $entity->{$this->documentProperty()} = self::$library->store('another/file.txt', 'content');
         $this->em()->flush();
         $this->em()->clear();
 

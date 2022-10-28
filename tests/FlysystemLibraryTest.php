@@ -11,6 +11,6 @@ final class FlysystemLibraryTest extends LibraryTest
 {
     protected function library(): Library
     {
-        return self::inMemoryLibrary();
+        return self::$library;
     }
 }

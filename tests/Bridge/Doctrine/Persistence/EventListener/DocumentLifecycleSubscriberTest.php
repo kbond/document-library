@@ -21,16 +21,25 @@ class DocumentLifecycleSubscriberTest extends TestCase
 {
     use HasORM;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $subscriber = $this->createSubscriber(self::$libraryRegistry);
+        $events = [Events::postFlush, Events::prePersist, Events::preUpdate, Events::postRemove, Events::postLoad];
+
+        foreach ($events as $event) {
+            $this->em()->getEventManager()->addEventListener($event, $subscriber);
+        }
+    }
+
     /**
      * @test
      */
     public function can_auto_load_documents(): void
     {
-        $registry = self::libraryRegistry();
-        $this->registerEventSubscriber($registry);
-
         $entity = new Entity1();
-        $entity->document1 = $registry->get('memory')->store('some/file.txt', 'content');
+        $entity->document1 = self::$libraryRegistry->get('memory')->store('some/file.txt', 'content');
         $this->em()->persist($entity);
         $this->em()->flush();
 
@@ -47,9 +56,7 @@ class DocumentLifecycleSubscriberTest extends TestCase
      */
     public function documents_can_be_persisted_and_updated_with_metadata(): void
     {
-        $registry = self::libraryRegistry();
-        $library = $registry->get('memory');
-        $this->registerEventSubscriber($registry);
+        $library = self::$libraryRegistry->get('memory');
 
         $entity = new Entity1();
         $entity->document2 = $library->store('some/file.txt', 'content');
@@ -89,9 +96,7 @@ class DocumentLifecycleSubscriberTest extends TestCase
      */
     public function documents_can_be_saved_with_all_metadata(): void
     {
-        $registry = self::libraryRegistry();
-        $library = $registry->get('memory');
-        $this->registerEventSubscriber($registry);
+        $library = self::$libraryRegistry->get('memory');
 
         $entity = new Entity1();
         $entity->document5 = $library->store('some/file.txt', 'content');
@@ -122,9 +127,7 @@ class DocumentLifecycleSubscriberTest extends TestCase
      */
     public function documents_can_update_their_metadata(): void
     {
-        $registry = self::libraryRegistry();
-        $library = $registry->get('memory');
-        $this->registerEventSubscriber($registry);
+        $library = self::$libraryRegistry->get('memory');
 
         $entity = new Entity1();
         $entity->document2 = $library->store('some/file.txt', 'content');
@@ -153,9 +156,7 @@ class DocumentLifecycleSubscriberTest extends TestCase
      */
     public function documents_are_deleted_on_update_to_new_document(): void
     {
-        $registry = self::libraryRegistry();
-        $library = $registry->get('memory');
-        $this->registerEventSubscriber($registry);
+        $library = self::$libraryRegistry->get('memory');
 
         $entity = new Entity1();
         $entity->document1 = $library->store('some/file.txt', 'content');
@@ -175,9 +176,7 @@ class DocumentLifecycleSubscriberTest extends TestCase
      */
     public function documents_are_deleted_on_remove(): void
     {
-        $registry = self::libraryRegistry();
-        $library = $registry->get('memory');
-        $this->registerEventSubscriber($registry);
+        $library = self::$libraryRegistry->get('memory');
 
         $entity = new Entity1();
         $entity->document1 = $library->store('some/file.txt', 'content');
@@ -197,9 +196,7 @@ class DocumentLifecycleSubscriberTest extends TestCase
      */
     public function can_persist_and_update_with_pending_file(): void
     {
-        $registry = self::libraryRegistry();
-        $library = $registry->get('memory');
-        $this->registerEventSubscriber($registry);
+        $library = self::$libraryRegistry->get('memory');
 
         $entity = new Entity1();
         $entity->name = 'Foo BaR';
@@ -236,9 +233,7 @@ class DocumentLifecycleSubscriberTest extends TestCase
      */
     public function can_lazily_load_with_name(): void
     {
-        $registry = self::libraryRegistry();
-        $library = $registry->get('memory');
-        $this->registerEventSubscriber($registry);
+        $library = self::$libraryRegistry->get('memory');
 
         $entity = new Entity1();
         $entity->name = 'Foo BaR';
@@ -260,9 +255,7 @@ class DocumentLifecycleSubscriberTest extends TestCase
      */
     public function can_load_lazy_documents(): void
     {
-        $registry = self::libraryRegistry();
-        $library = $registry->get('memory');
-        $this->registerEventSubscriber($registry);
+        $library = self::$libraryRegistry->get('memory');
 
         $library->store($expectedPath = 'prefix/foo-bar.txt', 'content');
 
@@ -296,15 +289,5 @@ class DocumentLifecycleSubscriberTest extends TestCase
             new ManagerRegistryMappingProvider($this->doctrine()),
             new MultiNamer(),
         );
-    }
-
-    private function registerEventSubscriber(LibraryRegistry $registry, string ...$events): void
-    {
-        $subscriber = $this->createSubscriber($registry);
-        $events = $events ?: [Events::postFlush, Events::prePersist, Events::preUpdate, Events::postRemove, Events::postLoad];
-
-        foreach ($events as $event) {
-            $this->em()->getEventManager()->addEventListener($event, $subscriber);
-        }
     }
 }

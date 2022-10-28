@@ -17,7 +17,7 @@ final class LazyDocumentNormalizerTest extends DocumentNormalizerTest
     protected static function normalizer(): DocumentNormalizer
     {
         return new LazyDocumentNormalizer(new ServiceLocator([
-            LibraryRegistry::class => self::registry(),
+            LibraryRegistry::class => self::$libraryRegistry,
             Namer::class => new MultiNamer(),
         ]));
     }

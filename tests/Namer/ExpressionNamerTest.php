@@ -17,10 +17,9 @@ final class ExpressionNamerTest extends TestCase
     public function generate_with_default_expression(): void
     {
         $namer = new ExpressionNamer();
-        $library = self::inMemoryLibrary();
 
-        $this->assertMatchesRegularExpression('#^foo-bar-[0-9a-z]{6}$#', $namer->generateName($library->store('some/FoO BaR', 'content')));
-        $this->assertMatchesRegularExpression('#^foo-bar-[0-9a-z]{6}\.txt$#', $namer->generateName($library->store('some/FoO BaR.TxT', 'content')));
+        $this->assertMatchesRegularExpression('#^foo-bar-[0-9a-z]{6}$#', $namer->generateName(self::$library->store('some/FoO BaR', 'content')));
+        $this->assertMatchesRegularExpression('#^foo-bar-[0-9a-z]{6}\.txt$#', $namer->generateName(self::$library->store('some/FoO BaR.TxT', 'content')));
     }
 
     /**
@@ -29,11 +28,10 @@ final class ExpressionNamerTest extends TestCase
     public function can_customize_default_expression(): void
     {
         $namer = new ExpressionNamer(defaultContext: ['expression' => '{name}{ext}']);
-        $library = self::inMemoryLibrary();
 
-        $this->assertSame('foo-bar', $namer->generateName($library->store('some/FoO BaR', 'content')));
-        $this->assertSame('foo-bar.txt', $namer->generateName($library->store('some/FoO BaR.txt', 'content')));
-        $this->assertSame('foo-bar.txt', $namer->generateName($library->store('some/FoO BaR.tXt', 'content')));
+        $this->assertSame('foo-bar', $namer->generateName(self::$library->store('some/FoO BaR', 'content')));
+        $this->assertSame('foo-bar.txt', $namer->generateName(self::$library->store('some/FoO BaR.txt', 'content')));
+        $this->assertSame('foo-bar.txt', $namer->generateName(self::$library->store('some/FoO BaR.tXt', 'content')));
     }
 
     /**
@@ -42,9 +40,8 @@ final class ExpressionNamerTest extends TestCase
     public function failing_to_set_the_default_expression_adds_default(): void
     {
         $namer = new ExpressionNamer(defaultContext: []);
-        $library = self::inMemoryLibrary();
 
-        $this->assertMatchesRegularExpression('#^foo-bar-[0-9a-z]{6}\.txt$#', $namer->generateName($library->store('some/FoO BaR.TxT', 'content')));
+        $this->assertMatchesRegularExpression('#^foo-bar-[0-9a-z]{6}\.txt$#', $namer->generateName(self::$library->store('some/FoO BaR.TxT', 'content')));
     }
 
     /**
@@ -53,7 +50,7 @@ final class ExpressionNamerTest extends TestCase
     public function custom_expression(): void
     {
         $namer = new ExpressionNamer();
-        $document = self::inMemoryLibrary()->store('some/pATh.txt', 'content');
+        $document = self::$library->store('some/pATh.txt', 'content');
 
         $this->assertSame(
             'a/prefix/path--9a0364b9e99bb480dd25e1f0284c8555.txt',
@@ -83,7 +80,7 @@ final class ExpressionNamerTest extends TestCase
     public function expression_with_rand(): void
     {
         $namer = new ExpressionNamer();
-        $document = self::inMemoryLibrary()->store('some/pATh.txt', 'content');
+        $document = self::$library->store('some/pATh.txt', 'content');
 
         $name1 = $namer->generateName($document, ['expression' => '{rand}-{rand}']);
         $name2 = $namer->generateName($document, ['expression' => '{rand}-{rand}']);
@@ -100,7 +97,7 @@ final class ExpressionNamerTest extends TestCase
     public function can_customize_rand_length(): void
     {
         $namer = new ExpressionNamer();
-        $document = self::inMemoryLibrary()->store('some/pATh.txt', 'content');
+        $document = self::$library->store('some/pATh.txt', 'content');
 
         $name1 = $namer->generateName($document, ['expression' => '{rand:3}-{rand:10}']);
         $name2 = $namer->generateName($document, ['expression' => '{rand:3}-{rand:10}']);
@@ -117,7 +114,7 @@ final class ExpressionNamerTest extends TestCase
     public function can_use_context_as_expression_variables(): void
     {
         $namer = new ExpressionNamer();
-        $document = self::inMemoryLibrary()->store('some/pATh.txt', 'content');
+        $document = self::$library->store('some/pATh.txt', 'content');
 
         $this->assertSame(
             'prefix/baz/value/stRIng/1//prop1-valUe/6',
@@ -136,7 +133,7 @@ final class ExpressionNamerTest extends TestCase
     public function can_access_raw_document_values(): void
     {
         $namer = new ExpressionNamer();
-        $document = self::inMemoryLibrary()->store('some/pATh.tXt', 'content');
+        $document = self::$library->store('some/pATh.tXt', 'content');
 
         $this->assertSame('prefix/9a0364b9e99bb480dd25e1f0284c8555-pATh.tXt', $namer->generateName($document, [
             'expression' => 'prefix/{document.checksum}-{document.name}',
@@ -149,7 +146,7 @@ final class ExpressionNamerTest extends TestCase
     public function can_use_variable_modifiers(): void
     {
         $namer = new ExpressionNamer();
-        $document = self::inMemoryLibrary()->store('some/pA Th.tXt', 'content');
+        $document = self::$library->store('some/pA Th.tXt', 'content');
 
         $this->assertSame('prefix/string/prop1-value/pa-th--9a0364b.txt', $namer->generateName($document, [
             'expression' => 'prefix/{object|slug}/{object.prop3|lower}/{document.nameWithoutExtension|slug}--{checksum:7|lower}{ext}',
@@ -163,7 +160,7 @@ final class ExpressionNamerTest extends TestCase
     public function invalid_expression_variable(): void
     {
         $namer = new ExpressionNamer();
-        $document = self::inMemoryLibrary()->store('some/pATh.txt', 'content');
+        $document = self::$library->store('some/pATh.txt', 'content');
 
         $this->expectException(NoSuchPropertyException::class);
 

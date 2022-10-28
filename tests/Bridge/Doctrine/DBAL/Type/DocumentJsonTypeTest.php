@@ -17,7 +17,7 @@ final class DocumentJsonTypeTest extends DocumentTypeTest
     public function can_persist_update_and_remove_document_with_metadata(): void
     {
         $entity = new Entity1();
-        $entity->{$this->documentProperty()} = new SerializableDocument(self::inMemoryLibrary()->store('some/file.txt', 'content'), [
+        $entity->{$this->documentProperty()} = new SerializableDocument(self::$library->store('some/file.txt', 'content'), [
             'path', 'mimeType', 'size',
         ]);
 
@@ -32,7 +32,7 @@ final class DocumentJsonTypeTest extends DocumentTypeTest
         $this->assertSame('text/plain', $entity->{$this->documentProperty()}->mimeType());
         $this->assertSame(7, $entity->{$this->documentProperty()}->size());
 
-        $entity->{$this->documentProperty()} = new SerializableDocument(self::inMemoryLibrary()->store('another/file.txt', 'new content'), [
+        $entity->{$this->documentProperty()} = new SerializableDocument(self::$library->store('another/file.txt', 'new content'), [
             'path', 'mimeType', 'size',
         ]);
         $this->em()->flush();

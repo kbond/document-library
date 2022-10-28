@@ -4,7 +4,6 @@ namespace Zenstruck\Document\Library\Tests;
 
 use Zenstruck\Document;
 use Zenstruck\Document\LazyDocument;
-use Zenstruck\Document\Library;
 use Zenstruck\Document\Namer\ExpressionNamer;
 
 /**
@@ -12,13 +11,6 @@ use Zenstruck\Document\Namer\ExpressionNamer;
  */
 final class LazyDocumentTest extends DocumentTest
 {
-    private Library $library;
-
-    protected function setUp(): void
-    {
-        $this->library = self::inMemoryLibrary();
-    }
-
     /**
      * @test
      */
@@ -75,13 +67,13 @@ final class LazyDocumentTest extends DocumentTest
 
     protected function document(string $path, \SplFileInfo $file): Document
     {
-        $this->library->store($path, $file);
+        self::$library->store($path, $file);
 
-        return (new LazyDocument($path))->setLibrary($this->library);
+        return (new LazyDocument($path))->setLibrary(self::$library);
     }
 
     protected function modifyDocument(string $path, string $content): void
     {
-        $this->library->store($path, $content);
+        self::$library->store($path, $content);
     }
 }

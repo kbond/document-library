@@ -12,6 +12,6 @@ final class LazyLibraryTest extends LibraryTest
 {
     protected function library(): Library
     {
-        return new LazyLibrary(fn() => self::inMemoryLibrary());
+        return new LazyLibrary(fn() => self::$library);
     }
 }

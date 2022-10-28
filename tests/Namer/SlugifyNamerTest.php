@@ -16,10 +16,9 @@ final class SlugifyNamerTest extends TestCase
     public function generate_name(): void
     {
         $namer = new SlugifyNamer();
-        $library = self::inMemoryLibrary();
 
-        $this->assertSame('foo-bar', $namer->generateName($library->store('some/FoO BaR', '')));
-        $this->assertSame('foo-bar.txt', $namer->generateName($library->store('some/FoO BaR.txt', '')));
-        $this->assertSame('foo-bar.txt', $namer->generateName($library->store('some/FoO BaR.tXt', '')));
+        $this->assertSame('foo-bar', $namer->generateName(self::$library->store('some/FoO BaR', '')));
+        $this->assertSame('foo-bar.txt', $namer->generateName(self::$library->store('some/FoO BaR.txt', '')));
+        $this->assertSame('foo-bar.txt', $namer->generateName(self::$library->store('some/FoO BaR.tXt', '')));
     }
 }

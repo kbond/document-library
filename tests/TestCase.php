@@ -14,6 +14,15 @@ use Zenstruck\Document\LibraryRegistry;
  */
 abstract class TestCase extends BaseTestCase
 {
+    protected static Library $library;
+    protected static LibraryRegistry $libraryRegistry;
+
+    protected function setUp(): void
+    {
+        self::$library = self::inMemoryLibrary();
+        self::$libraryRegistry = self::libraryRegistry();
+    }
+
     protected static function inMemoryLibrary(array $config = []): Library
     {
         return new FlysystemLibrary(new Filesystem(new InMemoryFilesystemAdapter(), $config));

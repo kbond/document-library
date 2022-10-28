@@ -8,7 +8,6 @@ use Zenstruck\Document;
 use Zenstruck\Document\LazyDocument;
 use Zenstruck\Document\Library\Bridge\Symfony\Serializer\DocumentNormalizer;
 use Zenstruck\Document\Library\Tests\TestCase;
-use Zenstruck\Document\LibraryRegistry;
 use Zenstruck\Document\Namer\MultiNamer;
 
 /**
@@ -16,14 +15,12 @@ use Zenstruck\Document\Namer\MultiNamer;
  */
 class DocumentNormalizerTest extends TestCase
 {
-    private static LibraryRegistry $registry;
-
     /**
      * @test
      */
     public function can_serialize_and_deserialize_document(): void
     {
-        $document = self::registry()->get('memory')->store('some/file.txt', 'content');
+        $document = self::$libraryRegistry->get('memory')->store('some/file.txt', 'content');
         $serializer = self::serializer();
 
         $serialized = $serializer->serialize($document, 'json');
@@ -47,7 +44,7 @@ class DocumentNormalizerTest extends TestCase
      */
     public function can_serialize_and_deserialize_document_and_set_library(): void
     {
-        $document = self::registry()->get('memory')->store('some/file.txt', 'content');
+        $document = self::$libraryRegistry->get('memory')->store('some/file.txt', 'content');
         $serializer = self::serializer();
 
         $serialized = $serializer->serialize($document, 'json');
@@ -69,7 +66,7 @@ class DocumentNormalizerTest extends TestCase
      */
     public function can_serialize_and_deserialize_document_with_metadata(): void
     {
-        $document = self::registry()->get('memory')->store('some/file.txt', 'content');
+        $document = self::$libraryRegistry->get('memory')->store('some/file.txt', 'content');
         $serializer = self::serializer();
 
         $serialized = $serializer->serialize($document, 'json', ['metadata' => ['path', 'mimeType', 'size']]);
@@ -95,7 +92,7 @@ class DocumentNormalizerTest extends TestCase
      */
     public function can_serialize_and_deserialize_document_with_metadata_and_set_library(): void
     {
-        $document = self::registry()->get('memory')->store('some/file.txt', 'content');
+        $document = self::$libraryRegistry->get('memory')->store('some/file.txt', 'content');
         $serializer = self::serializer();
 
         $serialized = $serializer->serialize($document, 'json', ['metadata' => ['path', 'mimeType', 'size']]);
@@ -119,7 +116,7 @@ class DocumentNormalizerTest extends TestCase
      */
     public function can_serialize_all_metadata(): void
     {
-        $document = self::registry()->get('memory')->store('some/file.txt', 'content');
+        $document = self::$libraryRegistry->get('memory')->store('some/file.txt', 'content');
         $serializer = self::serializer();
 
         $serialized = $serializer->serialize($document, 'json', ['metadata' => true]);
@@ -146,7 +143,7 @@ class DocumentNormalizerTest extends TestCase
      */
     public function can_serialize_metadata_without_path_and_names_during_deserialize(): void
     {
-        $document = self::registry()->get('memory')->store($expected = '9a0364b9e99bb480dd25e1f0284c8555.txt', 'content');
+        $document = self::$libraryRegistry->get('memory')->store($expected = '9a0364b9e99bb480dd25e1f0284c8555.txt', 'content');
         $serializer = self::serializer();
 
         $serialized = $serializer->serialize($document, 'json', ['metadata' => ['checksum', 'extension']]);
@@ -162,12 +159,7 @@ class DocumentNormalizerTest extends TestCase
 
     protected static function normalizer(): DocumentNormalizer
     {
-        return new DocumentNormalizer(self::registry(), new MultiNamer());
-    }
-
-    protected static function registry(): LibraryRegistry
-    {
-        return self::$registry ??= self::libraryRegistry();
+        return new DocumentNormalizer(self::$libraryRegistry, new MultiNamer());
     }
 
     private static function serializer(): Serializer
