@@ -78,4 +78,9 @@ final class NullDocument implements Document
     {
         throw new \BadMethodCallException(\sprintf('%s() is not available.', __METHOD__));
     }
+
+    public function asImage(): Image
+    {
+        throw new \BadMethodCallException(\sprintf('%s() is not available.', __METHOD__));
+    }
 }

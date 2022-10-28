@@ -13,6 +13,27 @@ final class SerializableDocumentTest extends DocumentTest
     /**
      * @test
      */
+    public function can_serialize_all_fields(): void
+    {
+        $library = self::inMemoryLibrary(['public_url' => '/']);
+        $document = new SerializableDocument($library->store('the/path.txt', 'content'), true);
+
+        $this->assertSame(
+            [
+                'path' => 'the/path.txt',
+                'lastModified' => \time(),
+                'size' => 7,
+                'checksum' => '9a0364b9e99bb480dd25e1f0284c8555',
+                'mimeType' => 'text/plain',
+                'url' => '/the/path.txt',
+            ],
+            $document->serialize()
+        );
+    }
+
+    /**
+     * @test
+     */
     public function can_serialize_with_fields(): void
     {
         $library = self::inMemoryLibrary(['public_url' => '/']);

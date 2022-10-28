@@ -69,6 +69,22 @@ final class PendingDocumentTest extends DocumentTest
         $this->assertSame('text/plain', $document->mimeType());
     }
 
+    /**
+     * @test
+     */
+    public function can_cast_to_image(): void
+    {
+        $this->markTestIncomplete();
+    }
+
+    /**
+     * @test
+     */
+    public function cannot_cast_to_image_if_not_image(): void
+    {
+        $this->markTestIncomplete();
+    }
+
     protected function document(string $path, \SplFileInfo $file): Document
     {
         return new PendingDocument($file);

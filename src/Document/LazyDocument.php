@@ -137,6 +137,11 @@ final class LazyDocument implements Document
         return $this->document()->tempFile();
     }
 
+    public function asImage(): Image
+    {
+        return $this->document()->asImage();
+    }
+
     private function document(): Document
     {
         $this->library ?? throw new \LogicException('A library has not been set for this document.');

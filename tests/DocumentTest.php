@@ -3,6 +3,7 @@
 namespace Zenstruck\Document\Library\Tests;
 
 use Zenstruck\Document;
+use Zenstruck\Document\Image;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
@@ -14,11 +15,11 @@ abstract class DocumentTest extends TestCase
      */
     public function access_document_path_info(): void
     {
-        $document = $this->document('some/file.txt', new \SplFileInfo(__FILE__));
+        $document = $this->document('some/file.png', new \SplFileInfo(self::FIXTURE_DIR.'/symfony.png'));
 
-        $this->assertSame('some/file.txt', $document->path());
-        $this->assertSame('file.txt', $document->name());
-        $this->assertSame('txt', $document->extension());
+        $this->assertSame('some/file.png', $document->path());
+        $this->assertSame('file.png', $document->name());
+        $this->assertSame('png', $document->extension());
         $this->assertSame('file', $document->nameWithoutExtension());
     }
 
@@ -27,16 +28,17 @@ abstract class DocumentTest extends TestCase
      */
     public function access_document_data(): void
     {
-        $document = $this->document('some/file.txt', new \SplFileInfo(__FILE__));
+        $file = self::FIXTURE_DIR.'/symfony.png';
+        $document = $this->document('some/file.png', new \SplFileInfo($file));
 
         $this->assertIsInt($document->lastModified());
-        $this->assertSame(\filesize(__FILE__), $document->size());
-        $this->assertSame(\md5_file(__FILE__), $document->checksum());
-        $this->assertSame(\sha1_file(__FILE__), $document->checksum('sha1'));
-        $this->assertStringEqualsFile(__FILE__, $document->contents());
-        $this->assertStringEqualsFile(__FILE__, \stream_get_contents($document->read()));
+        $this->assertSame(\filesize($file), $document->size());
+        $this->assertSame(\md5_file($file), $document->checksum());
+        $this->assertSame(\sha1_file($file), $document->checksum('sha1'));
+        $this->assertStringEqualsFile($file, $document->contents());
+        $this->assertStringEqualsFile($file, \stream_get_contents($document->read()));
         $this->assertTrue($document->exists());
-        $this->assertSame('text/x-php', $document->mimeType());
+        $this->assertSame('image/png', $document->mimeType());
     }
 
     /**
@@ -44,21 +46,22 @@ abstract class DocumentTest extends TestCase
      */
     public function refresh_resets_any_cached_metadata(): void
     {
-        $document = $this->document('some/file.txt', new \SplFileInfo(__FILE__));
+        $file = self::FIXTURE_DIR.'/symfony.png';
+        $document = $this->document('some/file.png', new \SplFileInfo($file));
 
         $this->assertIsInt($document->lastModified());
-        $this->assertSame(\filesize(__FILE__), $document->size());
-        $this->assertSame(\md5_file(__FILE__), $document->checksum());
+        $this->assertSame(\filesize($file), $document->size());
+        $this->assertSame(\md5_file($file), $document->checksum());
         $this->assertTrue($document->exists());
-        $this->assertSame('text/x-php', $document->mimeType());
+        $this->assertSame('image/png', $document->mimeType());
 
-        $this->modifyDocument('some/file.txt', 'new content');
+        $this->modifyDocument('some/file.png', 'new content');
 
         $this->assertIsInt($document->lastModified());
-        $this->assertSame(\filesize(__FILE__), $document->size());
-        $this->assertSame(\md5_file(__FILE__), $document->checksum());
+        $this->assertSame(\filesize($file), $document->size());
+        $this->assertSame(\md5_file($file), $document->checksum());
         $this->assertTrue($document->exists());
-        $this->assertSame('text/x-php', $document->mimeType());
+        $this->assertSame('image/png', $document->mimeType());
 
         $document->refresh();
 
@@ -66,7 +69,8 @@ abstract class DocumentTest extends TestCase
         $this->assertSame(11, $document->size());
         $this->assertSame('96c15c2bb2921193bf290df8cd85e2ba', $document->checksum());
         $this->assertTrue($document->exists());
-        $this->assertSame('text/plain', $document->mimeType());
+        // $this->assertSame('text/plain', $document->mimeType());
+        $this->assertSame('image/png', $document->mimeType());
     }
 
     /**
@@ -74,9 +78,10 @@ abstract class DocumentTest extends TestCase
      */
     public function can_get_temp_file(): void
     {
-        $document = $this->document('some/file.txt', new \SplFileInfo(__FILE__));
+        $file = self::FIXTURE_DIR.'/symfony.png';
+        $document = $this->document('some/file.png', new \SplFileInfo($file));
 
-        $this->assertFileEquals(__FILE__, $document->tempFile());
+        $this->assertFileEquals($file, $document->tempFile());
     }
 
     /**
@@ -84,9 +89,55 @@ abstract class DocumentTest extends TestCase
      */
     public function refresh_is_mutable(): void
     {
-        $document = $this->document('some/file.txt', new \SplFileInfo(__FILE__));
+        $document = $this->document('some/file.png', new \SplFileInfo(self::FIXTURE_DIR.'/symfony.png'));
 
         $this->assertSame($document, $document->refresh());
+    }
+
+    /**
+     * @test
+     */
+    public function can_cast_to_image(): void
+    {
+        $file = self::FIXTURE_DIR.'/symfony.png';
+        $document = $this->nonImageDocument('some/image.png', new \SplFileInfo($file));
+
+        if ($document instanceof Image) {
+            $this->fail('Document is an image.');
+        }
+
+        $image = $document->asImage();
+
+        $this->assertSame($document->path(), $image->path());
+        $this->assertSame($document->name(), $image->name());
+        $this->assertSame($document->nameWithoutExtension(), $image->nameWithoutExtension());
+        $this->assertSame($document->extension(), $image->extension());
+        $this->assertSame($document->lastModified(), $image->lastModified());
+        $this->assertSame($document->size(), $image->size());
+        $this->assertSame($document->checksum(), $image->checksum());
+        $this->assertSame($document->checksum('sha1'), $image->checksum('sha1'));
+        $this->assertSame($document->contents(), $image->contents());
+        $this->assertSame(\stream_get_contents($document->read()), \stream_get_contents($image->read()));
+        $this->assertSame($document->exists(), $image->exists());
+        $this->assertSame($document->mimeType(), $image->mimeType());
+    }
+
+    /**
+     * @test
+     */
+    public function cannot_cast_to_image_if_not_image(): void
+    {
+        $document = $this->nonImageDocument('some/file.txt', new \SplFileInfo(__FILE__));
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('"some/file.txt" is not an image.');
+
+        $document->asImage();
+    }
+
+    protected function nonImageDocument(string $path, \SplFileInfo $file): Document
+    {
+        return $this->document($path, $file);
     }
 
     abstract protected function document(string $path, \SplFileInfo $file): Document;

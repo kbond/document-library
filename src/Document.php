@@ -2,6 +2,8 @@
 
 namespace Zenstruck;
 
+use Zenstruck\Document\Image;
+
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
  */
@@ -57,4 +59,6 @@ interface Document
      * end of the script.
      */
     public function tempFile(): \SplFileInfo;
+
+    public function asImage(): Image;
 }

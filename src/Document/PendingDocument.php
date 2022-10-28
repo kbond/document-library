@@ -120,6 +120,11 @@ final class PendingDocument implements Document
         return TempFile::for($this);
     }
 
+    public function asImage(): Image
+    {
+        // TODO: Implement asImage() method.
+    }
+
     private function readStream(string $path) // @phpstan-ignore-line
     {
         return $this->read();

@@ -119,4 +119,9 @@ final class SerializableDocument implements Document
     {
         return $this->document->tempFile();
     }
+
+    public function asImage(): Image
+    {
+        return $this->document->asImage();
+    }
 }

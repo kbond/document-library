@@ -13,11 +13,13 @@
     ],
     "require": {
         "php": ">=8.0",
-        "league/flysystem": "^3.7"
+        "league/flysystem": "^3.7",
+        "symfony/polyfill-php81": "^1.26"
     },
     "require-dev": {
         "doctrine/orm": "^2.13",
         "league/flysystem-memory": "^3.3",
+        "league/flysystem-read-only": "^3.10",
         "phpstan/phpstan": "^1.4",
         "phpunit/phpunit": "^9.5.0",
         "symfony/cache": "^5.4|^6.0",
