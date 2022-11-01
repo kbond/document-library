@@ -133,6 +133,7 @@ class DocumentNormalizerTest extends TestCase
                 'size' => 7,
                 'checksum' => '9a0364b9e99bb480dd25e1f0284c8555',
                 'mimeType' => 'text/plain',
+                'url' => '/some/file.txt',
             ],
             $decoded
         );

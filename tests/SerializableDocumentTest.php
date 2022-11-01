@@ -15,8 +15,7 @@ final class SerializableDocumentTest extends DocumentTest
      */
     public function can_serialize_with_fields(): void
     {
-        $library = self::inMemoryLibrary(['public_url' => '/']);
-        $document = new SerializableDocument($library->store('the/path.txt', 'content'), [
+        $document = new SerializableDocument(self::$library->store('the/path.txt', 'content'), [
             'path',
             'name',
             'nameWithoutExtension',
