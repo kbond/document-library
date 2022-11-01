@@ -114,6 +114,11 @@ final class LazyDocument implements Document
         return $this->metadata[__FUNCTION__] ??= $this->document()->publicUrl();
     }
 
+    public function temporaryUrl(\DateTimeInterface|string $expires, array $config = []): string
+    {
+        return $this->document()->temporaryUrl($expires, $config);
+    }
+
     public function exists(): bool
     {
         return $this->document()->exists();

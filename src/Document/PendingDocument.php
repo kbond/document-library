@@ -88,7 +88,12 @@ final class PendingDocument implements Document
 
     public function publicUrl(array $config = []): string
     {
-        throw new \BadMethodCallException(\sprintf('Url is not available for "%s".', static::class));
+        throw new \BadMethodCallException(\sprintf('%s() is not available.', __METHOD__));
+    }
+
+    public function temporaryUrl(\DateTimeInterface|string $expires, array $config = []): string
+    {
+        throw new \BadMethodCallException(\sprintf('%s() is not available.', __METHOD__));
     }
 
     public function exists(): bool

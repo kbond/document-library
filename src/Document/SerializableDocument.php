@@ -98,6 +98,11 @@ final class SerializableDocument implements Document
         return $this->document->publicUrl($config);
     }
 
+    public function temporaryUrl(\DateTimeInterface|string $expires, array $config = []): string
+    {
+        return $this->document->temporaryUrl($expires, $config);
+    }
+
     public function exists(): bool
     {
         return $this->document->exists();

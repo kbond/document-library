@@ -21,6 +21,9 @@ final class FlysystemDocument implements Document
     /** @var array<string,string> */
     private array $publicUrl = [];
 
+    /** @var array<string,string> */
+    private array $temporaryUrl = [];
+
     public function __construct(private FilesystemOperator $filesystem, string $path)
     {
         if ('' === $this->path = \ltrim($path, '/')) {
@@ -98,6 +101,23 @@ final class FlysystemDocument implements Document
         return $this->publicUrl[$serialized] = $this->filesystem->publicUrl($this->path, $config);
     }
 
+    public function temporaryUrl(\DateTimeInterface|string $expires, array $config = []): string
+    {
+        if (\is_string($expires)) {
+            $expires = new \DateTimeImmutable($expires);
+        }
+
+        if (isset($this->temporaryUrl[$serialized = \serialize([$expires, $config])])) {
+            return $this->temporaryUrl($serialized);
+        }
+
+        if (!\method_exists($this->filesystem, 'temporaryUrl')) {
+            throw new \LogicException('A temporaryUrl is not available for this filesystem.');
+        }
+
+        return $this->temporaryUrl[$serialized] = $this->filesystem->temporaryUrl($this->path, $expires, $config);
+    }
+
     public function exists(): bool
     {
         return $this->filesystem->fileExists($this->path);
@@ -111,7 +131,7 @@ final class FlysystemDocument implements Document
     public function refresh(): static
     {
         unset($this->size, $this->lastModified, $this->mimeType);
-        $this->checksum = $this->publicUrl = [];
+        $this->checksum = $this->publicUrl = $this->temporaryUrl = [];
 
         return $this;
     }

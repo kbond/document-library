@@ -40,6 +40,8 @@ interface Document
 
     public function publicUrl(array $config = []): string;
 
+    public function temporaryUrl(\DateTimeInterface|string $expires, array $config = []): string;
+
     /**
      * Check if the document still exists.
      */

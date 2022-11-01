@@ -42,6 +42,26 @@ abstract class DocumentTest extends TestCase
     /**
      * @test
      */
+    public function access_public_url(): void
+    {
+        $document = $this->document('some/file.txt', new \SplFileInfo(__FILE__));
+
+        $this->assertSame('/some/file.txt', $document->publicUrl());
+    }
+
+    /**
+     * @test
+     */
+    public function access_temporary_url(): void
+    {
+        $document = $this->document('some/file.txt', new \SplFileInfo(__FILE__));
+
+        $this->assertSame('/some/file.txt?expires', $document->temporaryUrl('+10 minutes'));
+    }
+
+    /**
+     * @test
+     */
     public function refresh_resets_any_cached_metadata(): void
     {
         $document = $this->document('some/file.txt', new \SplFileInfo(__FILE__));

@@ -59,6 +59,11 @@ final class NullDocument implements Document
         throw new \BadMethodCallException(\sprintf('%s() is not available.', __METHOD__));
     }
 
+    public function temporaryUrl(\DateTimeInterface|string $expires, array $config = []): string
+    {
+        throw new \BadMethodCallException(\sprintf('%s() is not available.', __METHOD__));
+    }
+
     public function exists(): bool
     {
         return false;

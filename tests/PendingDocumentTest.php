@@ -69,6 +69,26 @@ final class PendingDocumentTest extends DocumentTest
         $this->assertSame('text/plain', $document->mimeType());
     }
 
+    /**
+     * @test
+     */
+    public function access_public_url(): void
+    {
+        $this->expectException(\BadMethodCallException::class);
+
+        parent::access_public_url();
+    }
+
+    /**
+     * @test
+     */
+    public function access_temporary_url(): void
+    {
+        $this->expectException(\BadMethodCallException::class);
+
+        parent::access_temporary_url();
+    }
+
     protected function document(string $path, \SplFileInfo $file): Document
     {
         return new PendingDocument($file);
