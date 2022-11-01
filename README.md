@@ -53,7 +53,7 @@ $document->checksum(); // string (uses default checksum algorithm for flysystem 
 $document->checksum('sha1'); // "string" (specify checksum algorithm)
 $document->read(); // resource (file contents as stream)
 $document->contents(); // string (file contents)
-$document->url(); // string (public url for document)
+$document->publicUrl(); // string (public url for document)
 $document->exists(); // bool (whether the document exists or not)
 $document->refresh(); // self (clears any cached metadata)
 $document->tempFile(); // \SplFileInfo (real, local file that's deleted at the end of the script)

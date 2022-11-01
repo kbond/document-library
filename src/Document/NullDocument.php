@@ -54,7 +54,7 @@ final class NullDocument implements Document
         throw new \BadMethodCallException(\sprintf('%s() is not available.', __METHOD__));
     }
 
-    public function url(array $config = []): string
+    public function publicUrl(array $config = []): string
     {
         throw new \BadMethodCallException(\sprintf('%s() is not available.', __METHOD__));
     }

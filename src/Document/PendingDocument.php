@@ -86,7 +86,7 @@ final class PendingDocument implements Document
         return \fopen($this->file, 'r') ?: throw new \RuntimeException(\sprintf('Unable to read "%s".', $this->file));
     }
 
-    public function url(array $config = []): string
+    public function publicUrl(array $config = []): string
     {
         throw new \BadMethodCallException(\sprintf('Url is not available for "%s".', static::class));
     }

@@ -105,13 +105,13 @@ final class LazyDocument implements Document
         return $this->document()->read();
     }
 
-    public function url(array $config = []): string
+    public function publicUrl(array $config = []): string
     {
         if ($config) {
-            return $this->document()->url($config);
+            return $this->document()->publicUrl($config);
         }
 
-        return $this->metadata[__FUNCTION__] ??= $this->document()->url();
+        return $this->metadata[__FUNCTION__] ??= $this->document()->publicUrl();
     }
 
     public function exists(): bool

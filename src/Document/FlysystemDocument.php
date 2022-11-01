@@ -19,7 +19,7 @@ final class FlysystemDocument implements Document
     private array $checksum = [];
 
     /** @var array<string,string> */
-    private array $url = [];
+    private array $publicUrl = [];
 
     public function __construct(private FilesystemOperator $filesystem, string $path)
     {
@@ -85,17 +85,17 @@ final class FlysystemDocument implements Document
         return $this->filesystem->readStream($this->path);
     }
 
-    public function url(array $config = []): string
+    public function publicUrl(array $config = []): string
     {
-        if (isset($this->url[$serialized = \serialize($config)])) {
-            return $this->url[$serialized];
+        if (isset($this->publicUrl[$serialized = \serialize($config)])) {
+            return $this->publicUrl[$serialized];
         }
 
         if (!\method_exists($this->filesystem, 'publicUrl')) {
             throw new \LogicException('A publicUrl is not available for this filesystem.');
         }
 
-        return $this->url[$serialized] = $this->filesystem->publicUrl($this->path, $config);
+        return $this->publicUrl[$serialized] = $this->filesystem->publicUrl($this->path, $config);
     }
 
     public function exists(): bool
@@ -111,7 +111,7 @@ final class FlysystemDocument implements Document
     public function refresh(): static
     {
         unset($this->size, $this->lastModified, $this->mimeType);
-        $this->checksum = $this->url = [];
+        $this->checksum = $this->publicUrl = [];
 
         return $this;
     }

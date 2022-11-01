@@ -12,7 +12,7 @@ use Zenstruck\Document;
  */
 final class SerializableDocument implements Document
 {
-    private const ALL_METADATA_FIELDS = ['path', 'lastModified', 'size', 'checksum', 'mimeType', 'url'];
+    private const ALL_METADATA_FIELDS = ['path', 'lastModified', 'size', 'checksum', 'mimeType', 'publicUrl'];
 
     private array $fields;
 
@@ -93,9 +93,9 @@ final class SerializableDocument implements Document
         return $this->document->read();
     }
 
-    public function url(array $config = []): string
+    public function publicUrl(array $config = []): string
     {
-        return $this->document->url($config);
+        return $this->document->publicUrl($config);
     }
 
     public function exists(): bool

@@ -24,7 +24,7 @@ final class LazyDocumentTest extends DocumentTest
             'lastModified' => 5,
             'size' => 6,
             'checksum' => '7',
-            'url' => '8',
+            'publicUrl' => '8',
             'mimeType' => '9',
         ]);
 
@@ -35,7 +35,7 @@ final class LazyDocumentTest extends DocumentTest
         $this->assertSame(5, $document->lastModified());
         $this->assertSame(6, $document->size());
         $this->assertSame('7', $document->checksum());
-        $this->assertSame('8', $document->url());
+        $this->assertSame('8', $document->publicUrl());
         $this->assertSame('9', $document->mimeType());
     }
 

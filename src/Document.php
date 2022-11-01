@@ -38,7 +38,7 @@ interface Document
      */
     public function read();
 
-    public function url(array $config = []): string;
+    public function publicUrl(array $config = []): string;
 
     /**
      * Check if the document still exists.

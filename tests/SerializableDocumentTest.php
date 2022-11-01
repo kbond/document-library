@@ -23,7 +23,7 @@ final class SerializableDocumentTest extends DocumentTest
             'lastModified',
             'size',
             'checksum',
-            'url',
+            'publicUrl',
             'mimeType',
         ]);
 
@@ -36,7 +36,7 @@ final class SerializableDocumentTest extends DocumentTest
                 'lastModified' => \time(),
                 'size' => 7,
                 'checksum' => '9a0364b9e99bb480dd25e1f0284c8555',
-                'url' => '/the/path.txt',
+                'publicUrl' => '/the/path.txt',
                 'mimeType' => 'text/plain',
             ],
             $document->serialize()
