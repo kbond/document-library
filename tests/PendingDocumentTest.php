@@ -5,7 +5,6 @@ namespace Zenstruck\Document\Library\Tests;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Zenstruck\Document;
 use Zenstruck\Document\PendingDocument;
-use Zenstruck\Document\TempFile;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
@@ -50,7 +49,7 @@ final class PendingDocumentTest extends DocumentTest
      */
     public function refresh_resets_any_cached_metadata(): void
     {
-        $document = new PendingDocument($tempFile = TempFile::for(new \SplFileInfo(__FILE__), 'txt'));
+        $document = new PendingDocument($tempFile = self::tempFile(new \SplFileInfo(__FILE__), 'txt'));
 
         $this->assertIsInt($document->lastModified());
         $this->assertSame(\filesize(__FILE__), $document->size());

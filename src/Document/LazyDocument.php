@@ -137,11 +137,6 @@ final class LazyDocument implements Document
         return $this;
     }
 
-    public function tempFile(): \SplFileInfo
-    {
-        return $this->document()->tempFile();
-    }
-
     private function document(): Document
     {
         $this->library ?? throw new \LogicException('A library has not been set for this document.');

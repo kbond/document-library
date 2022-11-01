@@ -92,16 +92,6 @@ abstract class DocumentTest extends TestCase
     /**
      * @test
      */
-    public function can_get_temp_file(): void
-    {
-        $document = $this->document('some/file.txt', new \SplFileInfo(__FILE__));
-
-        $this->assertFileEquals(__FILE__, $document->tempFile());
-    }
-
-    /**
-     * @test
-     */
     public function refresh_is_mutable(): void
     {
         $document = $this->document('some/file.txt', new \SplFileInfo(__FILE__));

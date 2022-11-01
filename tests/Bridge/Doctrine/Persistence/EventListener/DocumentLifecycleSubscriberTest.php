@@ -12,7 +12,6 @@ use Zenstruck\Document\Library\Tests\TestCase;
 use Zenstruck\Document\LibraryRegistry;
 use Zenstruck\Document\Namer\MultiNamer;
 use Zenstruck\Document\PendingDocument;
-use Zenstruck\Document\TempFile;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
@@ -213,7 +212,7 @@ class DocumentLifecycleSubscriberTest extends TestCase
         $this->assertSame($expectedPath, $entity->document1->path());
         $this->assertSame(\file_get_contents(__FILE__), $entity->document1->contents());
 
-        $entity->document1 = new PendingDocument(TempFile::for('content'));
+        $entity->document1 = new PendingDocument(self::tempFile('content'));
         $entity->name = 'new name';
         $this->em()->flush();
         $this->em()->clear();

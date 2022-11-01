@@ -119,9 +119,4 @@ final class SerializableDocument implements Document
 
         return $this;
     }
-
-    public function tempFile(): \SplFileInfo
-    {
-        return $this->document->tempFile();
-    }
 }

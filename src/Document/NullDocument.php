@@ -78,9 +78,4 @@ final class NullDocument implements Document
     {
         throw new \BadMethodCallException(\sprintf('%s() is not available.', __METHOD__));
     }
-
-    public function tempFile(): \SplFileInfo
-    {
-        throw new \BadMethodCallException(\sprintf('%s() is not available.', __METHOD__));
-    }
 }

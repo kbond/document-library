@@ -135,9 +135,4 @@ final class FlysystemDocument implements Document
 
         return $this;
     }
-
-    public function tempFile(): \SplFileInfo
-    {
-        return TempFile::for($this);
-    }
 }

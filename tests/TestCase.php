@@ -43,4 +43,29 @@ abstract class TestCase extends BaseTestCase
     {
         return new LibraryRegistry(\array_merge(['memory' => self::inMemoryLibrary()], $libraries));
     }
+
+    protected static function tempFile(string|\SplFileInfo $content, ?string $extension = null): \SplFileInfo
+    {
+        $filename = \tempnam(\sys_get_temp_dir(), 'zsdl_');
+
+        if ($extension) {
+            \rename($filename, $filename = "{$filename}.{$extension}");
+        }
+
+        if (\is_string($content)) {
+            \file_put_contents($filename, $content);
+        } else {
+            \copy($content, $filename);
+        }
+
+        \clearstatcache(false, $filename);
+
+        \register_shutdown_function(function() use ($filename) {
+            if (\file_exists($filename)) {
+                \unlink($filename);
+            }
+        });
+
+        return new \SplFileInfo($filename);
+    }
 }

@@ -58,7 +58,6 @@ $document->temporaryUrl(new \DateTime('+30 minutes')); // string (expiring url f
 $document->temporaryUrl('+30 minutes'); // equivalent to above
 $document->exists(); // bool (whether the document exists or not)
 $document->refresh(); // self (clears any cached metadata)
-$document->tempFile(); // \SplFileInfo (real, local file that's deleted at the end of the script)
 ```
 
 ### `PendingDocument`

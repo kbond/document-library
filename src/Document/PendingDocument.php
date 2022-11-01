@@ -120,11 +120,6 @@ final class PendingDocument implements Document
         return $this;
     }
 
-    public function tempFile(): \SplFileInfo
-    {
-        return TempFile::for($this);
-    }
-
     private function readStream(string $path) // @phpstan-ignore-line
     {
         return $this->read();
