@@ -60,36 +60,9 @@ $document->exists(); // bool (whether the document exists or not)
 $document->refresh(); // self (clears any cached metadata)
 ```
 
-### `PendingDocument`
-
-A `Zenstruck\Document` implementation that wraps a real, local file.
-
-```php
-use Zenstruck\Document\PendingDocument;
-
-$document = new PendingDocument('/path/to/some/file.txt');
-$document->path(); "/path/to/some/file.txt"
-// ...
-```
-
-A `PendingDocument` can be created with a `Symfony\Component\HttpFoundation\File\UploadedFile`:
-
-```php
-use Zenstruck\Document\PendingDocument;
-
-/** @var \Symfony\Component\HttpFoundation\File\UploadedFile $file */
-
-$document = new PendingDocument($file);
-$document->name(); // string - UploadedFile::getClientOriginalName()
-$document->extension(); // string - UploadedFile::getClientOriginalExtension()
-$document->mimeType(); // string - UploadedFile::getClientMimeType()
-// ...
-```
-
 ## Namers
 
-Namer's can be used to generate the path for a document before saving. They are handy
-when used in conjunction with [`PendingDocument`](#pendingdocument).
+Namer's can be used to generate the path for a document before saving.
 
 ### `ChecksumNamer`
 
@@ -286,9 +259,33 @@ $em->flush(); // "second/image.png" is deleted from the library
 
 #### Persist/Update with `PendingDocument`
 
-You can set [`PendingDocument`](#pendingdocument)'s to your entities `Document` properties.
-These are automatically named (on persist and update) using the [Namer system](#namers)
-and configured by your `Mapping`.
+`Zenstruck\Document\PendingDocument` is a `Zenstruck\Document` implementation that wraps
+a real, local file.
+
+```php
+use Zenstruck\Document\PendingDocument;
+
+$document = new PendingDocument('/path/to/some/file.txt');
+$document->path(); "/path/to/some/file.txt"
+// ...
+```
+
+A `PendingDocument` can be also be created with a `Symfony\Component\HttpFoundation\File\UploadedFile`:
+
+```php
+use Zenstruck\Document\PendingDocument;
+
+/** @var \Symfony\Component\HttpFoundation\File\UploadedFile $file */
+
+$document = new PendingDocument($file);
+$document->name(); // string - UploadedFile::getClientOriginalName()
+$document->extension(); // string - UploadedFile::getClientOriginalExtension()
+$document->mimeType(); // string - UploadedFile::getClientMimeType()
+// ...
+```
+
+You can set `PendingDocument`'s to your entity's `Document` properties. These are automatically
+named (on persist and update) using the [Namer system](#namers) and configured by your `Mapping`.
 
 ```php
 use Doctrine\ORM\Mapping as ORM;
@@ -343,12 +340,12 @@ use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\Mapping;
 
 class User
 {
-    #[Mapping(library: 'public', metadata: true)] // will store path, lastModified, size, checksum, mimeType and url
+    #[Mapping(library: 'public', metadata: true)] // will store path, lastModified, size, checksum, mimeType and publicUrl
     #[ORM\Column(type: Document::class, nullable: true)]
     public ?Document $image = null;
 
     // customize the saved metadata
-    #[Mapping(library: 'public', metadata: ['path', 'url', 'lastModified'])] // will store just path, url, lastModified
+    #[Mapping(library: 'public', metadata: ['path', 'publicUrl', 'lastModified'])] // will store just path, publicUrl and lastModified
     #[ORM\Column(type: Document::class, nullable: true)]
     public ?Document $image = null;
 }
@@ -364,11 +361,11 @@ Usage:
 $user = new User();
 $user->image = $library->open('first/image.png');
 $em->persist($user);
-$em->flush(); // json object with "path", "url" and "lastModified" saved to "user" db's "image" column
+$em->flush(); // json object with "path", "publicUrl" and "lastModified" saved to "user" db's "image" column
 
 // autoload
 $user = $em->find(User::class, 1);
-$user->image->url(); // loads from json object (does not load from library)
+$user->image->publicUrl(); // loads from json object (does not load from library)
 $user->image->lastModified(); // loads from json object (does not load from library)
 $user->image->read(); // will load document from filesystem
 ```
@@ -437,8 +434,8 @@ class User
 }
 ```
 
-> **Note**: this doesn't update the database automatically, see [Updating Metadata](#update-metadata)
-> to see how to do this.
+> **Note**: this doesn't update the path in the database automatically, see
+> [Updating Metadata](#update-metadata) to see how to do this.
 
 #### Virtual Document Properties
 
@@ -548,7 +545,7 @@ use Zenstruck\Document;
 
 $json = $serializer->serialize($document, 'json', [
     'metadata' => true,
-]); // {"path": "...", "lastModified": ..., "size": ..., "checksum": "...", "mimeType": "...", "url": "..."}
+]); // {"path": "...", "lastModified": ..., "size": ..., "checksum": "...", "mimeType": "...", "publicUrl": "..."}
 
 // customize the metadata stored
 $json = $serializer->serialize($document, 'json', [
