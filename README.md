@@ -156,10 +156,10 @@ $library->store($path, $document); // stored as "<slugified filename>"
 - `{checksum:alg:n}`: first `n` characters of document checksum using `alg` as the algorithm (ie `{checksum:sha1:7}`).
 - `{rand}`: random `6` character string.
 - `{rand:n}`: random `n` character string.
-- `{document.*}`: any raw document method (ie `{document.lastModified}`) - requires `symfony/property-access`.
+- `{document.*}`: any raw document method (ie `{document.lastModified}`).
 - `{x}`: any passed `$context` key, the value must be _stringable_.
 - `{x.y}`: if passed `$context` value for key `x` is an object, call method `y` on it, the return
-  value must be _stringable_ - requires `symfony/property-access`.
+  value must be _stringable_.
 
 #### Available Modifiers
 

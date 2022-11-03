@@ -2,7 +2,6 @@
 
 namespace Zenstruck\Document\Library\Tests\Namer;
 
-use Symfony\Component\PropertyAccess\Exception\NoSuchPropertyException;
 use Zenstruck\Document\Library\Tests\TestCase;
 use Zenstruck\Document\Namer\ExpressionNamer;
 
@@ -119,7 +118,7 @@ final class ExpressionNamerTest extends TestCase
         $this->assertSame(
             'prefix/baz/value/stRIng/1//prop1-valUe/6',
             $namer->generateName($document, [
-                'expression' => 'prefix/{foo.bar}/{[array][key]}/{object}/{[object].prop1}/{object.prop2}/{object.prop3}/{object.prop4}{object.prop5}',
+                'expression' => 'prefix/{foo.bar}/{array.key}/{object}/{object.prop1}/{object.prop2}/{object.prop3}/{object.prop4}{object.prop5}',
                 'foo.bar' => 'baz',
                 'array' => ['key' => 'value'],
                 'object' => new ContextObject(),
@@ -162,9 +161,10 @@ final class ExpressionNamerTest extends TestCase
         $namer = new ExpressionNamer();
         $document = self::$library->store('some/pATh.txt', 'content');
 
-        $this->expectException(NoSuchPropertyException::class);
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Unable to access "invalid.foo".');
 
-        $namer->generateName($document, ['expression' => 'prefix/{invalid}']);
+        $namer->generateName($document, ['expression' => 'prefix/{invalid.foo}']);
     }
 }
 

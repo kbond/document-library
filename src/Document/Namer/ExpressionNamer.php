@@ -2,9 +2,6 @@
 
 namespace Zenstruck\Document\Namer;
 
-use Symfony\Component\PropertyAccess\PropertyAccessor;
-use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
-use Symfony\Component\String\Slugger\SluggerInterface;
 use Zenstruck\Document;
 
 /**
@@ -14,17 +11,9 @@ final class ExpressionNamer extends BaseNamer
 {
     private const DEFAULT_EXPRESSION = '{name}-{rand}{ext}';
 
-    public function __construct(
-        ?SluggerInterface $slugger = null,
-        private ?PropertyAccessorInterface $accessor = null,
-        array $defaultContext = []
-    ) {
-        parent::__construct($slugger, $defaultContext);
-    }
-
     protected function generate(Document $document, array $context = []): string
     {
-        return \preg_replace_callback(
+        return \preg_replace_callback( // @phpstan-ignore-line
             '#{([\w.:\-\[\]]+)(\|(slug|slugify|lower))?}#',
             function($matches) use ($document, $context) {
                 $value = match ($matches[1]) {
@@ -67,34 +56,58 @@ final class ExpressionNamer extends BaseNamer
     private function parseVariableValue(Document $document, string $variable, array $context): mixed
     {
         if (\str_starts_with($variable, 'document.')) {
-            return $this->propertyAccessor()->getValue($document, \mb_substr($variable, 9));
+            return self::dotAccess($document, \mb_substr($variable, 9));
         }
 
         if (\array_key_exists($variable, $context)) {
             return $context[$variable];
         }
 
-        if (\str_contains($variable, '.') && !\str_starts_with($variable, '[')) {
-            // normalize dot notation for object access
-            $parts = \explode('.', $variable, 2);
-            $parts[0] = "[{$parts[0]}]";
-            $variable = \implode('.', $parts);
-        }
-
-        return $this->propertyAccessor()->getValue($context, $variable);
+        return self::dotAccess($context, $variable);
     }
 
-    private function propertyAccessor(): PropertyAccessorInterface
+    /**
+     * Quick and dirty "dot" accessor that works for objects and arrays.
+     */
+    private static function dotAccess(object|array &$what, string $path): mixed
     {
-        if ($this->accessor) {
-            return $this->accessor;
+        $current = &$what;
+
+        foreach (\explode('.', $path) as $segment) {
+            if (\is_array($current) && \array_key_exists($segment, $current)) {
+                $current = &$current[$segment];
+
+                continue;
+            }
+
+            if (!\is_object($current)) {
+                throw new \InvalidArgumentException(\sprintf('Unable to access "%s".', $path));
+            }
+
+            if (\method_exists($current, $segment)) {
+                $current = $current->{$segment}();
+
+                continue;
+            }
+
+            foreach (['get', 'has', 'is'] as $prefix) {
+                if (\method_exists($current, $method = $prefix.\ucfirst($segment))) {
+                    $current = $current->{$method}();
+
+                    continue 2;
+                }
+            }
+
+            if (\property_exists($current, $segment)) {
+                $current = &$current->{$segment};
+
+                continue;
+            }
+
+            throw new \InvalidArgumentException(\sprintf('Unable to access "%s".', $path));
         }
 
-        if (!\class_exists(PropertyAccessor::class)) {
-            throw new \LogicException('symfony/property-access is required to parse nested context. Install with "composer require symfony/property-access".');
-        }
-
-        return $this->accessor = new PropertyAccessor();
+        return $current;
     }
 
     private static function parseChecksum(Document $document, array $parts): string
