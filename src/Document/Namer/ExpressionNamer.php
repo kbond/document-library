@@ -13,7 +13,7 @@ final class ExpressionNamer extends BaseNamer
 
     protected function generate(Document $document, array $context = []): string
     {
-        return \preg_replace_callback( // @phpstan-ignore-line
+        return \preg_replace_callback(
             '#{([\w.:\-\[\]]+)(\|(slug|slugify|lower))?}#',
             function($matches) use ($document, $context) {
                 $value = match ($matches[1]) {
