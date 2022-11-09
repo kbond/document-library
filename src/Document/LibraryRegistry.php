@@ -24,7 +24,7 @@ final class LibraryRegistry
     {
         return $this->lazyLibraries[$name] ??= new LazyLibrary(function() use ($name) {
             if ($this->libraries instanceof ContainerInterface) {
-                return $this->get($name);
+                return $this->libraries->get($name);
             }
 
             return $this->libraries[$name] ?? throw new \InvalidArgumentException();
