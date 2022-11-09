@@ -200,7 +200,22 @@ $path = $namer->generateName($document, ['namer' => 'checksum']); // default nam
 
 ## Symfony
 
-### DocumentResponse
+### Validator
+
+A `DocumentConstraint` and `DocumentValidator` is provided. The `DocumentConstraint` has the
+same API as Symfony's native [`File`](https://symfony.com/doc/current/reference/constraints/File.html)
+constraint.
+
+```php
+use Zenstruck\Document\Library\Bridge\Symfony\Validator\DocumentConstraint;
+
+/** @var \Symfony\Component\Validator\Validator\ValidatorInterface $validator */
+/** @var \Zenstruck\Document $document */
+
+$validator->validate($document, new DocumentConstraint(maxSize: '1M'));
+```
+
+### Response
 
 A `DocumentResponse` object is provided to easily create a Symfony response
 from a `Document`:
