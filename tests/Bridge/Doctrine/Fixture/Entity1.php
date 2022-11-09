@@ -16,7 +16,7 @@ class Entity1
     #[ORM\GeneratedValue]
     public ?int $id = null;
 
-    #[ORM\Column(nullable: true)]
+    #[ORM\Column(nullable: true, unique: true)]
     public ?string $name = null;
 
     #[ORM\Column(type: Document::class, nullable: true, options: [

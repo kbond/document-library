@@ -24,6 +24,9 @@ class DocumentLifecycleSubscriber
     /** @var callable[] */
     private array $pendingOperations = [];
 
+    /** @var callable[] */
+    private array $onFailureOperations = [];
+
     public function __construct(
         private LibraryRegistry $registry,
         private MappingProvider $mappingProvider,
@@ -104,9 +107,10 @@ class DocumentLifecycleSubscriber
 
             if ($document instanceof PendingDocument) {
                 $document = $this->registry()->get($mapping->library)->store(
-                    $this->namer()->generateName($document, self::namerContext($mapping, $object)),
+                    $path = $this->namer()->generateName($document, self::namerContext($mapping, $object)),
                     $document
                 );
+                $this->onFailureOperations[] = fn() => $this->registry()->get($mapping->library)->delete($path);
 
                 $ref->set($property, $document);
             }
@@ -139,9 +143,10 @@ class DocumentLifecycleSubscriber
 
             if ($new instanceof PendingDocument) {
                 $new = $this->registry()->get($mapping->library)->store(
-                    $this->namer()->generateName($new, self::namerContext($mapping, $object)),
+                    $path = $this->namer()->generateName($new, self::namerContext($mapping, $object)),
                     $new
                 );
+                $this->onFailureOperations[] = fn() => $this->registry()->get($mapping->library)->delete($path);
 
                 $event->setNewValue($property, $new);
             }
@@ -169,7 +174,16 @@ class DocumentLifecycleSubscriber
             $operation();
         }
 
-        $this->pendingOperations = [];
+        $this->pendingOperations = $this->onFailureOperations = [];
+    }
+
+    final public function onClear(): void
+    {
+        foreach ($this->onFailureOperations as $operation) {
+            $operation();
+        }
+
+        $this->pendingOperations = $this->onFailureOperations = [];
     }
 
     protected function registry(): LibraryRegistry

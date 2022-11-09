@@ -25,7 +25,7 @@ class DocumentLifecycleSubscriberTest extends TestCase
         parent::setUp();
 
         $subscriber = $this->createSubscriber(self::$libraryRegistry);
-        $events = [Events::postFlush, Events::prePersist, Events::preUpdate, Events::postRemove, Events::postLoad];
+        $events = [Events::postFlush, Events::prePersist, Events::preUpdate, Events::postRemove, Events::postLoad, Events::onClear];
 
         foreach ($events as $event) {
             $this->em()->getEventManager()->addEventListener($event, $subscriber);
@@ -279,6 +279,65 @@ class DocumentLifecycleSubscriberTest extends TestCase
         $this->em()->flush();
 
         $this->assertFalse($library->has($expectedPath));
+    }
+
+    /**
+     * @test
+     */
+    public function pending_document_is_removed_on_persist_failure(): void
+    {
+        $library = self::$libraryRegistry->get('memory');
+
+        $entity = new Entity1();
+        $entity->name = 'foo';
+        $this->em()->persist($entity);
+        $this->em()->flush();
+
+        $entity = new Entity1();
+        $entity->name = 'foo';
+        $entity->document1 = new PendingDocument(__FILE__);
+        $this->em()->persist($entity);
+
+        try {
+            $this->em()->flush();
+        } catch (\Throwable) {
+            $this->assertFalse($library->has(\sprintf('prefix/foo-%s.php', \mb_substr(\md5_file(__FILE__), 0, 7))));
+
+            return;
+        }
+
+        $this->fail('no exception thrown');
+    }
+
+    /**
+     * @test
+     */
+    public function pending_document_is_removed_on_update_failure(): void
+    {
+        $library = self::$libraryRegistry->get('memory');
+
+        $entity = new Entity1();
+        $entity->name = 'foo';
+        $this->em()->persist($entity);
+        $this->em()->flush();
+
+        $entity = new Entity1();
+        $entity->name = 'bar';
+        $this->em()->persist($entity);
+        $this->em()->flush();
+
+        $entity->name = 'foo';
+        $entity->document1 = new PendingDocument(__FILE__);
+
+        try {
+            $this->em()->flush();
+        } catch (\Throwable) {
+            $this->assertFalse($library->has(\sprintf('prefix/foo-%s.php', \mb_substr(\md5_file(__FILE__), 0, 7))));
+
+            return;
+        }
+
+        $this->fail('no exception thrown');
     }
 
     protected function createSubscriber(LibraryRegistry $registry): DocumentLifecycleSubscriber
