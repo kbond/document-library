@@ -103,13 +103,10 @@ class DocumentLifecycleSubscriber
             }
 
             if ($document instanceof PendingDocument) {
-                $document = $document->withPath(
-                    $this->namer()->generateName($document, self::namerContext($mapping, $object))
+                $document = $this->registry()->get($mapping->library)->store(
+                    $this->namer()->generateName($document, self::namerContext($mapping, $object)),
+                    $document
                 );
-
-                $this->pendingOperations[] = function() use ($document, $mapping) {
-                    $this->registry()->get($mapping->library)->store($document->path(), $document);
-                };
 
                 $ref->set($property, $document);
             }
@@ -141,13 +138,10 @@ class DocumentLifecycleSubscriber
             $new = $event->getNewValue($property);
 
             if ($new instanceof PendingDocument) {
-                $new = $new->withPath(
-                    $this->namer()->generateName($new, self::namerContext($mapping, $object))
+                $new = $this->registry()->get($mapping->library)->store(
+                    $this->namer()->generateName($new, self::namerContext($mapping, $object)),
+                    $new
                 );
-
-                $this->pendingOperations[] = function() use ($new, $mapping) {
-                    $this->registry()->get($mapping->library)->store($new->path(), $new);
-                };
 
                 $event->setNewValue($property, $new);
             }
