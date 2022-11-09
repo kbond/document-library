@@ -10,7 +10,6 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Zenstruck\Document;
 use Zenstruck\Document\PendingDocument;
 
 /**
@@ -53,7 +52,7 @@ final class PendingDocumentType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => fn(Options $options) => $options['multiple'] ? null : Document::class,
+            'data_class' => fn(Options $options) => $options['multiple'] ? null : PendingDocument::class,
         ]);
     }
 

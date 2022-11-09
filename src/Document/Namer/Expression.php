@@ -5,7 +5,7 @@ namespace Zenstruck\Document\Namer;
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
  */
-final class Expression
+final class Expression implements \Stringable
 {
     public function __construct(private string $value)
     {

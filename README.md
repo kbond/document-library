@@ -200,6 +200,35 @@ $path = $namer->generateName($document, ['namer' => 'checksum']); // default nam
 
 ## Symfony
 
+### Form
+
+A `DocumentType` form type is provided - it extends Symfony's native
+[`FileType`](https://symfony.com/doc/current/reference/forms/types/file.html).
+This type takes one or more uploaded files and stores them in the configured
+`library` and names them using the configured [`namer`](#namers).
+
+```php
+use Zenstruck\Document\Library\Bridge\Symfony\Form\DocumentType;
+use Zenstruck\Document\Namer\Expression;
+
+/** @var \Symfony\Component\Form\FormBuilderInterface $builder */
+
+$builder->add('attachment', DocumentType::class, [
+    'library' => 'public',
+    'namer' => new Expression('users/profile-images/{checksum}{ext}'),
+]);
+
+// multiple
+$builder->add('attachments', DocumentType::class, [
+    'multiple' => true,
+    'library' => 'public',
+    'namer' => new Expression('users/profile-images/{checksum}{ext}'),
+]);
+```
+
+> **Note**: If no `namer` is configured, defaults to the `ExpressionNamer` with its configured
+> default expression.
+
 ### Validator
 
 A `DocumentConstraint` and `DocumentValidator` is provided. The `DocumentConstraint` has the
@@ -362,6 +391,21 @@ class User
 
 > **Note**: If no `namer` is configured, defaults to the `ExpressionNamer` with its configured
 > default expression.
+
+#### PendingDocument Form Type
+
+This form type is similar to [`DocumentType`](#form) but instead of storing
+the uploaded document to a library, it just converts to a `PendingDocument`.
+This allows your entity mapping to be used to name/store.
+
+```php
+use Zenstruck\Document\Library\Bridge\Symfony\Form\PendingDocumentType;
+use Zenstruck\Document\Namer\Expression;
+
+/** @var \Symfony\Component\Form\FormBuilderInterface $builder */
+
+$builder->add('attachment', PendingDocumentType::class);
+```
 
 #### Store Additional Document Metadata
 

@@ -25,7 +25,7 @@ abstract class TestCase extends BaseTestCase
         self::$libraryRegistry = self::libraryRegistry();
     }
 
-    protected static function inMemoryLibrary(array $config = []): Library
+    public static function inMemoryLibrary(array $config = []): Library
     {
         return new FlysystemLibrary(new Filesystem(
             new InMemoryFilesystemAdapter(),
@@ -39,7 +39,7 @@ abstract class TestCase extends BaseTestCase
         ));
     }
 
-    protected static function libraryRegistry(array $libraries = []): LibraryRegistry
+    public static function libraryRegistry(array $libraries = []): LibraryRegistry
     {
         return new LibraryRegistry(\array_merge(['memory' => self::inMemoryLibrary()], $libraries));
     }
