@@ -2,6 +2,7 @@
 
 namespace Zenstruck\Document\Library\Tests\Bridge\Symfony\Fixture;
 
+use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use League\Flysystem\Filesystem;
 use League\Flysystem\InMemory\InMemoryFilesystemAdapter;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
@@ -11,6 +12,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\Kernel;
 use Zenstruck\Document\Library\Bridge\Symfony\ZenstruckDocumentLibraryBundle;
+use Zenstruck\Foundry\ZenstruckFoundryBundle;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
@@ -22,6 +24,8 @@ final class TestKernel extends Kernel
     public function registerBundles(): iterable
     {
         yield new FrameworkBundle();
+        yield new DoctrineBundle();
+        yield new ZenstruckFoundryBundle();
         yield new ZenstruckDocumentLibraryBundle();
     }
 
@@ -31,6 +35,23 @@ final class TestKernel extends Kernel
             'secret' => 'S3CRET',
             'router' => ['utf8' => true],
             'test' => true,
+        ]);
+
+        $c->loadFromExtension('doctrine', [
+            'dbal' => ['url' => 'sqlite:///%kernel.project_dir%/var/data.db'],
+            'orm' => [
+                'auto_generate_proxy_classes' => true,
+                'auto_mapping' => true,
+                'mappings' => [
+                    'Test' => [
+                        'is_bundle' => false,
+                        'type' => 'attribute',
+                        'dir' => '%kernel.project_dir%/tests/Bridge/Symfony/Fixture/Entity',
+                        'prefix' => 'Zenstruck\Document\Library\Tests\Bridge\Symfony\Fixture\Entity',
+                        'alias' => 'Test',
+                    ],
+                ],
+            ],
         ]);
 
         $c->loadFromExtension('zenstruck_document_library', [

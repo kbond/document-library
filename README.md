@@ -200,6 +200,55 @@ $path = $namer->generateName($document, ['namer' => 'checksum']); // default nam
 
 ## Symfony
 
+### Bundle
+
+A Symfony bundle is available to configure different libraries for your application.
+Enable in your `config/bundles.php`:
+
+```php
+// config/bundles.php
+
+return [
+    // ...
+    Zenstruck\Document\Library\Bridge\Symfony\ZenstruckDocumentLibraryBundle::class => ['all' => true]
+];
+```
+
+> **Note**: the remaining Symfony docs will assume you have the bundle enabled.
+
+#### Configuration
+
+Configure your application's libraries:
+
+```yaml
+# config/packages/zenstruck_filesystem.yaml
+
+zenstruck_document_library:
+    libraries:
+        public: 'service.id.for.flysystem.operator'
+        private: 'service.id.for.flysystem.operator'
+```
+
+#### Services
+
+Your defined libraries can be autowired:
+
+```php
+use Zenstruck\Document\Library;
+
+class SomeController
+{
+    public function someAction(
+        Library $public, // the public library as defined in your config
+        Library $private, // the private library as defined in your config
+    ) {
+        $document = $public->open('some/path');
+
+        // ...
+    }
+}
+```
+
 ### Form
 
 A `DocumentType` form type is provided - it extends Symfony's native
