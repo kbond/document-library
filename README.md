@@ -306,12 +306,12 @@ use Zenstruck\Document\Library\Bridge\Symfony\HttpFoundation\DocumentResponse;
 $response = new DocumentResponse($document); // auto-adds content-type/last-modified headers
 
 // create inline/attachment responses
-$response = FileResponse::attachment($document); // auto names by the filename
-$response = FileResponse::inline($document); // auto names by the filename
+$response = DocumentResponse::attachment($document); // auto names by the filename
+$response = DocumentResponse::inline($document); // auto names by the filename
 
 // customize the filename used for the content-disposition header
-$response = FileResponse::attachment($document, 'different-name.txt');
-$response = FileResponse::inline($document, 'different-name.txt');
+$response = DocumentResponse::attachment($document, 'different-name.txt');
+$response = DocumentResponse::inline($document, 'different-name.txt');
 ```
 
 ### Doctrine ORM Integration
