@@ -19,6 +19,7 @@ use Zenstruck\Document\Library\Bridge\Symfony\Form\PendingDocumentType;
 use Zenstruck\Document\Library\Bridge\Symfony\HttpKernel\DoctrineMappingProviderCacheWarmer;
 use Zenstruck\Document\Library\Bridge\Symfony\Serializer\LazyDocumentNormalizer;
 use Zenstruck\Document\Library\Bridge\Symfony\ValueResolver\PendingDocumentValueResolver;
+use Zenstruck\Document\Library\Bridge\Symfony\ValueResolver\RequestFilesExtractor;
 use Zenstruck\Document\Library\FlysystemLibrary;
 use Zenstruck\Document\LibraryRegistry;
 use Zenstruck\Document\Namer;
@@ -92,8 +93,10 @@ final class ZenstruckDocumentLibraryExtension extends ConfigurableExtension
         ;
 
         // value resolver
+        $container->register('.zenstruck_document.value_resolver.extractor', RequestFilesExtractor::class);
         $container->register('.zenstruck_document.value_resolver.pending_document', PendingDocumentValueResolver::class)
             ->addTag('controller.argument_value_resolver', ['priority' => 110])
+            ->addArgument(new Reference('.zenstruck_document.value_resolver.extractor'))
         ;
 
         if (isset($container->getParameter('kernel.bundles')['DoctrineBundle'])) {
