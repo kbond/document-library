@@ -2,6 +2,7 @@
 
 namespace Zenstruck\Document\Library\Bridge\Symfony\ValueResolver;
 
+use Symfony\Component\HttpFoundation\File\UploadedFile as SfUploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Controller\ArgumentValueResolverInterface;
 use Symfony\Component\HttpKernel\Controller\ValueResolverInterface;
@@ -20,12 +21,22 @@ class PendingDocumentValueResolver implements ArgumentValueResolverInterface, Va
     {
         @trigger_deprecation('symfony/http-kernel', '6.2', 'The "%s()" method is deprecated, use "resolve()" instead.', __METHOD__);
 
-        return $argument->getType() === PendingDocument::class;
+        return in_array(
+            $argument->getType(),
+            [PendingDocument::class, 'array'],
+            true
+        );
     }
 
     public function resolve(Request $request, ArgumentMetadata $argument): iterable
     {
-        if ($argument->getType() !== PendingDocument::class) {
+        if (
+            !in_array(
+                $argument->getType(),
+                [PendingDocument::class, 'array'],
+                true
+            )
+        ) {
             return [];
         }
 
@@ -47,13 +58,30 @@ class PendingDocumentValueResolver implements ArgumentValueResolverInterface, Va
             PropertyAccessor::THROW_ON_INVALID_PROPERTY_PATH
         );
 
-        $file = $propertyAccessor->getValue($request->files->all(), $path);
+        $files = $propertyAccessor->getValue($request->files->all(), $path);
 
-        if (!$file) {
+        if (is_array($files)) {
+            if ($argument->getType() === PendingDocument::class) {
+                throw new \LogicException(sprintf('Could not resolve the "%s $%s" controller argument: expecting a single file, got %d files.', $argument->getType(), $argument->getName(), count($files)));
+            }
+
+            return [
+                array_map(
+                    static fn (SfUploadedFile $file) => new PendingDocument($file),
+                    $files
+                )
+            ];
+        }
+
+        if (!$files) {
             return [null];
         }
 
-        return [new PendingDocument($file)];
+        if ($argument->getType() === PendingDocument::class) {
+            return [new PendingDocument($files)];
+        }
+
+        return [[new PendingDocument($files)]];
     }
 }
 
