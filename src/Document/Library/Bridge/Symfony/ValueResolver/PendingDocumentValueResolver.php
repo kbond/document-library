@@ -6,6 +6,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Controller\ArgumentValueResolverInterface;
 use Symfony\Component\HttpKernel\Controller\ValueResolverInterface;
 use Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadata;
+use Symfony\Component\PropertyAccess\PropertyAccessor;
 use Zenstruck\Document\PendingDocument;
 
 /**
@@ -28,11 +29,31 @@ class PendingDocumentValueResolver implements ArgumentValueResolverInterface, Va
             return [];
         }
 
-        if (!$request->files->has($argument->getName())) {
+        $path = $argument->getAttributesOfType(UploadedFile::class)[0]?->path
+            ?? $argument->getName();
+
+        // Convert HTML paths, like "data[file]", to
+        // PropertyAccessor compatible ("[data][file]")
+        if ($path[0] !== '[') {
+            $path = preg_replace(
+                '/^([^[]+)/',
+                '[$1]',
+                $path
+            );
+        }
+
+        $propertyAccessor = new PropertyAccessor(
+            PropertyAccessor::DISALLOW_MAGIC_METHODS,
+            PropertyAccessor::THROW_ON_INVALID_PROPERTY_PATH
+        );
+
+        $file = $propertyAccessor->getValue($request->files->all(), $path);
+
+        if (!$file) {
             return [null];
         }
 
-        return [new PendingDocument($request->files->get($argument->getName()))];
+        return [new PendingDocument($file)];
     }
 }
 
