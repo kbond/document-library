@@ -30,6 +30,9 @@ class PendingDocumentValueResolver implements ArgumentValueResolverInterface, Va
             || !empty($argument->getAttributesOfType(UploadedFile::class));
     }
 
+    /**
+     * @return iterable<PendingDocument|array|null>
+     */
     public function resolve(Request $request, ArgumentMetadata $argument): iterable
     {
         $attributes = $argument->getAttributesOfType(UploadedFile::class);
