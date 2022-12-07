@@ -1,6 +1,6 @@
 <?php
 
-namespace Zenstruck\Document\Library\Bridge\Symfony\ValueResolver;
+namespace Zenstruck\Document\Library\Bridge\Symfony\HttpKernel;
 
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Zenstruck\Document\Library\Bridge\Symfony\ValueResolver;
+namespace Zenstruck\Document\Attribute;
 
 /**
  * @author Jakub Caban <kuba.iluvatar@gmail.com>

@@ -1,11 +1,12 @@
 <?php
 
-namespace Zenstruck\Document\Library\Bridge\Symfony\ValueResolver;
+namespace Zenstruck\Document\Library\Bridge\Symfony\HttpKernel;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Controller\ArgumentValueResolverInterface;
 use Symfony\Component\HttpKernel\Controller\ValueResolverInterface;
 use Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadata;
+use Zenstruck\Document\Attribute\UploadedFile;
 use Zenstruck\Document\PendingDocument;
 
 /**
