@@ -9,7 +9,7 @@ namespace Zenstruck\Document\Attribute;
 final class UploadedFile
 {
     public function __construct(
-        public string $path
+        public ?string $path = null
     ) {
     }
 }

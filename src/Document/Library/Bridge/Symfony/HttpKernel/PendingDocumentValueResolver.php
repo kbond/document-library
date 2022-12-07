@@ -26,26 +26,22 @@ class PendingDocumentValueResolver implements ArgumentValueResolverInterface, Va
     {
         @trigger_deprecation('symfony/http-kernel', '6.2', 'The "%s()" method is deprecated, use "resolve()" instead.', __METHOD__);
 
-        return in_array(
-            $argument->getType(),
-            [PendingDocument::class, 'array'],
-            true
-        );
+        return $argument->getType() === PendingDocument::class
+            || !empty($argument->getAttributesOfType(UploadedFile::class));
     }
 
     public function resolve(Request $request, ArgumentMetadata $argument): iterable
     {
+        $attributes = $argument->getAttributesOfType(UploadedFile::class);
+
         if (
-            !in_array(
-                $argument->getType(),
-                [PendingDocument::class, 'array'],
-                true
-            )
+            empty($attributes)
+            && $argument->getType() !== PendingDocument::class
         ) {
             return [];
         }
 
-        $path = $argument->getAttributesOfType(UploadedFile::class)[0]?->path
+        $path = $attributes[0]?->path
             ?? $argument->getName();
 
         return [
