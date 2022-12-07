@@ -115,7 +115,7 @@ final class DocumentValidator extends ConstraintValidator
             }
 
             if (!$found) {
-                $this->context->buildViolation($constraint->extensionsMessage) // @phpstan-ignore-line
+                $this->context->buildViolation($constraint->extensionsMessage)
                     ->setParameter('{{ file }}', $this->formatValue($value->path()))
                     ->setParameter('{{ extension }}', $this->formatValue($fileExtension))
                     ->setParameter('{{ extensions }}', $this->formatValues($normalizedExtensions))
