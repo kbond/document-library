@@ -14,14 +14,8 @@ use Zenstruck\Document\PendingDocument;
  */
 class RequestFilesExtractor
 {
-    private PropertyAccessor $propertyAccessor;
-
-    public function __construct()
+    public function __construct(private PropertyAccessor $propertyAccessor)
     {
-        $this->propertyAccessor = new PropertyAccessor(
-            PropertyAccessor::DISALLOW_MAGIC_METHODS,
-            PropertyAccessor::THROW_ON_INVALID_PROPERTY_PATH
-        );
     }
 
     public function extractFilesFromRequest(

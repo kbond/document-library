@@ -7,8 +7,10 @@ use Symfony\Component\DependencyInjection\Argument\ServiceLocatorArgument;
 use Symfony\Component\DependencyInjection\Argument\TaggedIteratorArgument;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
+use Symfony\Component\PropertyAccess\PropertyAccessor;
 use Zenstruck\Document\Library;
 use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\EventListener\LazyDocumentLifecycleSubscriber;
 use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\Mapping\CacheMappingProvider;
@@ -27,6 +29,7 @@ use Zenstruck\Document\Namer\ChecksumNamer;
 use Zenstruck\Document\Namer\ExpressionNamer;
 use Zenstruck\Document\Namer\MultiNamer;
 use Zenstruck\Document\Namer\SlugifyNamer;
+use function Symfony\Component\DependencyInjection\Loader\Configurator\inline_service;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
@@ -93,7 +96,13 @@ final class ZenstruckDocumentLibraryExtension extends ConfigurableExtension
         ;
 
         // value resolver
-        $container->register('.zenstruck_document.value_resolver.extractor', RequestFilesExtractor::class);
+        $container->register('.zenstruck_document.value_resolver.extractor', RequestFilesExtractor::class)
+            ->addArgument(
+                (new Definition(PropertyAccessor::class))->setArguments([
+                    PropertyAccessor::DISALLOW_MAGIC_METHODS,
+                    PropertyAccessor::THROW_ON_INVALID_PROPERTY_PATH
+                ])
+            );
         $container->register('.zenstruck_document.value_resolver.pending_document', PendingDocumentValueResolver::class)
             ->addTag('controller.argument_value_resolver', ['priority' => 110])
             ->addArgument(new Reference('.zenstruck_document.value_resolver.extractor'))
