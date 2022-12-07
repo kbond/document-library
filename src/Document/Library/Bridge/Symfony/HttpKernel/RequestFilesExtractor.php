@@ -54,17 +54,27 @@ class RequestFilesExtractor
     }
 
     /**
-     * Convert HTML paths, like "data[file]", to
-     * PropertyAccessor compatible ("[data][file]")
+     * Convert HTML paths to PropertyAccessor compatible.
+     * Examples: "data[file]" -> "[data][file]", "files[]" -> "[files]"
      */
     private function canonizePath(string $path): string
     {
+        $path = preg_replace(
+            '/\[]$/',
+            '',
+            $path
+        );
+        // Correct arguments passed to preg_replace guarantee string return
+        assert(is_string($path));
+
         if ($path[0] !== '[') {
-            return preg_replace(
+            $path = preg_replace(
                 '/^([^[]+)/',
                 '[$1]',
                 $path
             );
+            // Correct arguments passed to preg_replace guarantee string return
+            assert(is_string($path));
         }
 
         return $path;
