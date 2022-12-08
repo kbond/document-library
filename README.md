@@ -594,7 +594,10 @@ class Part
 }
 ```
 
-Note, if it's possible the document may not exist for every entity, add a setter that
+> **Note**: the namer for virtual documents will not have [document-related variables](#available-variables)
+> available (as it's not yet available). You can only access the object (via `this`).
+
+If it's possible the document may not exist for every entity, add a setter that
 checks for existence before returning:
 
 ```php
