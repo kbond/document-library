@@ -9,8 +9,6 @@ use Zenstruck\Document\PendingDocument;
 
 /**
  * @author Jakub Caban <kuba.iluvatar@gmail.com>
- *
- * @internal
  */
 class RequestFilesExtractor
 {
