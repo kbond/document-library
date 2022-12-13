@@ -25,7 +25,7 @@ class PendingDocumentValueResolver implements ArgumentValueResolverInterface
         @trigger_deprecation('symfony/http-kernel', '6.2', 'The "%s()" method is deprecated, use "resolve()" instead.', __METHOD__);
 
         return PendingDocument::class === $argument->getType()
-            || !empty($argument->getAttributesOfType(UploadedFile::class));
+            || !empty($argument->getAttributes(UploadedFile::class));
     }
 
     /**
@@ -33,7 +33,7 @@ class PendingDocumentValueResolver implements ArgumentValueResolverInterface
      */
     public function resolve(Request $request, ArgumentMetadata $argument): iterable
     {
-        $attributes = $argument->getAttributesOfType(UploadedFile::class);
+        $attributes = $argument->getAttributes(UploadedFile::class);
 
         if (
             empty($attributes)
