@@ -4,7 +4,6 @@ namespace Zenstruck\Document\Library\Bridge\Symfony\HttpKernel;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Controller\ArgumentValueResolverInterface;
-use Symfony\Component\HttpKernel\Controller\ValueResolverInterface;
 use Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadata;
 use Zenstruck\Document\Attribute\UploadedFile;
 use Zenstruck\Document\PendingDocument;
@@ -14,7 +13,7 @@ use Zenstruck\Document\PendingDocument;
  *
  * @internal
  */
-class PendingDocumentValueResolver implements ArgumentValueResolverInterface, ValueResolverInterface
+class PendingDocumentValueResolver implements ArgumentValueResolverInterface
 {
     public function __construct(
         private RequestFilesExtractor $filesExtractor
@@ -55,4 +54,3 @@ class PendingDocumentValueResolver implements ArgumentValueResolverInterface, Va
         ];
     }
 }
-
