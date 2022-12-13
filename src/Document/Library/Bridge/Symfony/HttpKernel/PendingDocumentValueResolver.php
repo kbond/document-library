@@ -50,8 +50,8 @@ class PendingDocumentValueResolver implements ArgumentValueResolverInterface, Va
             $this->filesExtractor->extractFilesFromRequest(
                 $request,
                 $path,
-                $argument->getType() !== PendingDocument::class
-            )
+                PendingDocument::class !== $argument->getType()
+            ),
         ];
     }
 }

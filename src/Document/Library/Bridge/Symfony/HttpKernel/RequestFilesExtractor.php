@@ -41,7 +41,7 @@ class RequestFilesExtractor
         }
 
         if (\is_array($files)) {
-            throw new \LogicException(sprintf('Could not extract files from request for "%s" path: expecting a single file, got %d files.', $path, count($files)));
+            throw new \LogicException(\sprintf('Could not extract files from request for "%s" path: expecting a single file, got %d files.', $path, \count($files)));
         }
 
         if (!$files) {
