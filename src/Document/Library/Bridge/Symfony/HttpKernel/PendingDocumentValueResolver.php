@@ -22,8 +22,6 @@ class PendingDocumentValueResolver implements ArgumentValueResolverInterface
 
     public function supports(Request $request, ArgumentMetadata $argument): bool
     {
-        @trigger_deprecation('symfony/http-kernel', '6.2', 'The "%s()" method is deprecated, use "resolve()" instead.', __METHOD__);
-
         return PendingDocument::class === $argument->getType()
             || !empty($argument->getAttributes(UploadedFile::class));
     }
