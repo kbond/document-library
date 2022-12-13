@@ -29,7 +29,6 @@ use Zenstruck\Document\Namer\ChecksumNamer;
 use Zenstruck\Document\Namer\ExpressionNamer;
 use Zenstruck\Document\Namer\MultiNamer;
 use Zenstruck\Document\Namer\SlugifyNamer;
-use function Symfony\Component\DependencyInjection\Loader\Configurator\inline_service;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
@@ -100,9 +99,10 @@ final class ZenstruckDocumentLibraryExtension extends ConfigurableExtension
             ->addArgument(
                 (new Definition(PropertyAccessor::class))->setArguments([
                     PropertyAccessor::DISALLOW_MAGIC_METHODS,
-                    PropertyAccessor::THROW_ON_INVALID_PROPERTY_PATH
+                    PropertyAccessor::THROW_ON_INVALID_PROPERTY_PATH,
                 ])
-            );
+            )
+        ;
         $container->register('.zenstruck_document.value_resolver.pending_document', PendingDocumentValueResolver::class)
             ->addTag('controller.argument_value_resolver', ['priority' => 110])
             ->addArgument(new Reference('.zenstruck_document.value_resolver.extractor'))

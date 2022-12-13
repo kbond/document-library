@@ -27,7 +27,8 @@ class PendingDocumentValueResolverTest extends TestCase
     {
         $request = Request::create('');
         $arguments = self::metadataFactory()
-            ->createArgumentMetadata(new NoInjectionController());
+            ->createArgumentMetadata(new NoInjectionController())
+        ;
         $resolver = self::resolver();
 
         self::assertFalse($resolver->supports($request, $arguments[0]));
@@ -41,7 +42,8 @@ class PendingDocumentValueResolverTest extends TestCase
     {
         $request = Request::create('');
         $arguments = self::metadataFactory()
-            ->createArgumentMetadata(new SingleFileController());
+            ->createArgumentMetadata(new SingleFileController())
+        ;
         $resolver = self::resolver();
 
         $resolve = $resolver->resolve($request, $arguments[0]);
@@ -58,7 +60,8 @@ class PendingDocumentValueResolverTest extends TestCase
         $request = Request::create('');
         $request->files->set('data', ['file' => self::uploadedFile()]);
         $arguments = self::metadataFactory()
-            ->createArgumentMetadata(new SingleFileWithPathController());
+            ->createArgumentMetadata(new SingleFileWithPathController())
+        ;
         $resolver = self::resolver();
 
         $resolve = $resolver->resolve($request, $arguments[0]);
@@ -76,7 +79,8 @@ class PendingDocumentValueResolverTest extends TestCase
         $request = Request::create('');
         $request->files->set('data', ['files' => [self::uploadedFile()]]);
         $arguments = self::metadataFactory()
-            ->createArgumentMetadata(new MultipleFilesController());
+            ->createArgumentMetadata(new MultipleFilesController())
+        ;
         $resolver = self::resolver();
 
         self::assertTrue($resolver->supports($request, $arguments[0]));

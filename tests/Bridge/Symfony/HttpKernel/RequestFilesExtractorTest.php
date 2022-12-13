@@ -2,7 +2,6 @@
 
 namespace Zenstruck\Document\Library\Tests\Bridge\Symfony\HttpKernel;
 
-use LogicException;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
@@ -86,7 +85,7 @@ class RequestFilesExtractorTest extends TestCase
         $request = Request::create('');
         $request->files->set('upload', [self::uploadedFile()]);
 
-        $this->expectException(LogicException::class);
+        $this->expectException(\LogicException::class);
         $extractor->extractFilesFromRequest($request, 'upload');
     }
 
