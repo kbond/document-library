@@ -96,12 +96,7 @@ final class ZenstruckDocumentLibraryExtension extends ConfigurableExtension
 
         // value resolver
         $container->register('.zenstruck_document.value_resolver.extractor', RequestFilesExtractor::class)
-            ->addArgument(
-                (new Definition(PropertyAccessor::class))->setArguments([
-                    PropertyAccessor::DISALLOW_MAGIC_METHODS,
-                    PropertyAccessor::THROW_ON_INVALID_PROPERTY_PATH,
-                ])
-            )
+            ->addArgument(new Reference('property_accessor'))
         ;
         $container->register('.zenstruck_document.value_resolver.pending_document', PendingDocumentValueResolver::class)
             ->addTag('controller.argument_value_resolver', ['priority' => 110])
