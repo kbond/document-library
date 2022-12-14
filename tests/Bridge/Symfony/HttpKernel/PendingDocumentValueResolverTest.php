@@ -2,22 +2,19 @@
 
 namespace Zenstruck\Document\Library\Tests\Bridge\Symfony\HttpKernel;
 
-use PHPUnit\Framework\TestCase;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Controller\ValueResolverInterface;
 use Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadataFactory;
-use Symfony\Component\PropertyAccess\PropertyAccessor;
-use Symfony\Contracts\Service\ServiceProviderInterface;
 use Zenstruck\Document\Library\Bridge\Symfony\HttpKernel\PendingDocumentValueResolver;
-use Zenstruck\Document\Library\Bridge\Symfony\HttpKernel\RequestFilesExtractor;
 use Zenstruck\Document\Library\Tests\Bridge\Symfony\Fixture\Controller\ArgumentResolverController;
 use Zenstruck\Document\PendingDocument;
 
 /**
  * @author Jakub Caban <kuba.iluvatar@gmail.com>
  */
-class PendingDocumentValueResolverTest extends TestCase
+class PendingDocumentValueResolverTest extends KernelTestCase
 {
     /**
      * @test
@@ -115,27 +112,10 @@ class PendingDocumentValueResolverTest extends TestCase
 
     private static function resolver(): PendingDocumentValueResolver
     {
-        $locator = new class() implements ServiceProviderInterface {
-            public function get(string $id): mixed
-            {
-                return new RequestFilesExtractor(
-                    new PropertyAccessor(
-                    )
-                );
-            }
+        /** @var PendingDocumentValueResolver $resolver */
+        $resolver = self::getContainer()->get(PendingDocumentValueResolver::class);
 
-            public function has(string $id): bool
-            {
-                return RequestFilesExtractor::class === $id;
-            }
-
-            public function getProvidedServices(): array
-            {
-                return [RequestFilesExtractor::class];
-            }
-        };
-
-        return new PendingDocumentValueResolver($locator);
+        return $resolver;
     }
 
     private static function controller(): ArgumentResolverController

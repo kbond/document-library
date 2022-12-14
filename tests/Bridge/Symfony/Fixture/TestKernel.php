@@ -11,6 +11,7 @@ use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\Kernel;
+use Zenstruck\Document\Library\Bridge\Symfony\HttpKernel\PendingDocumentValueResolver;
 use Zenstruck\Document\Library\Bridge\Symfony\ZenstruckDocumentLibraryBundle;
 use Zenstruck\Foundry\ZenstruckFoundryBundle;
 
@@ -73,6 +74,10 @@ final class TestKernel extends Kernel
         $c->register(Service::class)
             ->setPublic(true)
             ->setAutowired(true)
+        ;
+
+        $c->setAlias(PendingDocumentValueResolver::class, '.zenstruck_document.value_resolver.pending_document')
+            ->setPublic(true)
         ;
     }
 }
