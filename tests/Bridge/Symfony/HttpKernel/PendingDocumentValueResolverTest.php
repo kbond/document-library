@@ -30,7 +30,7 @@ class PendingDocumentValueResolverTest extends TestCase
         ;
         $resolver = self::resolver();
 
-        if (!interface_exists(ValueResolverInterface::class)) {
+        if (!\interface_exists(ValueResolverInterface::class)) {
             self::assertFalse($resolver->supports($request, $arguments[0]));
         } else {
             self::assertSame([], $resolver->resolve($request, $arguments[0]));
@@ -50,7 +50,7 @@ class PendingDocumentValueResolverTest extends TestCase
 
         $resolve = $resolver->resolve($request, $arguments[0]);
 
-        if (!interface_exists(ValueResolverInterface::class)) {
+        if (!\interface_exists(ValueResolverInterface::class)) {
             self::assertTrue($resolver->supports($request, $arguments[0]));
         }
         self::assertSame([null], $resolve);
@@ -87,7 +87,7 @@ class PendingDocumentValueResolverTest extends TestCase
         ;
         $resolver = self::resolver();
 
-        if (!interface_exists(ValueResolverInterface::class)) {
+        if (!\interface_exists(ValueResolverInterface::class)) {
             self::assertTrue($resolver->supports($request, $arguments[0]));
         }
 
