@@ -11,10 +11,7 @@ use Symfony\Component\PropertyAccess\PropertyAccessor;
 use Symfony\Contracts\Service\ServiceProviderInterface;
 use Zenstruck\Document\Library\Bridge\Symfony\HttpKernel\PendingDocumentValueResolver;
 use Zenstruck\Document\Library\Bridge\Symfony\HttpKernel\RequestFilesExtractor;
-use Zenstruck\Document\Library\Tests\Bridge\Symfony\Fixture\Controller\MultipleFilesController;
-use Zenstruck\Document\Library\Tests\Bridge\Symfony\Fixture\Controller\NoInjectionController;
-use Zenstruck\Document\Library\Tests\Bridge\Symfony\Fixture\Controller\SingleFileController;
-use Zenstruck\Document\Library\Tests\Bridge\Symfony\Fixture\Controller\SingleFileWithPathController;
+use Zenstruck\Document\Library\Tests\Bridge\Symfony\Fixture\Controller\ArgumentResolverController;
 use Zenstruck\Document\PendingDocument;
 
 /**
@@ -29,7 +26,7 @@ class PendingDocumentValueResolverTest extends TestCase
     {
         $request = Request::create('');
         $arguments = self::metadataFactory()
-            ->createArgumentMetadata(new NoInjectionController())
+            ->createArgumentMetadata([self::controller(), "noInjection"])
         ;
         $resolver = self::resolver();
 
@@ -47,7 +44,7 @@ class PendingDocumentValueResolverTest extends TestCase
     {
         $request = Request::create('');
         $arguments = self::metadataFactory()
-            ->createArgumentMetadata(new SingleFileController())
+            ->createArgumentMetadata([self::controller(), "singleFile"])
         ;
         $resolver = self::resolver();
 
@@ -67,7 +64,7 @@ class PendingDocumentValueResolverTest extends TestCase
         $request = Request::create('');
         $request->files->set('data', ['file' => self::uploadedFile()]);
         $arguments = self::metadataFactory()
-            ->createArgumentMetadata(new SingleFileWithPathController())
+            ->createArgumentMetadata([self::controller(), "singleFileWithPath"])
         ;
         $resolver = self::resolver();
 
@@ -86,7 +83,7 @@ class PendingDocumentValueResolverTest extends TestCase
         $request = Request::create('');
         $request->files->set('data', ['files' => [self::uploadedFile()]]);
         $arguments = self::metadataFactory()
-            ->createArgumentMetadata(new MultipleFilesController())
+            ->createArgumentMetadata([self::controller(), "multipleFiles"])
         ;
         $resolver = self::resolver();
 
@@ -139,5 +136,10 @@ class PendingDocumentValueResolverTest extends TestCase
             }
         };
         return new PendingDocumentValueResolver($locator);
+    }
+
+    private static function controller(): ArgumentResolverController
+    {
+        return new ArgumentResolverController();
     }
 }
