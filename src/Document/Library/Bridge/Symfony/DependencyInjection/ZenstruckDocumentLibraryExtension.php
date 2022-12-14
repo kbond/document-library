@@ -29,6 +29,8 @@ use Zenstruck\Document\Namer\ChecksumNamer;
 use Zenstruck\Document\Namer\ExpressionNamer;
 use Zenstruck\Document\Namer\MultiNamer;
 use Zenstruck\Document\Namer\SlugifyNamer;
+use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
+use function Symfony\Component\DependencyInjection\Loader\Configurator\service_locator;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
@@ -100,7 +102,11 @@ final class ZenstruckDocumentLibraryExtension extends ConfigurableExtension
         ;
         $container->register('.zenstruck_document.value_resolver.pending_document', PendingDocumentValueResolver::class)
             ->addTag('controller.argument_value_resolver', ['priority' => 110])
-            ->addArgument(new Reference('.zenstruck_document.value_resolver.extractor'))
+            ->addArgument(
+                service_locator([
+                    RequestFilesExtractor::class => service('.zenstruck_document.value_resolver.extractor')
+                ])
+            )
         ;
 
         if (isset($container->getParameter('kernel.bundles')['DoctrineBundle'])) {

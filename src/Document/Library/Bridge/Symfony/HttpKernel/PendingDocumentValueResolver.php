@@ -2,10 +2,12 @@
 
 namespace Zenstruck\Document\Library\Bridge\Symfony\HttpKernel;
 
+use Symfony\Component\DependencyInjection\ServiceLocator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Controller\ArgumentValueResolverInterface;
 use Symfony\Component\HttpKernel\Controller\ValueResolverInterface;
 use Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadata;
+use Symfony\Contracts\Service\ServiceProviderInterface;
 use Zenstruck\Document\Attribute\UploadedFile;
 use Zenstruck\Document\PendingDocument;
 
@@ -18,7 +20,7 @@ if (interface_exists(ValueResolverInterface::class)) {
     class PendingDocumentValueResolver implements ValueResolverInterface
     {
         public function __construct(
-            private RequestFilesExtractor $filesExtractor
+            private ServiceProviderInterface $locator
         )
         {
         }
@@ -41,19 +43,24 @@ if (interface_exists(ValueResolverInterface::class)) {
                 ?? $argument->getName();
 
             return [
-                $this->filesExtractor->extractFilesFromRequest(
+                $this->extractor()->extractFilesFromRequest(
                     $request,
                     $path,
                     PendingDocument::class !== $argument->getType()
                 ),
             ];
         }
+
+        private function extractor(): RequestFilesExtractor
+        {
+            return $this->locator->get(RequestFilesExtractor::class);
+        }
     }
 } else {
     class PendingDocumentValueResolver implements ArgumentValueResolverInterface
     {
         public function __construct(
-            private RequestFilesExtractor $filesExtractor
+            private ServiceProviderInterface $locator
         )
         {
         }
@@ -76,12 +83,17 @@ if (interface_exists(ValueResolverInterface::class)) {
                 ?? $argument->getName();
 
             return [
-                $this->filesExtractor->extractFilesFromRequest(
+                $this->extractor()->extractFilesFromRequest(
                     $request,
                     $path,
                     PendingDocument::class !== $argument->getType()
                 ),
             ];
+        }
+
+        private function extractor(): RequestFilesExtractor
+        {
+            return $this->locator->get(RequestFilesExtractor::class);
         }
     }
 }

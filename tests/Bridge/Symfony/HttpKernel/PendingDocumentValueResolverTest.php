@@ -5,8 +5,10 @@ namespace Zenstruck\Document\Library\Tests\Bridge\Symfony\HttpKernel;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Controller\ValueResolverInterface;
 use Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadataFactory;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
+use Symfony\Contracts\Service\ServiceProviderInterface;
 use Zenstruck\Document\Library\Bridge\Symfony\HttpKernel\PendingDocumentValueResolver;
 use Zenstruck\Document\Library\Bridge\Symfony\HttpKernel\RequestFilesExtractor;
 use Zenstruck\Document\Library\Tests\Bridge\Symfony\Fixture\Controller\MultipleFilesController;
@@ -31,8 +33,11 @@ class PendingDocumentValueResolverTest extends TestCase
         ;
         $resolver = self::resolver();
 
-        self::assertFalse($resolver->supports($request, $arguments[0]));
-        self::assertSame([], $resolver->resolve($request, $arguments[0]));
+        if (!interface_exists(ValueResolverInterface::class)) {
+            self::assertFalse($resolver->supports($request, $arguments[0]));
+        } else {
+            self::assertSame([], $resolver->resolve($request, $arguments[0]));
+        }
     }
 
     /**
@@ -48,7 +53,9 @@ class PendingDocumentValueResolverTest extends TestCase
 
         $resolve = $resolver->resolve($request, $arguments[0]);
 
-        self::assertTrue($resolver->supports($request, $arguments[0]));
+        if (!interface_exists(ValueResolverInterface::class)) {
+            self::assertTrue($resolver->supports($request, $arguments[0]));
+        }
         self::assertSame([null], $resolve);
     }
 
@@ -83,7 +90,9 @@ class PendingDocumentValueResolverTest extends TestCase
         ;
         $resolver = self::resolver();
 
-        self::assertTrue($resolver->supports($request, $arguments[0]));
+        if (!interface_exists(ValueResolverInterface::class)) {
+            self::assertTrue($resolver->supports($request, $arguments[0]));
+        }
 
         $resolve = $resolver->resolve($request, $arguments[0]);
 
@@ -109,16 +118,26 @@ class PendingDocumentValueResolverTest extends TestCase
 
     private static function resolver(): PendingDocumentValueResolver
     {
-        return new PendingDocumentValueResolver(self::extractor());
-    }
+        $locator = new class implements ServiceProviderInterface {
 
-    private static function extractor(): RequestFilesExtractor
-    {
-        return new RequestFilesExtractor(
-            new PropertyAccessor(
-                PropertyAccessor::DISALLOW_MAGIC_METHODS,
-                PropertyAccessor::THROW_ON_INVALID_PROPERTY_PATH
-            )
-        );
+            public function get(string $id): mixed
+            {
+                return new RequestFilesExtractor(
+                    new PropertyAccessor(
+                    )
+                );
+            }
+
+            public function has(string $id): bool
+            {
+                return $id === RequestFilesExtractor::class;
+            }
+
+            public function getProvidedServices(): array
+            {
+                return [RequestFilesExtractor::class];
+            }
+        };
+        return new PendingDocumentValueResolver($locator);
     }
 }
