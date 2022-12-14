@@ -26,7 +26,7 @@ class PendingDocumentValueResolverTest extends TestCase
     {
         $request = Request::create('');
         $arguments = self::metadataFactory()
-            ->createArgumentMetadata([self::controller(), "noInjection"])
+            ->createArgumentMetadata([self::controller(), 'noInjection'])
         ;
         $resolver = self::resolver();
 
@@ -44,7 +44,7 @@ class PendingDocumentValueResolverTest extends TestCase
     {
         $request = Request::create('');
         $arguments = self::metadataFactory()
-            ->createArgumentMetadata([self::controller(), "singleFile"])
+            ->createArgumentMetadata([self::controller(), 'singleFile'])
         ;
         $resolver = self::resolver();
 
@@ -64,7 +64,7 @@ class PendingDocumentValueResolverTest extends TestCase
         $request = Request::create('');
         $request->files->set('data', ['file' => self::uploadedFile()]);
         $arguments = self::metadataFactory()
-            ->createArgumentMetadata([self::controller(), "singleFileWithPath"])
+            ->createArgumentMetadata([self::controller(), 'singleFileWithPath'])
         ;
         $resolver = self::resolver();
 
@@ -83,7 +83,7 @@ class PendingDocumentValueResolverTest extends TestCase
         $request = Request::create('');
         $request->files->set('data', ['files' => [self::uploadedFile()]]);
         $arguments = self::metadataFactory()
-            ->createArgumentMetadata([self::controller(), "multipleFiles"])
+            ->createArgumentMetadata([self::controller(), 'multipleFiles'])
         ;
         $resolver = self::resolver();
 
@@ -115,8 +115,7 @@ class PendingDocumentValueResolverTest extends TestCase
 
     private static function resolver(): PendingDocumentValueResolver
     {
-        $locator = new class implements ServiceProviderInterface {
-
+        $locator = new class() implements ServiceProviderInterface {
             public function get(string $id): mixed
             {
                 return new RequestFilesExtractor(
@@ -127,7 +126,7 @@ class PendingDocumentValueResolverTest extends TestCase
 
             public function has(string $id): bool
             {
-                return $id === RequestFilesExtractor::class;
+                return RequestFilesExtractor::class === $id;
             }
 
             public function getProvidedServices(): array
@@ -135,6 +134,7 @@ class PendingDocumentValueResolverTest extends TestCase
                 return [RequestFilesExtractor::class];
             }
         };
+
         return new PendingDocumentValueResolver($locator);
     }
 

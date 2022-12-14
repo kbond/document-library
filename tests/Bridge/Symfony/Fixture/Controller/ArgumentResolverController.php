@@ -16,12 +16,12 @@ class ArgumentResolverController extends AbstractController
         #[UploadedFile('data[files]')]
         array $files
     ): Response {
-        return new Response((string) count($files));
+        return new Response((string) \count($files));
     }
 
     public function noInjection(array $params): Response
     {
-        return new Response((string) count($params));
+        return new Response((string) \count($params));
     }
 
     public function singleFile(?PendingDocument $file): Response

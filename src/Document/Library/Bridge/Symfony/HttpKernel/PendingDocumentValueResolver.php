@@ -2,7 +2,6 @@
 
 namespace Zenstruck\Document\Library\Bridge\Symfony\HttpKernel;
 
-use Symfony\Component\DependencyInjection\ServiceLocator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Controller\ArgumentValueResolverInterface;
 use Symfony\Component\HttpKernel\Controller\ValueResolverInterface;
@@ -16,13 +15,12 @@ use Zenstruck\Document\PendingDocument;
  *
  * @internal
  */
-if (interface_exists(ValueResolverInterface::class)) {
+if (\interface_exists(ValueResolverInterface::class)) {
     class PendingDocumentValueResolver implements ValueResolverInterface
     {
         public function __construct(
             private ServiceProviderInterface $locator
-        )
-        {
+        ) {
         }
 
         /**
@@ -61,8 +59,7 @@ if (interface_exists(ValueResolverInterface::class)) {
     {
         public function __construct(
             private ServiceProviderInterface $locator
-        )
-        {
+        ) {
         }
 
         public function supports(Request $request, ArgumentMetadata $argument): bool

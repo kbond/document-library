@@ -7,10 +7,8 @@ use Symfony\Component\DependencyInjection\Argument\ServiceLocatorArgument;
 use Symfony\Component\DependencyInjection\Argument\TaggedIteratorArgument;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
-use Symfony\Component\PropertyAccess\PropertyAccessor;
 use Zenstruck\Document\Library;
 use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\EventListener\LazyDocumentLifecycleSubscriber;
 use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\Mapping\CacheMappingProvider;
@@ -29,6 +27,7 @@ use Zenstruck\Document\Namer\ChecksumNamer;
 use Zenstruck\Document\Namer\ExpressionNamer;
 use Zenstruck\Document\Namer\MultiNamer;
 use Zenstruck\Document\Namer\SlugifyNamer;
+
 use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\service_locator;
 
@@ -104,7 +103,7 @@ final class ZenstruckDocumentLibraryExtension extends ConfigurableExtension
             ->addTag('controller.argument_value_resolver', ['priority' => 110])
             ->addArgument(
                 service_locator([
-                    RequestFilesExtractor::class => service('.zenstruck_document.value_resolver.extractor')
+                    RequestFilesExtractor::class => service('.zenstruck_document.value_resolver.extractor'),
                 ])
             )
         ;
