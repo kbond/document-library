@@ -19,6 +19,7 @@ if (\interface_exists(ValueResolverInterface::class)) {
     class PendingDocumentValueResolver implements ValueResolverInterface
     {
         public function __construct(
+            /** @var ServiceProviderInterface<RequestFilesExtractor> $locator */
             private ServiceProviderInterface $locator
         ) {
         }
@@ -58,6 +59,7 @@ if (\interface_exists(ValueResolverInterface::class)) {
     class PendingDocumentValueResolver implements ArgumentValueResolverInterface
     {
         public function __construct(
+            /** @var ServiceProviderInterface<RequestFilesExtractor> $locator */
             private ServiceProviderInterface $locator
         ) {
         }
