@@ -295,27 +295,8 @@ $validator->validate($document, new DocumentConstraint(maxSize: '1M'));
 
 ### Argument injection
 
-You can create `PendingDocument` in controllers from request object:
-
-```php
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Zenstruck\Document\PendingDocument;
-
-class MyController extends AbstractController
-{
-    public function __invoke(Request $request): Response
-    {
-        $file = null;
-        if ($request->files->has('file')) {
-            $file = new PendingDocument()
-        }
-        // Handle file and prepare response
-    }
-}
-```
-
-Argument value resolver is provided that handles this boilerplate code
-and injects `PendingDocument` directly, so below examples are handled:
+An argument value resolver is provided that enables injecting `PendingDocument`'s
+(from `$request->files`) directly into your controllers:
 
 ```php
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -327,12 +308,15 @@ class MyController extends AbstractController
     public function __invoke(
         // Inject directly from $request->files->get('file')
         ?PendingDocument $file,
+
         // Inject by path, which is the same format as `name` on HTML `<input>`
         #[UploadedFile('data[file]')]
         ?PendingDocument $anotherFile,
+
         // Inject array of pending documents from $request->files->get('files')
         #[UploadedFile]
         array $files,
+
         // Inject array of pending documents by path
         #[UploadedFile('data[files]')]
         array $anotherFiles
