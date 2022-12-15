@@ -70,7 +70,6 @@ class PendingDocumentValueResolverTest extends WebTestCase
      */
     public function inject_array_on_argument_with_attribute(): void
     {
-
         $client = self::createClient();
 
         $client->request(
@@ -94,7 +93,6 @@ class PendingDocumentValueResolverTest extends WebTestCase
      */
     public function inject_array_on_argument_with_attribute_and_path(): void
     {
-
         $client = self::createClient();
 
         $client->request(
