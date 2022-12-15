@@ -24,11 +24,16 @@ final class FlysystemDocument implements Document
     /** @var array<string,string> */
     private array $temporaryUrl = [];
 
-    public function __construct(private FilesystemOperator $filesystem, string $path)
+    public function __construct(private string $libraryId, private FilesystemOperator $filesystem, string $path)
     {
         if ('' === $this->path = \ltrim($path, '/')) {
             throw new \InvalidArgumentException('Path cannot be empty.');
         }
+    }
+
+    public function dsn(): string
+    {
+        return sprintf('%s:%s', $this->libraryId, $this->path);
     }
 
     public function path(): string

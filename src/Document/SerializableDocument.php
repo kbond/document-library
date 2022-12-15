@@ -48,6 +48,11 @@ final class SerializableDocument implements Document
         return $data;
     }
 
+    public function dsn(): string
+    {
+        return $this->document->dsn();
+    }
+
     public function path(): string
     {
         return $this->document->path();

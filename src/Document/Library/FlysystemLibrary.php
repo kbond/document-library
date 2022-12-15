@@ -25,7 +25,7 @@ final class FlysystemLibrary implements Library
 
     public function open(string $path): Document
     {
-        return new FlysystemDocument($this->filesystem, $path);
+        return new FlysystemDocument($this->id, $this->filesystem, $path);
     }
 
     public function has(string $path): bool

@@ -20,7 +20,15 @@ final class LazyDocument implements Document
     public function __construct(string|array $metadata)
     {
         if (\is_string($metadata)) {
-            $metadata = ['path' => $metadata];
+            $parsedUrl = parse_url($metadata);
+            $metadata = [];
+            if (isset($parsedUrl['path'])) {
+                $metadata = ['path' => $parsedUrl['path']];
+            }
+
+            if (isset($parsedUrl['scheme'])) {
+                $metadata['library'] = $parsedUrl['scheme'];
+            }
         }
 
         $this->metadata = $metadata;
@@ -28,6 +36,13 @@ final class LazyDocument implements Document
 
     public function setLibrary(Library $library): static
     {
+        if (
+            isset($this->metadata['library'])
+            && $this->metadata['library'] !== $library->id()
+        ) {
+            throw new \LogicException(sprintf('This document is registered in "%s" library, while "%s" library object was provided.', $this->metadata['library'], $library->id()));
+        }
+
         $this->library = $library;
 
         return $this;
@@ -39,6 +54,27 @@ final class LazyDocument implements Document
         $this->namerContext = $context;
 
         return $this;
+    }
+
+    public function dsn(): string
+    {
+        if (isset($this->metadata[__FUNCTION__])) {
+            return $this->metadata[__FUNCTION__];
+        }
+
+        if (isset($this->document)) {
+            return $this->document->dsn();
+        }
+
+        if (isset($this->library)) {
+            $libraryId = $this->library->id();
+        } elseif (isset($this->metadata['library'])) {
+            $libraryId = $this->metadata['library'];
+        } else {
+            throw new \LogicException('A library object or metadata entry is required to generate the dsn.');
+        }
+
+        return sprintf('%s:%s', $libraryId, $this->path());
     }
 
     public function path(): string

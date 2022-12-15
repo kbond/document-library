@@ -26,8 +26,10 @@ final class LazyDocumentTest extends DocumentTest
             'checksum' => '7',
             'publicUrl' => '8',
             'mimeType' => '9',
+            'library' => '0'
         ]);
 
+        $this->assertSame('0:1', $document->dsn());
         $this->assertSame('1', $document->path());
         $this->assertSame('2', $document->name());
         $this->assertSame('3', $document->nameWithoutExtension());
@@ -37,6 +39,19 @@ final class LazyDocumentTest extends DocumentTest
         $this->assertSame('7', $document->checksum());
         $this->assertSame('8', $document->publicUrl());
         $this->assertSame('9', $document->mimeType());
+    }
+
+    /**
+     * @test
+     */
+    public function library_is_required_to_generate_dsn(): void
+    {
+        $document = (new LazyDocument(['checksum' => 'foo']));
+
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('A library object or metadata entry is required to generate the dsn.');
+
+        $document->dsn();
     }
 
     /**
@@ -63,6 +78,32 @@ final class LazyDocumentTest extends DocumentTest
         $this->expectExceptionMessage('A namer is required to generate the path from metadata.');
 
         $document->path();
+    }
+
+    /**
+     * @test
+     */
+    public function library_must_match_dsn(): void
+    {
+        $document = (new LazyDocument('public:file.txt'));
+
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('This document is registered in "public" library, while "test" library object was provided.');
+
+        $document->setLibrary(self::$library);
+    }
+
+    /**
+     * @test
+     */
+    public function library_must_match_metadata(): void
+    {
+        $document = (new LazyDocument(['library' => 'public']));
+
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('This document is registered in "public" library, while "test" library object was provided.');
+
+        $document->setLibrary(self::$library);
     }
 
     protected function document(string $path, \SplFileInfo $file): Document
