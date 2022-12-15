@@ -27,7 +27,7 @@ final class DocumentJsonType extends JsonType
         }
 
         return parent::convertToDatabaseValue(
-            $value instanceof SerializableDocument ? $value->serialize() : $value->path(),
+            $value instanceof SerializableDocument ? $value->serialize() : $value->dsn(),
             $platform
         );
     }

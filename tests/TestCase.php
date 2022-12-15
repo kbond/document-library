@@ -27,7 +27,7 @@ abstract class TestCase extends BaseTestCase
 
     public static function inMemoryLibrary(array $config = []): Library
     {
-        return new FlysystemLibrary('test', new Filesystem(
+        return new FlysystemLibrary('memory', new Filesystem(
             new InMemoryFilesystemAdapter(),
             \array_merge(['public_url' => '/'], $config),
             temporaryUrlGenerator: new class() implements TemporaryUrlGenerator {

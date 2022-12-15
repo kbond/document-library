@@ -88,7 +88,7 @@ final class LazyDocumentTest extends DocumentTest
         $document = (new LazyDocument('public:file.txt'));
 
         $this->expectException(\LogicException::class);
-        $this->expectExceptionMessage('This document is registered in "public" library, while "test" library object was provided.');
+        $this->expectExceptionMessage('This document is registered in "public" library, while "memory" library object was provided.');
 
         $document->setLibrary(self::$library);
     }
@@ -101,7 +101,7 @@ final class LazyDocumentTest extends DocumentTest
         $document = (new LazyDocument(['library' => 'public']));
 
         $this->expectException(\LogicException::class);
-        $this->expectExceptionMessage('This document is registered in "public" library, while "test" library object was provided.');
+        $this->expectExceptionMessage('This document is registered in "public" library, while "memory" library object was provided.');
 
         $document->setLibrary(self::$library);
     }

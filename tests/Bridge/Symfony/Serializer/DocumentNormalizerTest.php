@@ -129,6 +129,7 @@ class DocumentNormalizerTest extends TestCase
 
         $this->assertSame(
             [
+                'library' => 'memory',
                 'path' => 'some/file.txt',
                 'size' => 7,
                 'checksum' => '9a0364b9e99bb480dd25e1f0284c8555',
