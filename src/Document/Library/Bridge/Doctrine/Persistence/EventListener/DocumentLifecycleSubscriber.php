@@ -151,7 +151,7 @@ class DocumentLifecycleSubscriber
                 $event->setNewValue($property, $new);
             }
 
-            if ($mapping->deleteOnChange && $new instanceof Document && $old instanceof Document && $new->path() !== $old->path()) {
+            if ($mapping->deleteOnChange && $new instanceof Document && $old instanceof Document && $new->dsn() !== $old->dsn()) {
                 // document was changed, delete old from library
                 $this->pendingOperations[] = fn() => $this->registry()->get($mapping->library)->delete($old->path());
             }

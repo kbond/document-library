@@ -30,7 +30,7 @@ final class SerializableDocumentTest extends DocumentTest
 
         $this->assertSame(
             [
-                'library' => 'test',
+                'library' => 'memory',
                 'path' => 'the/path.txt',
                 'name' => 'path.txt',
                 'nameWithoutExtension' => 'path',

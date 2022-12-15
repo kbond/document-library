@@ -16,7 +16,7 @@ final class DocumentStringType extends StringType
 
     public function convertToDatabaseValue($value, AbstractPlatform $platform): ?string
     {
-        return $value instanceof Document ? $value->path() : null;
+        return $value instanceof Document ? $value->dsn() : null;
     }
 
     public function convertToPHPValue($value, AbstractPlatform $platform): ?Document
