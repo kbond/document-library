@@ -12,7 +12,7 @@ use Zenstruck\Document;
  */
 final class SerializableDocument implements Document
 {
-    private const ALL_METADATA_FIELDS = ['path', 'lastModified', 'size', 'checksum', 'mimeType', 'publicUrl', 'library'];
+    private const ALL_METADATA_FIELDS = ['path', 'lastModified', 'size', 'checksum', 'mimeType', 'publicUrl'];
 
     private array $fields;
 
@@ -31,20 +31,14 @@ final class SerializableDocument implements Document
 
     public function serialize(): array
     {
-        $data = [];
+        $parsedUrl = parse_url($this->document->dsn());
+        \assert(isset($parsedUrl['scheme']));
 
-        if (in_array('library', $this->fields, true)) {
-            $parsedUrl = parse_url($this->document->dsn());
-            \assert(isset($parsedUrl['scheme']));
-
-            $data['library'] = $parsedUrl['scheme'];
-        }
+        $data = [
+            'library' => $parsedUrl['scheme']
+        ];
 
         foreach ($this->fields as $field) {
-            if (isset($data[$field])) {
-                continue;
-            }
-
             if (!\method_exists($this->document, $field)) {
                 throw new \LogicException(\sprintf('Method %d::%s() does not exist.', static::class, $field));
             }
