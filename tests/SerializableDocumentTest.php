@@ -25,7 +25,6 @@ final class SerializableDocumentTest extends DocumentTest
             'checksum',
             'publicUrl',
             'mimeType',
-            'library',
         ]);
 
         $this->assertSame(
