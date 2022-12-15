@@ -70,7 +70,7 @@ class DocumentLifecycleSubscriber
             $document = $ref->get($property);
 
             if ($document instanceof Document && $document->exists()) {
-                $this->registry()->get($mapping->library)->delete($document->path());
+                $this->registry()->getForDocument($document)->delete($document->path());
             }
         }
     }
@@ -110,7 +110,7 @@ class DocumentLifecycleSubscriber
                     $path = $this->namer()->generateName($document, self::namerContext($mapping, $object)),
                     $document
                 );
-                $this->onFailureOperations[] = fn() => $this->registry()->get($mapping->library)->delete($path);
+                $this->onFailureOperations[] = fn() => $this->registry()->getForDocument($document)->delete($path);
 
                 $ref->set($property, $document);
             }
@@ -153,7 +153,7 @@ class DocumentLifecycleSubscriber
 
             if ($mapping->deleteOnChange && $new instanceof Document && $old instanceof Document && $new->dsn() !== $old->dsn()) {
                 // document was changed, delete old from library
-                $this->pendingOperations[] = fn() => $this->registry()->get($mapping->library)->delete($old->path());
+                $this->pendingOperations[] = fn() => $this->registry()->getForDocument($old)->delete($old->path());
             }
 
             if ($new instanceof Document && !$new instanceof SerializableDocument && $mapping->metadata) {
@@ -163,7 +163,7 @@ class DocumentLifecycleSubscriber
 
             if ($mapping->deleteOnChange && $old instanceof Document && null === $new) {
                 // document was removed, delete from library
-                $this->pendingOperations[] = fn() => $this->registry()->get($mapping->library)->delete($old->path());
+                $this->pendingOperations[] = fn() => $this->registry()->getForDocument($old)->delete($old->path());
             }
         }
     }
