@@ -33,7 +33,7 @@ class DocumentNormalizer implements NormalizerInterface, DenormalizerInterface, 
             return (new SerializableDocument($object, $metadata))->serialize();
         }
 
-        return $object->path();
+        return $object->dsn();
     }
 
     final public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
@@ -47,7 +47,10 @@ class DocumentNormalizer implements NormalizerInterface, DenormalizerInterface, 
     final public function denormalize(mixed $data, string $type, ?string $format = null, array $context = []): Document
     {
         if (\is_string($data)) {
-            $data = ['path' => $data];
+            $parsedUrl = parse_url($data);
+            \assert(isset($parsedUrl['path'], $parsedUrl['scheme']));
+
+            $data = ['path' => $parsedUrl['path'], 'library' => $parsedUrl['scheme']];
         }
 
         if ($context[self::RENAME] ?? false) {
