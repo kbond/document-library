@@ -31,12 +31,10 @@ final class SerializableDocument implements Document
 
     public function serialize(): array
     {
-        $parsedUrl = parse_url($this->document->dsn());
+        $parsedUrl = \parse_url($this->document->dsn());
         \assert(isset($parsedUrl['scheme']));
 
-        $data = [
-            'library' => $parsedUrl['scheme']
-        ];
+        $data = ['library' => $parsedUrl['scheme']];
 
         foreach ($this->fields as $field) {
             if (!\method_exists($this->document, $field)) {
