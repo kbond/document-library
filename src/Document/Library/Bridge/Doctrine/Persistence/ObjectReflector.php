@@ -31,7 +31,7 @@ final class ObjectReflector
     {
         foreach ($mappings as $property => $mapping) {
             if ($mapping->virtual) {
-                $this->set($property, $document = new LazyDocument([]));
+                $this->set($property, $document = new LazyDocument(['library' => $mapping->library]));
 
                 yield $property => $document;
 

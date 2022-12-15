@@ -58,10 +58,7 @@ class DocumentNormalizer implements NormalizerInterface, DenormalizerInterface, 
         }
 
         $document = new LazyDocument($data);
-
-        if ($library = $context[self::LIBRARY] ?? null) {
-            $document->setLibrary($this->registry()->get($library));
-        }
+        $document->setLibrary($this->registry());
 
         if (!isset($data['path'])) {
             $document->setNamer($this->namer(), $context);
