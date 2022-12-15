@@ -12,8 +12,15 @@ use Zenstruck\Document\Library;
  */
 final class FlysystemLibrary implements Library
 {
-    public function __construct(private FilesystemOperator $filesystem)
+    public function __construct(
+        private string $id,
+        private FilesystemOperator $filesystem
+    ) {
+    }
+
+    public function id(): string
     {
+        return $this->id;
     }
 
     public function open(string $path): Document
