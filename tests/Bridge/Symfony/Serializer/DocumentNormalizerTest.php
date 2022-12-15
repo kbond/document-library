@@ -25,11 +25,12 @@ class DocumentNormalizerTest extends TestCase
 
         $serialized = $serializer->serialize($document, 'json');
 
-        $this->assertSame(\json_encode('some/file.txt'), $serialized);
+        $this->assertSame(\json_encode('memory:some/file.txt'), $serialized);
 
         $deserialized = $serializer->deserialize($serialized, Document::class, 'json');
 
         $this->assertInstanceOf(LazyDocument::class, $deserialized);
+        $this->assertSame('memory:some/file.txt', $deserialized->dsn());
         $this->assertSame('some/file.txt', $deserialized->path());
         $this->assertSame('file.txt', $deserialized->name());
         $this->assertSame('file', $deserialized->nameWithoutExtension());
@@ -49,11 +50,12 @@ class DocumentNormalizerTest extends TestCase
 
         $serialized = $serializer->serialize($document, 'json');
 
-        $this->assertSame(\json_encode('some/file.txt'), $serialized);
+        $this->assertSame(\json_encode('memory:some/file.txt'), $serialized);
 
         $deserialized = $serializer->deserialize($serialized, Document::class, 'json', ['library' => 'memory']);
 
         $this->assertInstanceOf(LazyDocument::class, $deserialized);
+        $this->assertSame('memory:some/file.txt', $deserialized->dsn());
         $this->assertSame('some/file.txt', $deserialized->path());
         $this->assertSame('file.txt', $deserialized->name());
         $this->assertSame('file', $deserialized->nameWithoutExtension());
@@ -71,11 +73,12 @@ class DocumentNormalizerTest extends TestCase
 
         $serialized = $serializer->serialize($document, 'json', ['metadata' => ['path', 'mimeType', 'size']]);
 
-        $this->assertSame(\json_encode(['path' => 'some/file.txt', 'mimeType' => 'text/plain', 'size' => 7]), $serialized);
+        $this->assertSame(\json_encode(['library' => 'memory', 'path' => 'some/file.txt', 'mimeType' => 'text/plain', 'size' => 7]), $serialized);
 
         $deserialized = $serializer->deserialize($serialized, Document::class, 'json');
 
         $this->assertInstanceOf(LazyDocument::class, $deserialized);
+        $this->assertSame('memory:some/file.txt', $deserialized->dsn());
         $this->assertSame('some/file.txt', $deserialized->path());
         $this->assertSame('file.txt', $deserialized->name());
         $this->assertSame('file', $deserialized->nameWithoutExtension());
@@ -97,11 +100,12 @@ class DocumentNormalizerTest extends TestCase
 
         $serialized = $serializer->serialize($document, 'json', ['metadata' => ['path', 'mimeType', 'size']]);
 
-        $this->assertSame(\json_encode(['path' => 'some/file.txt', 'mimeType' => 'text/plain', 'size' => 7]), $serialized);
+        $this->assertSame(\json_encode(['library' => 'memory', 'path' => 'some/file.txt', 'mimeType' => 'text/plain', 'size' => 7]), $serialized);
 
         $deserialized = $serializer->deserialize($serialized, Document::class, 'json', ['library' => 'memory']);
 
         $this->assertInstanceOf(LazyDocument::class, $deserialized);
+        $this->assertSame('memory:some/file.txt', $deserialized->dsn());
         $this->assertSame('some/file.txt', $deserialized->path());
         $this->assertSame('file.txt', $deserialized->name());
         $this->assertSame('file', $deserialized->nameWithoutExtension());
@@ -150,7 +154,7 @@ class DocumentNormalizerTest extends TestCase
 
         $serialized = $serializer->serialize($document, 'json', ['metadata' => ['checksum', 'extension']]);
 
-        $this->assertSame(\json_encode(['checksum' => '9a0364b9e99bb480dd25e1f0284c8555', 'extension' => 'txt']), $serialized);
+        $this->assertSame(\json_encode(['library' => 'memory', 'checksum' => '9a0364b9e99bb480dd25e1f0284c8555', 'extension' => 'txt']), $serialized);
 
         $document = $serializer->deserialize($serialized, Document::class, 'json', ['library' => 'memory', 'namer' => 'checksum']);
 
