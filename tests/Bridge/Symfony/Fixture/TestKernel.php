@@ -11,8 +11,11 @@ use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\Kernel;
+use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
+use Symfony\Component\Routing\RouteCollection;
 use Zenstruck\Document\Library\Bridge\Symfony\HttpKernel\PendingDocumentValueResolver;
 use Zenstruck\Document\Library\Bridge\Symfony\ZenstruckDocumentLibraryBundle;
+use Zenstruck\Document\Library\Tests\Bridge\Symfony\Fixture\Controller\ArgumentResolverController;
 use Zenstruck\Foundry\ZenstruckFoundryBundle;
 
 /**
@@ -76,8 +79,11 @@ final class TestKernel extends Kernel
             ->setAutowired(true)
         ;
 
-        $c->setAlias(PendingDocumentValueResolver::class, '.zenstruck_document.value_resolver.pending_document')
-            ->setPublic(true)
-        ;
+        $c->register(ArgumentResolverController::class)->addTag('controller.service_arguments');
+    }
+
+    public function configureRoutes(RoutingConfigurator $routes): void
+    {
+        $routes->import(__DIR__.'/Controller', 'annotation');
     }
 }
