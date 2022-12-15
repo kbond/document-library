@@ -47,7 +47,7 @@ class DocumentNormalizer implements NormalizerInterface, DenormalizerInterface, 
     final public function denormalize(mixed $data, string $type, ?string $format = null, array $context = []): Document
     {
         if (\is_string($data)) {
-            $parsedUrl = parse_url($data);
+            $parsedUrl = \parse_url($data);
             \assert(isset($parsedUrl['path'], $parsedUrl['scheme']));
 
             $data = ['path' => $parsedUrl['path'], 'library' => $parsedUrl['scheme']];

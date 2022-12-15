@@ -34,7 +34,7 @@ final class LibraryRegistry
 
     public function getForDocument(Document $document): Library
     {
-        $dsn = parse_url($document->dsn());
+        $dsn = \parse_url($document->dsn());
         if (!isset($dsn['scheme'])) {
             throw new \InvalidArgumentException();
         }

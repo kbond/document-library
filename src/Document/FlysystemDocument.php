@@ -33,7 +33,7 @@ final class FlysystemDocument implements Document
 
     public function dsn(): string
     {
-        return sprintf('%s:%s', $this->libraryId, $this->path);
+        return \sprintf('%s:%s', $this->libraryId, $this->path);
     }
 
     public function path(): string

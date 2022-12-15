@@ -26,7 +26,7 @@ final class LazyDocumentTest extends DocumentTest
             'checksum' => '7',
             'publicUrl' => '8',
             'mimeType' => '9',
-            'library' => '0'
+            'library' => '0',
         ]);
 
         $this->assertSame('0:1', $document->dsn());

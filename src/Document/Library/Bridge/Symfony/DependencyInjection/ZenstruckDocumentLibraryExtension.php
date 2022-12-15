@@ -44,7 +44,7 @@ final class ZenstruckDocumentLibraryExtension extends ConfigurableExtension
             $container->register($id = '.zenstruck_document.library.'.$name, FlysystemLibrary::class)
                 ->setArguments([
                     $name,
-                    new Reference($service)
+                    new Reference($service),
                 ])
                 ->addTag('document_library', ['key' => $name])
             ;

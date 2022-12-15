@@ -20,7 +20,7 @@ final class LazyDocument implements Document
     public function __construct(string|array $metadata)
     {
         if (\is_string($metadata)) {
-            $parsedUrl = parse_url($metadata);
+            $parsedUrl = \parse_url($metadata);
             $metadata = [];
             if (isset($parsedUrl['path'])) {
                 $metadata['path'] = $parsedUrl['path'];
@@ -73,7 +73,7 @@ final class LazyDocument implements Document
             throw new \LogicException('A library object or metadata entry is required to generate the dsn.');
         }
 
-        return sprintf('%s:%s', $libraryId, $this->path());
+        return \sprintf('%s:%s', $libraryId, $this->path());
     }
 
     public function path(): string
