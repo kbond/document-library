@@ -10,13 +10,16 @@ use Zenstruck\Document\Library\FlysystemLibrary;
 
 /** @var \League\Flysystem\FilesystemOperator $filesystem */
 
-$library = new FlysystemLibrary($filesystem);
+$library = new FlysystemLibrary('public', $filesystem);
 ```
 
 ### Library API
 
 ```php
 /** @var \Zenstruck\Document\Library $library */
+
+// Library ID
+$library->id(); // string identifier passed to the constructor
 
 // "Open" Documents
 $document = $library->open('path/to/file.txt'); // \Zenstruck\Document
@@ -42,6 +45,7 @@ $library->delete('some/file.txt'); // self (fluent)
 ```php
 /** @var \Zenstruck\Document $document */
 
+$document->dsn(); // "library:path/to/file.txt"
 $document->path(); // "path/to/file.txt"
 $document->name(); // "file.txt"
 $document->extension(); // "txt"
@@ -493,7 +497,8 @@ $builder->add('attachment', PendingDocumentType::class);
 
 You can choose to store additional document metadata in the database column
 (since it is a json type). This is useful to avoid retrieving this data
-lazily from the filesystem.
+lazily from the filesystem. Note that library identifier is always stored
+in the metadata.
 
 ```php
 use Doctrine\ORM\Mapping as ORM;
@@ -502,12 +507,12 @@ use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\Mapping;
 
 class User
 {
-    #[Mapping(library: 'public', metadata: true)] // will store path, lastModified, size, checksum, mimeType and publicUrl
+    #[Mapping(library: 'public', metadata: true)] // will store library, path, lastModified, size, checksum, mimeType and publicUrl
     #[ORM\Column(type: Document::class, nullable: true)]
     public ?Document $image = null;
 
     // customize the saved metadata
-    #[Mapping(library: 'public', metadata: ['path', 'publicUrl', 'lastModified'])] // will store just path, publicUrl and lastModified
+    #[Mapping(library: 'public', metadata: ['path', 'publicUrl', 'lastModified'])] // will store just library, path, publicUrl and lastModified
     #[ORM\Column(type: Document::class, nullable: true)]
     public ?Document $image = null;
 }
@@ -523,7 +528,7 @@ Usage:
 $user = new User();
 $user->image = $library->open('first/image.png');
 $em->persist($user);
-$em->flush(); // json object with "path", "publicUrl" and "lastModified" saved to "user" db's "image" column
+$em->flush(); // json object with "library", "path", "publicUrl" and "lastModified" saved to "user" db's "image" column
 
 // autoload
 $user = $em->find(User::class, 1);
@@ -562,7 +567,7 @@ class User
 
     #[Mapping(
         library: 'public',
-        metadata: ['checksum', 'size', 'extension'], // just store the checksum, size and file extension in the db
+        metadata: ['checksum', 'size', 'extension'], // just store the library, checksum, size and file extension in the db
         namer: new Expression('images/{this.username}-{checksum:7}{ext}'), // use "namer: 'expression:images/{this.username}-{checksum:7}{ext}'" on PHP 8.0
     )]
     #[ORM\Column(type: Document::class, nullable: true)]
@@ -664,6 +669,9 @@ class User
 }
 ```
 
+> **Warning**: The actual string that is stored in the database contains both library name
+> and the document path (for example "public:foo/bar.txt").
+
 > **Warning**: If you ever want to store additional metadata, you will need to run a database
 > migration to convert the column from string to JSON.
 
@@ -679,23 +687,7 @@ use Zenstruck\Document;
 
 $json = $serializer->serialize($document, 'json'); // "path/to/document"
 
-$document = $serializer->deserialize($json, Document::class, 'json', [
-    'library' => 'public', // library name IS REQUIRED when deserializing
-]); // \Zenstruck\Document
-```
-
-When a document is a property on an object you want to serialize/deserialize, use the `Context`
-attribute to specify the library name:
-
-```php
-use Symfony\Component\Serializer\Annotation\Context;
-use Zenstruck\Document;
-
-class User
-{
-    #[Context(['library' => 'public'])]
-    public Document $profileImage;
-}
+$document = $serializer->deserialize($json, Document::class); // \Zenstruck\Document
 ```
 
 #### Serialize Additional Metadata
@@ -710,12 +702,12 @@ use Zenstruck\Document;
 
 $json = $serializer->serialize($document, 'json', [
     'metadata' => true,
-]); // {"path": "...", "lastModified": ..., "size": ..., "checksum": "...", "mimeType": "...", "publicUrl": "..."}
+]); // {"library": "...", "path": "...", "lastModified": ..., "size": ..., "checksum": "...", "mimeType": "...", "publicUrl": "..."}
 
 // customize the metadata stored
 $json = $serializer->serialize($document, 'json', [
     'metadata' => ['path', 'size', 'lastModified']
-]); // {"path": "...", "size": ..., "lastModified": ...}
+]); // {"library": "...", "path": "...", "size": ..., "lastModified": ...}
 ```
 
 #### Name on Deserialize
@@ -730,7 +722,6 @@ all serialized document's location.
 $json = $serializer->serialize($document, 'json', ['metadata' => ['checksum', 'extension']]); // no "path"
 
 $document = $serializer->deserialize($json, Document::class, 'json', [
-    'library' => 'public',
     'namer' => 'checksum',
 ]); // \Zenstruck\Document
 
@@ -743,33 +734,9 @@ You can force this behaviour even if the `path` is serialized:
 $json = $serializer->serialize($document, 'json', ['metadata' => ['path', 'checksum', 'extension']]); // includes path
 
 $document = $serializer->deserialize($json, Document::class, 'json', [
-    'library' => 'public',
     'namer' => 'checksum',
     'rename' => true, // trigger the rename
 ]); // \Zenstruck\Document
 
 $document->path(); // always generated via the namer
-```
-
-#### Doctrine/Serializer Mapping
-
-If you have an entity with a document that also can be serialized, you can configure
-the doctrine mapping and serializer context with just the `Context` attribute to avoid
-duplication.
-
-```php
-use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Serializer\Annotation\Context;
-use Zenstruck\Document;
-
-class User
-{
-    // ...
-
-    #[Context(['library' => 'public'])]
-    #[ORM\Column(type: Document::class, nullable: true)]
-    public ?Document $profileImage = null;
-
-    // ...
-}
 ```
