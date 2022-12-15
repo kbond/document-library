@@ -93,14 +93,14 @@ final class ZenstruckDocumentLibraryExtension extends ConfigurableExtension
         ;
 
         // value resolver
-        $container->register(RequestFilesExtractor::class)
+        $container->register('.zenstruck_document.value_resolver.request_files_extractor', RequestFilesExtractor::class)
             ->addArgument(new Reference('property_accessor'))
         ;
         $container->register('.zenstruck_document.value_resolver.pending_document', PendingDocumentValueResolver::class)
             ->addTag('controller.argument_value_resolver', ['priority' => 110])
             ->addArgument(
                 new ServiceLocatorArgument([
-                    RequestFilesExtractor::class => new Reference(RequestFilesExtractor::class),
+                    RequestFilesExtractor::class => new Reference('.zenstruck_document.value_resolver.request_files_extractor'),
                 ])
             )
         ;
