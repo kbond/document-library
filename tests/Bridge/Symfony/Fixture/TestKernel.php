@@ -11,7 +11,9 @@ use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\Kernel;
+use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 use Zenstruck\Document\Library\Bridge\Symfony\ZenstruckDocumentLibraryBundle;
+use Zenstruck\Document\Library\Tests\Bridge\Symfony\Fixture\Controller\ArgumentResolverController;
 use Zenstruck\Foundry\ZenstruckFoundryBundle;
 
 /**
@@ -27,6 +29,11 @@ final class TestKernel extends Kernel
         yield new DoctrineBundle();
         yield new ZenstruckFoundryBundle();
         yield new ZenstruckDocumentLibraryBundle();
+    }
+
+    public function configureRoutes(RoutingConfigurator $routes): void
+    {
+        $routes->import(__DIR__.'/Controller', 'annotation');
     }
 
     protected function configureContainer(ContainerBuilder $c, LoaderInterface $loader): void
@@ -74,5 +81,7 @@ final class TestKernel extends Kernel
             ->setPublic(true)
             ->setAutowired(true)
         ;
+
+        $c->register(ArgumentResolverController::class)->addTag('controller.service_arguments');
     }
 }

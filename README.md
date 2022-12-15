@@ -293,6 +293,39 @@ use Zenstruck\Document\Library\Bridge\Symfony\Validator\DocumentConstraint;
 $validator->validate($document, new DocumentConstraint(maxSize: '1M'));
 ```
 
+### Argument injection
+
+An argument value resolver is provided that enables injecting `PendingDocument`'s
+(from `$request->files`) directly into your controllers:
+
+```php
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Zenstruck\Document\Attribute\UploadedFile;
+use Zenstruck\Document\PendingDocument;
+
+class MyController extends AbstractController
+{
+    public function __invoke(
+        // Inject directly from $request->files->get('file')
+        ?PendingDocument $file,
+
+        // Inject by path, which is the same format as `name` on HTML `<input>`
+        #[UploadedFile('data[file]')]
+        ?PendingDocument $anotherFile,
+
+        // Inject array of pending documents from $request->files->get('files')
+        #[UploadedFile]
+        array $files,
+
+        // Inject array of pending documents by path
+        #[UploadedFile('data[files]')]
+        array $anotherFiles
+    ): Response {
+        // Handle files and prepare response
+    }
+}
+```
+
 ### Response
 
 A `DocumentResponse` object is provided to easily create a Symfony response

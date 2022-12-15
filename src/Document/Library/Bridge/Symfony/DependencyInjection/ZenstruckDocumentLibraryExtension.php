@@ -17,6 +17,8 @@ use Zenstruck\Document\Library\Bridge\Doctrine\Persistence\MappingProvider;
 use Zenstruck\Document\Library\Bridge\Symfony\Form\DocumentType;
 use Zenstruck\Document\Library\Bridge\Symfony\Form\PendingDocumentType;
 use Zenstruck\Document\Library\Bridge\Symfony\HttpKernel\DoctrineMappingProviderCacheWarmer;
+use Zenstruck\Document\Library\Bridge\Symfony\HttpKernel\PendingDocumentValueResolver;
+use Zenstruck\Document\Library\Bridge\Symfony\HttpKernel\RequestFilesExtractor;
 use Zenstruck\Document\Library\Bridge\Symfony\Serializer\LazyDocumentNormalizer;
 use Zenstruck\Document\Library\FlysystemLibrary;
 use Zenstruck\Document\LibraryRegistry;
@@ -88,6 +90,19 @@ final class ZenstruckDocumentLibraryExtension extends ConfigurableExtension
         $container->register('.zenstruck_document.form.document_type', DocumentType::class)
             ->setArguments([new Reference(LibraryRegistry::class), new Reference(Namer::class)])
             ->addTag('form.type')
+        ;
+
+        // value resolver
+        $container->register('.zenstruck_document.value_resolver.request_files_extractor', RequestFilesExtractor::class)
+            ->addArgument(new Reference('property_accessor'))
+        ;
+        $container->register('.zenstruck_document.value_resolver.pending_document', PendingDocumentValueResolver::class)
+            ->addTag('controller.argument_value_resolver', ['priority' => 110])
+            ->addArgument(
+                new ServiceLocatorArgument([
+                    RequestFilesExtractor::class => new Reference('.zenstruck_document.value_resolver.request_files_extractor'),
+                ])
+            )
         ;
 
         if (isset($container->getParameter('kernel.bundles')['DoctrineBundle'])) {
