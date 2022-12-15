@@ -35,9 +35,6 @@ class DocumentNormalizerTest extends TestCase
         $this->assertSame('file.txt', $deserialized->name());
         $this->assertSame('file', $deserialized->nameWithoutExtension());
         $this->assertSame('txt', $deserialized->extension());
-
-        $this->expectException(\LogicException::class);
-        $deserialized->mimeType();
     }
 
     /**
@@ -85,9 +82,6 @@ class DocumentNormalizerTest extends TestCase
         $this->assertSame('txt', $deserialized->extension());
         $this->assertSame('text/plain', $deserialized->mimeType());
         $this->assertSame(7, $deserialized->size());
-
-        $this->expectException(\LogicException::class);
-        $deserialized->lastModified();
     }
 
     /**

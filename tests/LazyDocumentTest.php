@@ -44,13 +44,12 @@ final class LazyDocumentTest extends DocumentTest
     /**
      * @test
      */
-    public function library_is_required_to_generate_dsn(): void
+    public function library_is_required_to_construct_lazy_document(): void
     {
-        $document = (new LazyDocument(['checksum' => 'foo']));
-
         $this->expectException(\LogicException::class);
-        $this->expectExceptionMessage('A library object or metadata entry is required to generate the dsn.');
+        $this->expectExceptionMessage('Library metadata is required to construct lazy document.');
 
+        $document = (new LazyDocument(['checksum' => 'foo']));
         $document->dsn();
     }
 
@@ -59,7 +58,7 @@ final class LazyDocumentTest extends DocumentTest
      */
     public function can_lazily_generate_path_with_namer(): void
     {
-        $document = (new LazyDocument(['checksum' => 'foo']))->setNamer(new ExpressionNamer(), [
+        $document = (new LazyDocument(['library' => 'memory', 'checksum' => 'foo']))->setNamer(new ExpressionNamer(), [
             'expression' => 'prefix/{checksum}-{bar}.pdf',
             'bar' => 'baz',
         ]);
@@ -72,7 +71,7 @@ final class LazyDocumentTest extends DocumentTest
      */
     public function namer_is_required_to_generate_name(): void
     {
-        $document = (new LazyDocument(['checksum' => 'foo']));
+        $document = (new LazyDocument(['library' => 'memory', 'checksum' => 'foo']));
 
         $this->expectException(\LogicException::class);
         $this->expectExceptionMessage('A namer is required to generate the path from metadata.');
@@ -80,37 +79,11 @@ final class LazyDocumentTest extends DocumentTest
         $document->path();
     }
 
-    /**
-     * @test
-     */
-    public function library_must_match_dsn(): void
-    {
-        $document = (new LazyDocument('public:file.txt'));
-
-        $this->expectException(\LogicException::class);
-        $this->expectExceptionMessage('This document is registered in "public" library, while "memory" library object was provided.');
-
-        $document->setLibrary(self::$library);
-    }
-
-    /**
-     * @test
-     */
-    public function library_must_match_metadata(): void
-    {
-        $document = (new LazyDocument(['library' => 'public']));
-
-        $this->expectException(\LogicException::class);
-        $this->expectExceptionMessage('This document is registered in "public" library, while "memory" library object was provided.');
-
-        $document->setLibrary(self::$library);
-    }
-
     protected function document(string $path, \SplFileInfo $file): Document
     {
-        self::$library->store($path, $file);
+        $document = self::$library->store($path, $file);
 
-        return (new LazyDocument($path))->setLibrary(self::$library);
+        return (new LazyDocument($document->dsn()))->setLibrary(self::$libraryRegistry);
     }
 
     protected function modifyDocument(string $path, string $content): void

@@ -23,7 +23,9 @@ final class LazyDocument implements Document
             $parsedUrl = parse_url($metadata);
             $metadata = [];
             if (isset($parsedUrl['path'])) {
-                $metadata = ['path' => $parsedUrl['path']];
+                $metadata['path'] = $parsedUrl['path'];
+            } else {
+                throw new \LogicException('Path is required to construct lazy document from string.');
             }
 
             if (isset($parsedUrl['scheme'])) {
@@ -31,19 +33,16 @@ final class LazyDocument implements Document
             }
         }
 
+        if (!isset($metadata['library'])) {
+            throw new \LogicException('Library metadata is required to construct lazy document.');
+        }
+
         $this->metadata = $metadata;
     }
 
-    public function setLibrary(Library $library): static
+    public function setLibrary(LibraryRegistry $registry): static
     {
-        if (
-            isset($this->metadata['library'])
-            && $this->metadata['library'] !== $library->id()
-        ) {
-            throw new \LogicException(sprintf('This document is registered in "%s" library, while "%s" library object was provided.', $this->metadata['library'], $library->id()));
-        }
-
-        $this->library = $library;
+        $this->library = $registry->get($this->metadata['library']);
 
         return $this;
     }
