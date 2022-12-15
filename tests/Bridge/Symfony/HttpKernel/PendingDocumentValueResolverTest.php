@@ -2,36 +2,28 @@
 
 namespace Zenstruck\Document\Library\Tests\Bridge\Symfony\HttpKernel;
 
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Controller\ValueResolverInterface;
-use Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadataFactory;
-use Zenstruck\Document\Library\Bridge\Symfony\HttpKernel\PendingDocumentValueResolver;
-use Zenstruck\Document\Library\Tests\Bridge\Symfony\Fixture\Controller\ArgumentResolverController;
-use Zenstruck\Document\PendingDocument;
 
 /**
  * @author Jakub Caban <kuba.iluvatar@gmail.com>
  */
-class PendingDocumentValueResolverTest extends KernelTestCase
+class PendingDocumentValueResolverTest extends WebTestCase
 {
     /**
      * @test
      */
     public function do_nothing_on_wrong_type(): void
     {
-        $request = Request::create('');
-        $arguments = self::metadataFactory()
-            ->createArgumentMetadata([self::controller(), 'noInjection'])
-        ;
-        $resolver = self::resolver();
+        $client = self::createClient();
 
-        if (!\interface_exists(ValueResolverInterface::class)) {
-            self::assertFalse($resolver->supports($request, $arguments[0]));
-        } else {
-            self::assertSame([], $resolver->resolve($request, $arguments[0]));
-        }
+        $client->request(
+            'GET',
+            'no-injection',
+            files: ['file' => self::uploadedFile()]
+        );
+
+        self::assertSame('0', $client->getResponse()->getContent());
     }
 
     /**
@@ -39,18 +31,22 @@ class PendingDocumentValueResolverTest extends KernelTestCase
      */
     public function inject_on_typed_argument(): void
     {
-        $request = Request::create('');
-        $arguments = self::metadataFactory()
-            ->createArgumentMetadata([self::controller(), 'singleFile'])
-        ;
-        $resolver = self::resolver();
+        $client = self::createClient();
 
-        $resolve = $resolver->resolve($request, $arguments[0]);
+        $client->request(
+            'GET',
+            'single-file',
+        );
 
-        if (!\interface_exists(ValueResolverInterface::class)) {
-            self::assertTrue($resolver->supports($request, $arguments[0]));
-        }
-        self::assertSame([null], $resolve);
+        self::assertSame('', $client->getResponse()->getContent());
+
+        $client->request(
+            'GET',
+            'single-file',
+            files: ['file' => self::uploadedFile()]
+        );
+
+        self::assertSame("content\n", $client->getResponse()->getContent());
     }
 
     /**
@@ -58,18 +54,15 @@ class PendingDocumentValueResolverTest extends KernelTestCase
      */
     public function inject_on_typed_argument_with_path(): void
     {
-        $request = Request::create('');
-        $request->files->set('data', ['file' => self::uploadedFile()]);
-        $arguments = self::metadataFactory()
-            ->createArgumentMetadata([self::controller(), 'singleFileWithPath'])
-        ;
-        $resolver = self::resolver();
+        $client = self::createClient();
 
-        $resolve = $resolver->resolve($request, $arguments[0]);
+        $client->request(
+            'GET',
+            'single-file-with-path',
+            files: ['data' => ['file' => self::uploadedFile()]]
+        );
 
-        self::assertIsArray($resolve);
-        self::assertCount(1, $resolve);
-        self::assertInstanceOf(PendingDocument::class, $resolve[0]);
+        self::assertSame("content\n", $client->getResponse()->getContent());
     }
 
     /**
@@ -77,28 +70,47 @@ class PendingDocumentValueResolverTest extends KernelTestCase
      */
     public function inject_array_on_argument_with_attribute(): void
     {
-        $request = Request::create('');
-        $request->files->set('data', ['files' => [self::uploadedFile()]]);
-        $arguments = self::metadataFactory()
-            ->createArgumentMetadata([self::controller(), 'multipleFiles'])
-        ;
-        $resolver = self::resolver();
 
-        if (!\interface_exists(ValueResolverInterface::class)) {
-            self::assertTrue($resolver->supports($request, $arguments[0]));
-        }
+        $client = self::createClient();
 
-        $resolve = $resolver->resolve($request, $arguments[0]);
+        $client->request(
+            'GET',
+            'multiple-files'
+        );
 
-        self::assertIsArray($resolve);
-        self::assertCount(1, $resolve);
-        self::assertIsArray($resolve[0]);
-        self::assertInstanceOf(PendingDocument::class, $resolve[0][0]);
+        self::assertSame('0', $client->getResponse()->getContent());
+
+        $client->request(
+            'GET',
+            'multiple-files',
+            files: ['files' => self::uploadedFile()]
+        );
+
+        self::assertSame('1', $client->getResponse()->getContent());
     }
 
-    private static function metadataFactory(): ArgumentMetadataFactory
+    /**
+     * @test
+     */
+    public function inject_array_on_argument_with_attribute_and_path(): void
     {
-        return new ArgumentMetadataFactory();
+
+        $client = self::createClient();
+
+        $client->request(
+            'GET',
+            'multiple-files-with-path'
+        );
+
+        self::assertSame('0', $client->getResponse()->getContent());
+
+        $client->request(
+            'GET',
+            'multiple-files-with-path',
+            files: ['data' => ['files' => self::uploadedFile()]]
+        );
+
+        self::assertSame('1', $client->getResponse()->getContent());
     }
 
     private static function uploadedFile(): UploadedFile
@@ -108,18 +120,5 @@ class PendingDocumentValueResolverTest extends KernelTestCase
             'test.txt',
             test: true
         );
-    }
-
-    private static function resolver(): PendingDocumentValueResolver
-    {
-        /** @var PendingDocumentValueResolver $resolver */
-        $resolver = self::getContainer()->get(PendingDocumentValueResolver::class);
-
-        return $resolver;
-    }
-
-    private static function controller(): ArgumentResolverController
-    {
-        return new ArgumentResolverController();
     }
 }

@@ -15,6 +15,14 @@ class ArgumentResolverController
 {
     #[Route('/multiple-files', name: 'multiple-files')]
     public function multipleFiles(
+        #[UploadedFile]
+        array $files
+    ): Response {
+        return new Response((string) \count($files));
+    }
+
+    #[Route('/multiple-files-with-path', name: 'multiple-files-with-path')]
+    public function multipleFilesWithPath(
         #[UploadedFile('data[files]')]
         array $files
     ): Response {
