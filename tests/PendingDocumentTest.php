@@ -71,6 +71,18 @@ final class PendingDocumentTest extends DocumentTest
     /**
      * @test
      */
+    public function access_dsn(): void
+    {
+        $document = new PendingDocument(new \SplFileInfo(__FILE__));
+
+        $this->expectException(\BadMethodCallException::class);
+
+        $document->dsn();
+    }
+
+    /**
+     * @test
+     */
     public function access_public_url(): void
     {
         $this->expectException(\BadMethodCallException::class);
