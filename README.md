@@ -512,7 +512,7 @@ class User
     public ?Document $image = null;
 
     // customize the saved metadata
-    #[Mapping(library: 'public', metadata: ['path', 'publicUrl', 'lastModified'])] // will store just library, path, publicUrl and lastModified
+    #[Mapping(library: 'public', metadata: ['library', 'path', 'publicUrl', 'lastModified'])] // will store just library, path, publicUrl and lastModified
     #[ORM\Column(type: Document::class, nullable: true)]
     public ?Document $image = null;
 }
@@ -661,15 +661,21 @@ class User
 {
     // ...
 
+    // Store DSN document string (default behavior)
     #[Mapping(library: 'public')]
     #[ORM\Column(type: 'document_string', nullable: true)]
     public ?Document $image = null;
+
+    // Store only document path (you need to ensure the library is correctly set by yourself)
+    #[Mapping(library: 'public', onlyPath: true)]
+    #[ORM\Column(type: 'document_string', nullable: true)]
+    public ?Document $image2 = null;
 
     // ...
 }
 ```
 
-> **Warning**: The actual string that is stored in the database contains both library name
+> **Warning**: The default string that is stored in the database contains both library name
 > and the document path (for example "public:foo/bar.txt").
 
 > **Warning**: If you ever want to store additional metadata, you will need to run a database
@@ -688,6 +694,22 @@ use Zenstruck\Document;
 $json = $serializer->serialize($document, 'json'); // "path/to/document"
 
 $document = $serializer->deserialize($json, Document::class); // \Zenstruck\Document
+```
+
+#### Serialize as path string
+
+You can optionally serialize document using only its path.
+In such a case you need to provide document library as a deserialization context:
+
+```php
+use Zenstruck\Document;
+
+/** @var \Symfony\Component\Serializer\Serializer $serializer */
+/** @var Document $document */
+
+$json = $serializer->serialize($document, 'json', ['only_path' => true]); // "path/to/document"
+
+$document = $serializer->deserialize($json, Document::class, ['library' => 'public']); // \Zenstruck\Document
 ```
 
 #### Serialize Additional Metadata
