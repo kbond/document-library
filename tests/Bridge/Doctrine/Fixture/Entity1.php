@@ -25,7 +25,7 @@ class Entity1
     ])]
     public ?Document $document1 = null;
 
-    #[Context(['library' => 'memory', 'metadata' => ['path', 'size']])]
+    #[Context(['library' => 'memory', 'metadata' => ['library', 'path', 'size']])]
     #[ORM\Column(type: Document::class, nullable: true)]
     public ?Document $document2 = null;
 
