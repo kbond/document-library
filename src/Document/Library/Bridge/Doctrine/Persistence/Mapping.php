@@ -3,6 +3,7 @@
 namespace Zenstruck\Document\Library\Bridge\Doctrine\Persistence;
 
 use Symfony\Component\Serializer\Annotation\Context;
+use Zenstruck\Document\SerializationMode;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
@@ -17,6 +18,7 @@ final class Mapping
         public string $library,
         public ?string $namer = null,
         public array|bool $metadata = false,
+        public bool $onlyPath = false,
         public bool $autoload = true,
         public bool $deleteOnRemove = true,
         public bool $deleteOnChange = true,
@@ -43,6 +45,18 @@ final class Mapping
     /**
      * @internal
      */
+    public function serializationMode(): SerializationMode
+    {
+        return match (true) {
+            (false !== $this->metadata) => SerializationMode::AsArray,
+            $this->onlyPath => SerializationMode::AsPathString,
+            default => SerializationMode::AsDsnString
+        };
+    }
+
+    /**
+     * @internal
+     */
     public static function fromProperty(\ReflectionProperty $property, array $mapping = []): self
     {
         if (\class_exists(Context::class) && $attribute = $property->getAttributes(Context::class)[0] ?? null) {
@@ -57,12 +71,13 @@ final class Mapping
             $mapping['library'] ?? throw new \LogicException(\sprintf('A library is not configured for %s::$%s.', $property->class, $property->name)),
             $mapping['namer'] ?? null,
             $mapping['metadata'] ?? false,
+            $mapping['onlyPath'] ?? false,
             $mapping['autoload'] ?? true,
             $mapping['deleteOnRemove'] ?? true,
             $mapping['deleteOnChange'] ?? true,
             $mapping['nameOnLoad'] ?? false,
             \array_diff_key($mapping, \array_flip([
-                'library', 'namer', 'metadata', 'autoload', 'deleteOnRemove', 'deleteOnChange', 'nameOnLoad',
+                'library', 'namer', 'metadata', 'onlyPath', 'autoload', 'deleteOnRemove', 'deleteOnChange', 'nameOnLoad',
             ])),
         );
     }
