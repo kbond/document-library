@@ -33,16 +33,16 @@ final class LazyDocument implements Document
             }
         }
 
-        if (!isset($metadata['library'])) {
-            throw new \LogicException('Library metadata is required to construct lazy document.');
-        }
-
         $this->metadata = $metadata;
     }
 
-    public function setLibrary(LibraryRegistry $registry): static
+    public function setLibrary(LibraryRegistry $registry, ?string $defaultLibrary = null): static
     {
-        $this->library = $registry->get($this->metadata['library']);
+        $library = $this->metadata['library']
+            ?? $defaultLibrary
+            ?? throw new \LogicException('Missing library metadata.');
+
+        $this->library = $registry->get($library);
 
         return $this;
     }

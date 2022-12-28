@@ -44,13 +44,24 @@ final class LazyDocumentTest extends DocumentTest
     /**
      * @test
      */
-    public function library_is_required_to_construct_lazy_document(): void
+    public function library_is_required_to_use_lazy_document(): void
     {
         $this->expectException(\LogicException::class);
-        $this->expectExceptionMessage('Library metadata is required to construct lazy document.');
+        $this->expectExceptionMessage('Missing library metadata.');
 
         $document = (new LazyDocument(['checksum' => 'foo']));
+        $document->setLibrary(self::$libraryRegistry);
         $document->dsn();
+    }
+
+    /**
+     * @test
+     */
+    public function can_lazily_provide_library(): void
+    {
+        $document = (new LazyDocument('test/path'));
+        $document->setLibrary(self::$libraryRegistry, 'memory');
+        self::assertSame('memory:test/path', $document->dsn());
     }
 
     /**
