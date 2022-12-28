@@ -16,6 +16,7 @@ final class SerializableDocumentTest extends DocumentTest
     public function can_serialize_with_fields(): void
     {
         $document = new SerializableDocument(self::$library->store('the/path.txt', 'content'), [
+            'library',
             'path',
             'name',
             'nameWithoutExtension',
@@ -29,6 +30,7 @@ final class SerializableDocumentTest extends DocumentTest
 
         $this->assertSame(
             [
+                'library' => 'memory',
                 'path' => 'the/path.txt',
                 'name' => 'path.txt',
                 'nameWithoutExtension' => 'path',

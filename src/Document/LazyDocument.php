@@ -17,18 +17,32 @@ final class LazyDocument implements Document
     private Namer $namer;
     private array $namerContext;
 
-    public function __construct(string|array $metadata)
+    public function __construct(string|array $metadata = [])
     {
         if (\is_string($metadata)) {
-            $metadata = ['path' => $metadata];
+            $parsedUrl = \parse_url($metadata);
+            $metadata = [];
+            if (isset($parsedUrl['path'])) {
+                $metadata['path'] = $parsedUrl['path'];
+            } else {
+                throw new \LogicException('Path is required to construct lazy document from string.');
+            }
+
+            if (isset($parsedUrl['scheme'])) {
+                $metadata['library'] = $parsedUrl['scheme'];
+            }
         }
 
         $this->metadata = $metadata;
     }
 
-    public function setLibrary(Library $library): static
+    public function setLibrary(LibraryRegistry $registry, ?string $defaultLibrary = null): static
     {
-        $this->library = $library;
+        $library = $this->metadata['library']
+            ?? $defaultLibrary
+            ?? throw new \LogicException('Missing library metadata.');
+
+        $this->library = $registry->get($library);
 
         return $this;
     }
@@ -39,6 +53,27 @@ final class LazyDocument implements Document
         $this->namerContext = $context;
 
         return $this;
+    }
+
+    public function dsn(): string
+    {
+        if (isset($this->metadata[__FUNCTION__])) {
+            return $this->metadata[__FUNCTION__];
+        }
+
+        if (isset($this->document)) {
+            return $this->document->dsn();
+        }
+
+        if (isset($this->library)) {
+            $libraryId = $this->library->id();
+        } elseif (isset($this->metadata['library'])) {
+            $libraryId = $this->metadata['library'];
+        } else {
+            throw new \LogicException('A library object or metadata entry is required to generate the dsn.');
+        }
+
+        return \sprintf('%s:%s', $libraryId, $this->path());
     }
 
     public function path(): string

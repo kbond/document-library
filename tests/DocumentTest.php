@@ -16,6 +16,7 @@ abstract class DocumentTest extends TestCase
     {
         $document = $this->document('some/file.txt', new \SplFileInfo(__FILE__));
 
+        $this->assertSame('memory:some/file.txt', $document->dsn());
         $this->assertSame('some/file.txt', $document->path());
         $this->assertSame('file.txt', $document->name());
         $this->assertSame('txt', $document->extension());

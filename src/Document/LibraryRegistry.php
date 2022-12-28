@@ -3,6 +3,7 @@
 namespace Zenstruck\Document;
 
 use Psr\Container\ContainerInterface;
+use Zenstruck\Document;
 use Zenstruck\Document\Library\LazyLibrary;
 
 /**
@@ -29,5 +30,15 @@ final class LibraryRegistry
 
             return $this->libraries[$name] ?? throw new \InvalidArgumentException();
         });
+    }
+
+    public function getForDocument(Document $document): Library
+    {
+        $dsn = \parse_url($document->dsn());
+        if (!isset($dsn['scheme'])) {
+            throw new \InvalidArgumentException();
+        }
+
+        return $this->get($dsn['scheme']);
     }
 }

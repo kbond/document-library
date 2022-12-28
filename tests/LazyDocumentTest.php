@@ -26,8 +26,10 @@ final class LazyDocumentTest extends DocumentTest
             'checksum' => '7',
             'publicUrl' => '8',
             'mimeType' => '9',
+            'library' => '0',
         ]);
 
+        $this->assertSame('0:1', $document->dsn());
         $this->assertSame('1', $document->path());
         $this->assertSame('2', $document->name());
         $this->assertSame('3', $document->nameWithoutExtension());
@@ -42,9 +44,32 @@ final class LazyDocumentTest extends DocumentTest
     /**
      * @test
      */
+    public function library_is_required_to_use_lazy_document(): void
+    {
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('Missing library metadata.');
+
+        $document = (new LazyDocument(['checksum' => 'foo']));
+        $document->setLibrary(self::$libraryRegistry);
+        $document->dsn();
+    }
+
+    /**
+     * @test
+     */
+    public function can_lazily_provide_library(): void
+    {
+        $document = (new LazyDocument('test/path'));
+        $document->setLibrary(self::$libraryRegistry, 'memory');
+        self::assertSame('memory:test/path', $document->dsn());
+    }
+
+    /**
+     * @test
+     */
     public function can_lazily_generate_path_with_namer(): void
     {
-        $document = (new LazyDocument(['checksum' => 'foo']))->setNamer(new ExpressionNamer(), [
+        $document = (new LazyDocument(['library' => 'memory', 'checksum' => 'foo']))->setNamer(new ExpressionNamer(), [
             'expression' => 'prefix/{checksum}-{bar}.pdf',
             'bar' => 'baz',
         ]);
@@ -57,7 +82,7 @@ final class LazyDocumentTest extends DocumentTest
      */
     public function namer_is_required_to_generate_name(): void
     {
-        $document = (new LazyDocument(['checksum' => 'foo']));
+        $document = (new LazyDocument(['library' => 'memory', 'checksum' => 'foo']));
 
         $this->expectException(\LogicException::class);
         $this->expectExceptionMessage('A namer is required to generate the path from metadata.');
@@ -67,9 +92,9 @@ final class LazyDocumentTest extends DocumentTest
 
     protected function document(string $path, \SplFileInfo $file): Document
     {
-        self::$library->store($path, $file);
+        $document = self::$library->store($path, $file);
 
-        return (new LazyDocument($path))->setLibrary(self::$library);
+        return (new LazyDocument($document->dsn()))->setLibrary(self::$libraryRegistry);
     }
 
     protected function modifyDocument(string $path, string $content): void

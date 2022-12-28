@@ -10,6 +10,7 @@ use Zenstruck\Document\LazyDocument;
 use Zenstruck\Document\LibraryRegistry;
 use Zenstruck\Document\Namer;
 use Zenstruck\Document\SerializableDocument;
+use Zenstruck\Document\SerializationMode;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
@@ -18,6 +19,7 @@ class DocumentNormalizer implements NormalizerInterface, DenormalizerInterface, 
 {
     public const LIBRARY = 'library';
     public const METADATA = 'metadata';
+    public const ONLY_PATH = 'only_path';
     public const RENAME = 'rename';
 
     public function __construct(private LibraryRegistry $registry, private Namer $namer)
@@ -29,11 +31,14 @@ class DocumentNormalizer implements NormalizerInterface, DenormalizerInterface, 
      */
     final public function normalize(mixed $object, ?string $format = null, array $context = []): string|array
     {
+        $mode = SerializationMode::AsDsnString;
         if ($metadata = $context[self::METADATA] ?? false) {
-            return (new SerializableDocument($object, $metadata))->serialize();
+            $mode = SerializationMode::AsArray;
+        } elseif ($context[self::ONLY_PATH] ?? false) {
+            $mode = SerializationMode::AsPathString;
         }
 
-        return $object->path();
+        return (new SerializableDocument($object, $metadata, $mode))->serialize();
     }
 
     final public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
@@ -47,18 +52,27 @@ class DocumentNormalizer implements NormalizerInterface, DenormalizerInterface, 
     final public function denormalize(mixed $data, string $type, ?string $format = null, array $context = []): Document
     {
         if (\is_string($data)) {
-            $data = ['path' => $data];
+            $parsedUrl = \parse_url($data);
+            \assert(isset($parsedUrl['path']));
+
+            $data = ['path' => $parsedUrl['path']];
+
+            if (isset($parsedUrl['scheme'])) {
+                $data['library'] = $parsedUrl['scheme'];
+            }
         }
 
         if ($context[self::RENAME] ?? false) {
             unset($data['path']);
         }
 
-        $document = new LazyDocument($data);
-
-        if ($library = $context[self::LIBRARY] ?? null) {
-            $document->setLibrary($this->registry()->get($library));
+        $library = null;
+        if (\is_string($context[self::LIBRARY] ?? null)) {
+            $library = $context[self::LIBRARY];
         }
+
+        $document = new LazyDocument($data);
+        $document->setLibrary($this->registry(), $library);
 
         if (!isset($data['path'])) {
             $document->setNamer($this->namer(), $context);
