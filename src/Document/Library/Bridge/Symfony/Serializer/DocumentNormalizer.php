@@ -18,6 +18,7 @@ class DocumentNormalizer implements NormalizerInterface, DenormalizerInterface, 
 {
     public const LIBRARY = 'library';
     public const METADATA = 'metadata';
+    public const ONLY_PATH = 'only_path';
     public const RENAME = 'rename';
 
     public function __construct(private LibraryRegistry $registry, private Namer $namer)
@@ -31,6 +32,10 @@ class DocumentNormalizer implements NormalizerInterface, DenormalizerInterface, 
     {
         if ($metadata = $context[self::METADATA] ?? false) {
             return (new SerializableDocument($object, $metadata))->serialize();
+        }
+
+        if ($context[self::ONLY_PATH] ?? false) {
+            return $object->path();
         }
 
         return $object->dsn();
@@ -48,9 +53,13 @@ class DocumentNormalizer implements NormalizerInterface, DenormalizerInterface, 
     {
         if (\is_string($data)) {
             $parsedUrl = \parse_url($data);
-            \assert(isset($parsedUrl['path'], $parsedUrl['scheme']));
+            \assert(isset($parsedUrl['path']));
 
-            $data = ['path' => $parsedUrl['path'], 'library' => $parsedUrl['scheme']];
+            $data = ['path' => $parsedUrl['path']];
+
+            if (isset($parsedUrl['scheme'])) {
+                $data['library'] = $parsedUrl['scheme'];
+            }
         }
 
         if ($context[self::RENAME] ?? false) {
