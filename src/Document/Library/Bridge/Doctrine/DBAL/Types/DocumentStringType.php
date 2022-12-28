@@ -19,10 +19,11 @@ final class DocumentStringType extends StringType
     {
         if ($value instanceof SerializableDocument) {
             $value = $value->serialize();
-        } else if ($value instanceof Document) {
+        } elseif ($value instanceof Document) {
             $value = $value->dsn();
         }
-        return is_string($value) ? $value : null;
+
+        return \is_string($value) ? $value : null;
     }
 
     public function convertToPHPValue($value, AbstractPlatform $platform): ?Document
