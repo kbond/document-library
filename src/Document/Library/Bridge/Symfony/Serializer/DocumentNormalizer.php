@@ -34,7 +34,7 @@ class DocumentNormalizer implements NormalizerInterface, DenormalizerInterface, 
         $mode = SerializationMode::AsDsnString;
         if ($metadata = $context[self::METADATA] ?? false) {
             $mode = SerializationMode::AsArray;
-        } else if ($context[self::ONLY_PATH] ?? false) {
+        } elseif ($context[self::ONLY_PATH] ?? false) {
             $mode = SerializationMode::AsPathString;
         }
 
@@ -67,7 +67,7 @@ class DocumentNormalizer implements NormalizerInterface, DenormalizerInterface, 
         }
 
         $library = null;
-        if (is_string($context[self::LIBRARY] ?? null)) {
+        if (\is_string($context[self::LIBRARY] ?? null)) {
             $library = $context[self::LIBRARY];
         }
 

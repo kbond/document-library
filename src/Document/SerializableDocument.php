@@ -27,7 +27,7 @@ final class SerializableDocument implements Document
 
         if (true === $fields) {
             $this->fields = self::ALL_METADATA_FIELDS;
-        } else if (is_array($fields)) {
+        } elseif (\is_array($fields)) {
             $this->fields = $fields;
         }
     }
