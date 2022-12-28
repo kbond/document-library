@@ -115,9 +115,9 @@ class DocumentLifecycleSubscriber
                 $ref->set($property, $document);
             }
 
-            if (!$document instanceof SerializableDocument && $mapping->metadata) {
-                // save with metadata
-                $ref->set($property, new SerializableDocument($document, $mapping->metadata));
+            if (!$document instanceof SerializableDocument) {
+                // save with correct serialization mode
+                $ref->set($property, new SerializableDocument($document, $mapping->metadata, $mapping->serializationMode()));
             }
         }
     }
@@ -156,9 +156,9 @@ class DocumentLifecycleSubscriber
                 $this->pendingOperations[] = fn() => $this->registry()->getForDocument($old)->delete($old->path());
             }
 
-            if ($new instanceof Document && !$new instanceof SerializableDocument && $mapping->metadata) {
-                // save with metadata
-                $event->setNewValue($property, new SerializableDocument($new, $mapping->metadata));
+            if ($new instanceof Document && !$new instanceof SerializableDocument) {
+                // save with correct serialization mode
+                $event->setNewValue($property, new SerializableDocument($new, $mapping->metadata, $mapping->serializationMode()));
             }
 
             if ($mapping->deleteOnChange && $old instanceof Document && null === $new) {
