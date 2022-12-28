@@ -14,48 +14,31 @@ final class SerializableDocument implements Document
 {
     private const ALL_METADATA_FIELDS = ['library', 'path', 'lastModified', 'size', 'checksum', 'mimeType', 'publicUrl'];
 
-    private array $fields;
+    private array $fields = [];
 
-    public function __construct(private Document $document, array|bool $fields)
-    {
-        if (false === $fields) {
+    public function __construct(
+        private Document $document,
+        array|bool $fields,
+        private readonly SerializationMode $mode = SerializationMode::AsArray
+    ) {
+        if (SerializationMode::AsArray === $this->mode && false === $fields) {
             throw new \InvalidArgumentException('$fields cannot be false.');
         }
 
         if (true === $fields) {
-            $fields = self::ALL_METADATA_FIELDS;
+            $this->fields = self::ALL_METADATA_FIELDS;
+        } else if (is_array($fields)) {
+            $this->fields = $fields;
         }
-
-        $this->fields = $fields;
     }
 
-    public function serialize(): array
+    public function serialize(): array|string
     {
-        $data = [];
-
-        foreach ($this->fields as $field) {
-            if ('library' === $field) {
-                $parsedUrl = \parse_url($this->document->dsn());
-
-                if (isset($parsedUrl['scheme'])) {
-                    $data[$field] = $parsedUrl['scheme'];
-                }
-
-                continue;
-            }
-
-            if (!\method_exists($this->document, $field)) {
-                throw new \LogicException(\sprintf('Method %d::%s() does not exist.', static::class, $field));
-            }
-
-            try {
-                $data[$field] = $this->document->{$field}();
-            } catch (UnableToGeneratePublicUrl) {
-                // url not available, skip
-            }
-        }
-
-        return $data;
+        return match ($this->mode) {
+            SerializationMode::AsArray => $this->toArray(),
+            SerializationMode::AsDsnString => $this->document->dsn(),
+            SerializationMode::AsPathString => $this->document->path(),
+        };
     }
 
     public function dsn(): string
@@ -133,5 +116,34 @@ final class SerializableDocument implements Document
         $this->document = $this->document->refresh();
 
         return $this;
+    }
+
+    private function toArray(): array
+    {
+        $data = [];
+
+        foreach ($this->fields as $field) {
+            if ('library' === $field) {
+                $parsedUrl = \parse_url($this->document->dsn());
+
+                if (isset($parsedUrl['scheme'])) {
+                    $data[$field] = $parsedUrl['scheme'];
+                }
+
+                continue;
+            }
+
+            if (!\method_exists($this->document, $field)) {
+                throw new \LogicException(\sprintf('Method %d::%s() does not exist.', static::class, $field));
+            }
+
+            try {
+                $data[$field] = $this->document->{$field}();
+            } catch (UnableToGeneratePublicUrl) {
+                // url not available, skip
+            }
+        }
+
+        return $data;
     }
 }
