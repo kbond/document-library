@@ -17,7 +17,7 @@ final class LazyDocument implements Document
     private Namer $namer;
     private array $namerContext;
 
-    public function __construct(string|array $metadata)
+    public function __construct(string|array $metadata = [])
     {
         if (\is_string($metadata)) {
             $parsedUrl = \parse_url($metadata);

@@ -46,7 +46,7 @@ class DocumentLifecycleSubscriber
         }
 
         foreach ((new ObjectReflector($object))->documents($mappings) as $property => $document) {
-            $document->setLibrary($this->registry());
+            $document->setLibrary($this->registry(), $mappings[$property]->library);
 
             if ($mappings[$property]->nameOnLoad()) {
                 $document->setNamer($this->namer(), self::namerContext($mappings[$property], $object));
@@ -91,8 +91,8 @@ class DocumentLifecycleSubscriber
 
             if ($mapping->virtual) {
                 // set virtual document
-                $ref->set($property, (new LazyDocument(['library' => $mapping->library]))
-                    ->setLibrary($this->registry())
+                $ref->set($property, (new LazyDocument())
+                    ->setLibrary($this->registry(), $mapping->library)
                     ->setNamer($this->namer(), self::namerContext($mapping, $object))
                 );
 
