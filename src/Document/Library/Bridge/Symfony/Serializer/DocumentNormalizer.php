@@ -10,6 +10,7 @@ use Zenstruck\Document\LazyDocument;
 use Zenstruck\Document\LibraryRegistry;
 use Zenstruck\Document\Namer;
 use Zenstruck\Document\SerializableDocument;
+use Zenstruck\Document\SerializationMode;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
@@ -30,15 +31,14 @@ class DocumentNormalizer implements NormalizerInterface, DenormalizerInterface, 
      */
     final public function normalize(mixed $object, ?string $format = null, array $context = []): string|array
     {
+        $mode = SerializationMode::AsDsnString;
         if ($metadata = $context[self::METADATA] ?? false) {
-            return (new SerializableDocument($object, $metadata))->serialize();
+            $mode = SerializationMode::AsArray;
+        } else if ($context[self::ONLY_PATH] ?? false) {
+            $mode = SerializationMode::AsPathString;
         }
 
-        if ($context[self::ONLY_PATH] ?? false) {
-            return $object->path();
-        }
-
-        return $object->dsn();
+        return (new SerializableDocument($object, $metadata, $mode))->serialize();
     }
 
     final public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
