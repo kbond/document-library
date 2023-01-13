@@ -23,7 +23,7 @@ final class SerializableDocument implements Document
         self::SERIALIZE_AS_ARRAY,
         self::SERIALIZE_AS_DSN_STRING,
         self::SERIALIZE_AS_PATH_STRING,
-        self::SERIALIZE_AS_STRING
+        self::SERIALIZE_AS_STRING,
     ];
 
     private array $fields = [];
@@ -34,8 +34,8 @@ final class SerializableDocument implements Document
         private string $mode = self::SERIALIZE_AS_ARRAY,
         private ?string $defaultLibrary = null,
     ) {
-        if (!in_array($mode, self::ALL_SERIALIZATION_MODES, true)) {
-            throw new \InvalidArgumentException(sprintf('Unsupported serialization mode. Available modes are: %s. %s provided.', implode(', ', self::ALL_SERIALIZATION_MODES), $this->mode));
+        if (!\in_array($mode, self::ALL_SERIALIZATION_MODES, true)) {
+            throw new \InvalidArgumentException(\sprintf('Unsupported serialization mode. Available modes are: %s. %s provided.', \implode(', ', self::ALL_SERIALIZATION_MODES), $this->mode));
         }
         if (self::SERIALIZE_AS_ARRAY === $this->mode && false === $fields) {
             throw new \InvalidArgumentException('$fields cannot be false.');
@@ -55,6 +55,7 @@ final class SerializableDocument implements Document
             self::SERIALIZE_AS_DSN_STRING => $this->document->dsn(),
             self::SERIALIZE_AS_PATH_STRING => $this->document->path(),
             self::SERIALIZE_AS_STRING => $this->toString(),
+            default => throw new \InvalidArgumentException(\sprintf('Unsupported serialization mode. Available modes are: %s. %s provided.', \implode(', ', self::ALL_SERIALIZATION_MODES), $this->mode)),
         };
     }
 
@@ -168,7 +169,7 @@ final class SerializableDocument implements Document
     {
         if (
             !$this->defaultLibrary
-            || !str_starts_with($this->document->dsn(), $this->defaultLibrary.':')
+            || !\str_starts_with($this->document->dsn(), $this->defaultLibrary.':')
         ) {
             return $this->dsn();
         }
