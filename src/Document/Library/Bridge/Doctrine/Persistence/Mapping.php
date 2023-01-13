@@ -3,7 +3,7 @@
 namespace Zenstruck\Document\Library\Bridge\Doctrine\Persistence;
 
 use Symfony\Component\Serializer\Annotation\Context;
-use Zenstruck\Document\SerializationMode;
+use Zenstruck\Document\SerializableDocument;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
@@ -18,7 +18,6 @@ final class Mapping
         public string $library,
         public ?string $namer = null,
         public array|bool $metadata = false,
-        public bool $onlyPath = false,
         public bool $autoload = true,
         public bool $deleteOnRemove = true,
         public bool $deleteOnChange = true,
@@ -45,12 +44,11 @@ final class Mapping
     /**
      * @internal
      */
-    public function serializationMode(): SerializationMode
+    public function serializationMode(): string
     {
         return match (true) {
-            (false !== $this->metadata) => SerializationMode::AsArray,
-            $this->onlyPath => SerializationMode::AsPathString,
-            default => SerializationMode::AsDsnString
+            (false !== $this->metadata) => SerializableDocument::SERIALIZE_AS_ARRAY,
+            default => SerializableDocument::SERIALIZE_AS_STRING
         };
     }
 
@@ -71,7 +69,6 @@ final class Mapping
             $mapping['library'] ?? throw new \LogicException(\sprintf('A library is not configured for %s::$%s.', $property->class, $property->name)),
             $mapping['namer'] ?? null,
             $mapping['metadata'] ?? false,
-            $mapping['onlyPath'] ?? false,
             $mapping['autoload'] ?? true,
             $mapping['deleteOnRemove'] ?? true,
             $mapping['deleteOnChange'] ?? true,

@@ -117,7 +117,7 @@ class DocumentLifecycleSubscriber
 
             if (!$document instanceof SerializableDocument) {
                 // save with correct serialization mode
-                $ref->set($property, new SerializableDocument($document, $mapping->metadata, $mapping->serializationMode()));
+                $ref->set($property, new SerializableDocument($document, $mapping->metadata, $mapping->serializationMode(), $mapping->library));
             }
         }
     }
@@ -158,7 +158,7 @@ class DocumentLifecycleSubscriber
 
             if ($new instanceof Document && !$new instanceof SerializableDocument) {
                 // save with correct serialization mode
-                $event->setNewValue($property, new SerializableDocument($new, $mapping->metadata, $mapping->serializationMode()));
+                $event->setNewValue($property, new SerializableDocument($new, $mapping->metadata, $mapping->serializationMode(), $mapping->library));
             }
 
             if ($mapping->deleteOnChange && $old instanceof Document && null === $new) {

@@ -12,16 +12,32 @@ use Zenstruck\Document;
  */
 final class SerializableDocument implements Document
 {
+    public const SERIALIZE_AS_ARRAY = 'array';
+    public const SERIALIZE_AS_DSN_STRING = 'dsn';
+    public const SERIALIZE_AS_PATH_STRING = 'path';
+    public const SERIALIZE_AS_STRING = 'string';
+
     private const ALL_METADATA_FIELDS = ['library', 'path', 'lastModified', 'size', 'checksum', 'mimeType', 'publicUrl'];
+
+    private const ALL_SERIALIZATION_MODES = [
+        self::SERIALIZE_AS_ARRAY,
+        self::SERIALIZE_AS_DSN_STRING,
+        self::SERIALIZE_AS_PATH_STRING,
+        self::SERIALIZE_AS_STRING
+    ];
 
     private array $fields = [];
 
     public function __construct(
         private Document $document,
         array|bool $fields,
-        private readonly SerializationMode $mode = SerializationMode::AsArray
+        private string $mode = self::SERIALIZE_AS_ARRAY,
+        private ?string $defaultLibrary = null,
     ) {
-        if (SerializationMode::AsArray === $this->mode && false === $fields) {
+        if (!in_array($mode, self::ALL_SERIALIZATION_MODES, true)) {
+            throw new \InvalidArgumentException(sprintf('Unsupported serialization mode. Available modes are: %s. %s provided.', implode(', ', self::ALL_SERIALIZATION_MODES), $this->mode));
+        }
+        if (self::SERIALIZE_AS_ARRAY === $this->mode && false === $fields) {
             throw new \InvalidArgumentException('$fields cannot be false.');
         }
 
@@ -35,9 +51,10 @@ final class SerializableDocument implements Document
     public function serialize(): array|string
     {
         return match ($this->mode) {
-            SerializationMode::AsArray => $this->toArray(),
-            SerializationMode::AsDsnString => $this->document->dsn(),
-            SerializationMode::AsPathString => $this->document->path(),
+            self::SERIALIZE_AS_ARRAY => $this->toArray(),
+            self::SERIALIZE_AS_DSN_STRING => $this->document->dsn(),
+            self::SERIALIZE_AS_PATH_STRING => $this->document->path(),
+            self::SERIALIZE_AS_STRING => $this->toString(),
         };
     }
 
@@ -145,5 +162,17 @@ final class SerializableDocument implements Document
         }
 
         return $data;
+    }
+
+    private function toString(): string
+    {
+        if (
+            !$this->defaultLibrary
+            || !str_starts_with($this->document->dsn(), $this->defaultLibrary.':')
+        ) {
+            return $this->dsn();
+        }
+
+        return $this->path();
     }
 }

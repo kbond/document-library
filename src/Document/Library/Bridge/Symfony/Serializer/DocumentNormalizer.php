@@ -10,7 +10,6 @@ use Zenstruck\Document\LazyDocument;
 use Zenstruck\Document\LibraryRegistry;
 use Zenstruck\Document\Namer;
 use Zenstruck\Document\SerializableDocument;
-use Zenstruck\Document\SerializationMode;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
@@ -19,7 +18,6 @@ class DocumentNormalizer implements NormalizerInterface, DenormalizerInterface, 
 {
     public const LIBRARY = 'library';
     public const METADATA = 'metadata';
-    public const ONLY_PATH = 'only_path';
     public const RENAME = 'rename';
 
     public function __construct(private LibraryRegistry $registry, private Namer $namer)
@@ -31,14 +29,12 @@ class DocumentNormalizer implements NormalizerInterface, DenormalizerInterface, 
      */
     final public function normalize(mixed $object, ?string $format = null, array $context = []): string|array
     {
-        $mode = SerializationMode::AsDsnString;
+        $mode = SerializableDocument::SERIALIZE_AS_STRING;
         if ($metadata = $context[self::METADATA] ?? false) {
-            $mode = SerializationMode::AsArray;
-        } elseif ($context[self::ONLY_PATH] ?? false) {
-            $mode = SerializationMode::AsPathString;
+            $mode = SerializableDocument::SERIALIZE_AS_ARRAY;
         }
 
-        return (new SerializableDocument($object, $metadata, $mode))->serialize();
+        return (new SerializableDocument($object, $metadata, $mode, $context[self::LIBRARY] ?? null))->serialize();
     }
 
     final public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool

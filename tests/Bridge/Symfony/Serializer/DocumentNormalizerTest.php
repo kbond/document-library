@@ -63,28 +63,6 @@ class DocumentNormalizerTest extends TestCase
     /**
      * @test
      */
-    public function can_serialize_and_deserialize_document_as_path(): void
-    {
-        $document = self::$libraryRegistry->get('memory')->store('some/file.txt', 'content');
-        $serializer = self::serializer();
-
-        $serialized = $serializer->serialize($document, 'json', ['only_path' => true]);
-
-        $this->assertSame(\json_encode('some/file.txt'), $serialized);
-
-        $deserialized = $serializer->deserialize($serialized, Document::class, 'json', ['library' => 'memory']);
-
-        $this->assertInstanceOf(LazyDocument::class, $deserialized);
-        $this->assertSame('memory:some/file.txt', $deserialized->dsn());
-        $this->assertSame('some/file.txt', $deserialized->path());
-        $this->assertSame('file.txt', $deserialized->name());
-        $this->assertSame('file', $deserialized->nameWithoutExtension());
-        $this->assertSame('txt', $deserialized->extension());
-    }
-
-    /**
-     * @test
-     */
     public function can_serialize_and_deserialize_document_with_metadata(): void
     {
         $document = self::$libraryRegistry->get('memory')->store('some/file.txt', 'content');
