@@ -94,7 +94,7 @@ class DocumentNormalizerTest extends TestCase
 
         $serialized = $serializer->serialize($document, 'json', ['metadata' => ['path', 'mimeType', 'size']]);
 
-        $this->assertSame(\json_encode(['path' => 'some/file.txt', 'mimeType' => 'text/plain', 'size' => 7]), $serialized);
+        $this->assertSame(\json_encode(['path' => 'some/file.txt', 'mimeType' => 'text/plain', 'size' => 7, 'library' => 'memory']), $serialized);
 
         $deserialized = $serializer->deserialize($serialized, Document::class, 'json', ['library' => 'memory']);
 
@@ -148,7 +148,7 @@ class DocumentNormalizerTest extends TestCase
 
         $serialized = $serializer->serialize($document, 'json', ['metadata' => ['checksum', 'extension']]);
 
-        $this->assertSame(\json_encode(['checksum' => '9a0364b9e99bb480dd25e1f0284c8555', 'extension' => 'txt']), $serialized);
+        $this->assertSame(\json_encode(['checksum' => '9a0364b9e99bb480dd25e1f0284c8555', 'extension' => 'txt', 'library' => 'memory']), $serialized);
 
         $document = $serializer->deserialize($serialized, Document::class, 'json', ['library' => 'memory', 'namer' => 'checksum']);
 

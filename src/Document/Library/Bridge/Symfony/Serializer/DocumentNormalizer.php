@@ -29,9 +29,12 @@ class DocumentNormalizer implements NormalizerInterface, DenormalizerInterface, 
      */
     final public function normalize(mixed $object, ?string $format = null, array $context = []): string|array
     {
-        $mode = SerializableDocument::SERIALIZE_AS_STRING;
+        $mode = SerializableDocument::SERIALIZE_AS_DSN_STRING;
         if ($metadata = $context[self::METADATA] ?? false) {
             $mode = SerializableDocument::SERIALIZE_AS_ARRAY;
+            if (is_array($metadata) && !\in_array('library', $metadata, true)) {
+                $metadata[] = 'library';
+            }
         }
 
         return (new SerializableDocument($object, $metadata, $mode, $context[self::LIBRARY] ?? null))->serialize();
