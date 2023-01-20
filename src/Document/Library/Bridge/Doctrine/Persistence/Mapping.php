@@ -15,7 +15,7 @@ final class Mapping
     public bool $virtual = false;
 
     public function __construct(
-        public string $library,
+        public ?string $library,
         public ?string $namer = null,
         public array|bool $metadata = false,
         public bool $autoload = true,
@@ -65,8 +65,15 @@ final class Mapping
             $mapping = \array_merge($mapping, $attribute->newInstance()->toArray());
         }
 
+        if (
+            ($mapping['nameOnLoad'] ?? false)
+            && !isset($mapping['library'])
+        ) {
+            throw new \LogicException(\sprintf('A library is not configured for %s::$%s.', $property->class, $property->name));
+        }
+
         return new self(
-            $mapping['library'] ?? throw new \LogicException(\sprintf('A library is not configured for %s::$%s.', $property->class, $property->name)),
+            $mapping['library'] ?? null,
             $mapping['namer'] ?? null,
             $mapping['metadata'] ?? false,
             $mapping['autoload'] ?? true,
