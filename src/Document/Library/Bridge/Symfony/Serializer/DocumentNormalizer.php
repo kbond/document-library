@@ -32,7 +32,7 @@ class DocumentNormalizer implements NormalizerInterface, DenormalizerInterface, 
         $mode = SerializableDocument::SERIALIZE_AS_DSN_STRING;
         if ($metadata = $context[self::METADATA] ?? false) {
             $mode = SerializableDocument::SERIALIZE_AS_ARRAY;
-            if (is_array($metadata) && !\in_array('library', $metadata, true)) {
+            if (\is_array($metadata) && !\in_array('library', $metadata, true)) {
                 $metadata[] = 'library';
             }
         }
