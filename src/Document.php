@@ -7,6 +7,13 @@ namespace Zenstruck;
  */
 interface Document
 {
+    /**
+     * Returns standardized document identification, containing library ID and file path.
+     *
+     * @example If file comes from "public" library with "foo/bar.txt" path, returns "public:foo/bar.txt"
+     */
+    public function dsn(): string;
+
     public function path(): string;
 
     /**

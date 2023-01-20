@@ -9,6 +9,8 @@ use Zenstruck\Document;
  */
 interface Library
 {
+    public function id(): string;
+
     public function open(string $path): Document;
 
     public function has(string $path): bool;

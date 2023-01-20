@@ -9,6 +9,11 @@ use Zenstruck\Document;
  */
 final class NullDocument implements Document
 {
+    public function dsn(): string
+    {
+        throw new \BadMethodCallException(\sprintf('%s() is not available.', __METHOD__));
+    }
+
     public function path(): string
     {
         throw new \BadMethodCallException(\sprintf('%s() is not available.', __METHOD__));

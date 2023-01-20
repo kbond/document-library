@@ -27,7 +27,7 @@ abstract class TestCase extends BaseTestCase
 
     public static function inMemoryLibrary(array $config = []): Library
     {
-        return new FlysystemLibrary(new Filesystem(
+        return new FlysystemLibrary('memory', new Filesystem(
             new InMemoryFilesystemAdapter(),
             \array_merge(['public_url' => '/'], $config),
             temporaryUrlGenerator: new class() implements TemporaryUrlGenerator {
@@ -41,7 +41,7 @@ abstract class TestCase extends BaseTestCase
 
     public static function libraryRegistry(array $libraries = []): LibraryRegistry
     {
-        return new LibraryRegistry(\array_merge(['memory' => self::inMemoryLibrary()], $libraries));
+        return new LibraryRegistry(\array_merge(['memory' => self::$library], $libraries));
     }
 
     protected static function tempFile(string|\SplFileInfo $content, ?string $extension = null): \SplFileInfo

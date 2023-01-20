@@ -12,40 +12,56 @@ use Zenstruck\Document;
  */
 final class SerializableDocument implements Document
 {
-    private const ALL_METADATA_FIELDS = ['path', 'lastModified', 'size', 'checksum', 'mimeType', 'publicUrl'];
+    public const SERIALIZE_AS_ARRAY = 'array';
+    public const SERIALIZE_AS_DSN_STRING = 'dsn';
+    public const SERIALIZE_AS_PATH_STRING = 'path';
+    public const SERIALIZE_AS_STRING = 'string';
 
-    private array $fields;
+    private const ALL_METADATA_FIELDS = ['library', 'path', 'lastModified', 'size', 'checksum', 'mimeType', 'publicUrl'];
 
-    public function __construct(private Document $document, array|bool $fields)
-    {
-        if (false === $fields) {
+    private const ALL_SERIALIZATION_MODES = [
+        self::SERIALIZE_AS_ARRAY,
+        self::SERIALIZE_AS_DSN_STRING,
+        self::SERIALIZE_AS_PATH_STRING,
+        self::SERIALIZE_AS_STRING,
+    ];
+
+    private array $fields = [];
+
+    public function __construct(
+        private Document $document,
+        array|bool $fields,
+        private string $mode = self::SERIALIZE_AS_ARRAY,
+        private ?string $defaultLibrary = null,
+    ) {
+        if (!\in_array($mode, self::ALL_SERIALIZATION_MODES, true)) {
+            throw new \InvalidArgumentException(\sprintf('Unsupported serialization mode. Available modes are: %s. %s provided.', \implode(', ', self::ALL_SERIALIZATION_MODES), $this->mode));
+        }
+        if (self::SERIALIZE_AS_ARRAY === $this->mode && false === $fields) {
             throw new \InvalidArgumentException('$fields cannot be false.');
         }
 
         if (true === $fields) {
-            $fields = self::ALL_METADATA_FIELDS;
+            $this->fields = self::ALL_METADATA_FIELDS;
+        } elseif (\is_array($fields)) {
+            $this->fields = $fields;
         }
-
-        $this->fields = $fields;
     }
 
-    public function serialize(): array
+    public function serialize(): array|string
     {
-        $data = [];
+        return match ($this->mode) {
+            self::SERIALIZE_AS_ARRAY => $this->toArray(),
+            self::SERIALIZE_AS_DSN_STRING => $this->document->dsn(),
+            self::SERIALIZE_AS_PATH_STRING => $this->document->path(),
+            self::SERIALIZE_AS_STRING => $this->toString(),
+            default => throw new \InvalidArgumentException(\sprintf('Unsupported serialization mode. Available modes are: %s. %s provided.', \implode(', ', self::ALL_SERIALIZATION_MODES), $this->mode)),
+        };
+    }
 
-        foreach ($this->fields as $field) {
-            if (!\method_exists($this->document, $field)) {
-                throw new \LogicException(\sprintf('Method %d::%s() does not exist.', static::class, $field));
-            }
-
-            try {
-                $data[$field] = $this->document->{$field}();
-            } catch (UnableToGeneratePublicUrl) {
-                // url not available, skip
-            }
-        }
-
-        return $data;
+    public function dsn(): string
+    {
+        return $this->document->dsn();
     }
 
     public function path(): string
@@ -118,5 +134,46 @@ final class SerializableDocument implements Document
         $this->document = $this->document->refresh();
 
         return $this;
+    }
+
+    private function toArray(): array
+    {
+        $data = [];
+
+        foreach ($this->fields as $field) {
+            if ('library' === $field) {
+                $parsedUrl = \parse_url($this->document->dsn());
+
+                if (isset($parsedUrl['scheme'])) {
+                    $data[$field] = $parsedUrl['scheme'];
+                }
+
+                continue;
+            }
+
+            if (!\method_exists($this->document, $field)) {
+                throw new \LogicException(\sprintf('Method %d::%s() does not exist.', static::class, $field));
+            }
+
+            try {
+                $data[$field] = $this->document->{$field}();
+            } catch (UnableToGeneratePublicUrl) {
+                // url not available, skip
+            }
+        }
+
+        return $data;
+    }
+
+    private function toString(): string
+    {
+        if (
+            !$this->defaultLibrary
+            || !\str_starts_with($this->document->dsn(), $this->defaultLibrary.':')
+        ) {
+            return $this->dsn();
+        }
+
+        return $this->path();
     }
 }

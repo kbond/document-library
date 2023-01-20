@@ -29,11 +29,15 @@ class DocumentNormalizer implements NormalizerInterface, DenormalizerInterface, 
      */
     final public function normalize(mixed $object, ?string $format = null, array $context = []): string|array
     {
+        $mode = SerializableDocument::SERIALIZE_AS_DSN_STRING;
         if ($metadata = $context[self::METADATA] ?? false) {
-            return (new SerializableDocument($object, $metadata))->serialize();
+            $mode = SerializableDocument::SERIALIZE_AS_ARRAY;
+            if (\is_array($metadata) && !\in_array('library', $metadata, true)) {
+                $metadata[] = 'library';
+            }
         }
 
-        return $object->path();
+        return (new SerializableDocument($object, $metadata, $mode, $context[self::LIBRARY] ?? null))->serialize();
     }
 
     final public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
@@ -47,18 +51,27 @@ class DocumentNormalizer implements NormalizerInterface, DenormalizerInterface, 
     final public function denormalize(mixed $data, string $type, ?string $format = null, array $context = []): Document
     {
         if (\is_string($data)) {
-            $data = ['path' => $data];
+            $parsedUrl = \parse_url($data);
+            \assert(isset($parsedUrl['path']));
+
+            $data = ['path' => $parsedUrl['path']];
+
+            if (isset($parsedUrl['scheme'])) {
+                $data['library'] = $parsedUrl['scheme'];
+            }
         }
 
         if ($context[self::RENAME] ?? false) {
             unset($data['path']);
         }
 
-        $document = new LazyDocument($data);
-
-        if ($library = $context[self::LIBRARY] ?? null) {
-            $document->setLibrary($this->registry()->get($library));
+        $library = null;
+        if (\is_string($context[self::LIBRARY] ?? null)) {
+            $library = $context[self::LIBRARY];
         }
+
+        $document = new LazyDocument($data);
+        $document->setLibrary($this->registry(), $library);
 
         if (!isset($data['path'])) {
             $document->setNamer($this->namer(), $context);

@@ -25,6 +25,11 @@ final class PendingDocument implements Document
         $this->file = \is_string($file) ? new \SplFileInfo($file) : $file;
     }
 
+    public function dsn(): string
+    {
+        throw new \BadMethodCallException('DSN generation is impossible for pending documents.');
+    }
+
     public function path(): string
     {
         return (string) $this->file;

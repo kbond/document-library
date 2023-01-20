@@ -3,6 +3,7 @@
 namespace Zenstruck\Document\Library\Bridge\Doctrine\Persistence;
 
 use Symfony\Component\Serializer\Annotation\Context;
+use Zenstruck\Document\SerializableDocument;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
@@ -14,7 +15,7 @@ final class Mapping
     public bool $virtual = false;
 
     public function __construct(
-        public string $library,
+        public ?string $library,
         public ?string $namer = null,
         public array|bool $metadata = false,
         public bool $autoload = true,
@@ -43,6 +44,17 @@ final class Mapping
     /**
      * @internal
      */
+    public function serializationMode(): string
+    {
+        return match (true) {
+            (false !== $this->metadata) => SerializableDocument::SERIALIZE_AS_ARRAY,
+            default => SerializableDocument::SERIALIZE_AS_STRING
+        };
+    }
+
+    /**
+     * @internal
+     */
     public static function fromProperty(\ReflectionProperty $property, array $mapping = []): self
     {
         if (\class_exists(Context::class) && $attribute = $property->getAttributes(Context::class)[0] ?? null) {
@@ -53,8 +65,15 @@ final class Mapping
             $mapping = \array_merge($mapping, $attribute->newInstance()->toArray());
         }
 
+        if (
+            ($mapping['nameOnLoad'] ?? false)
+            && !isset($mapping['library'])
+        ) {
+            throw new \LogicException(\sprintf('A library is not configured for %s::$%s.', $property->class, $property->name));
+        }
+
         return new self(
-            $mapping['library'] ?? throw new \LogicException(\sprintf('A library is not configured for %s::$%s.', $property->class, $property->name)),
+            $mapping['library'] ?? null,
             $mapping['namer'] ?? null,
             $mapping['metadata'] ?? false,
             $mapping['autoload'] ?? true,
@@ -62,7 +81,7 @@ final class Mapping
             $mapping['deleteOnChange'] ?? true,
             $mapping['nameOnLoad'] ?? false,
             \array_diff_key($mapping, \array_flip([
-                'library', 'namer', 'metadata', 'autoload', 'deleteOnRemove', 'deleteOnChange', 'nameOnLoad',
+                'library', 'namer', 'metadata', 'onlyPath', 'autoload', 'deleteOnRemove', 'deleteOnChange', 'nameOnLoad',
             ])),
         );
     }

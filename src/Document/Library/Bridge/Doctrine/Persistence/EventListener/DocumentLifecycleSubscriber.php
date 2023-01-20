@@ -46,7 +46,7 @@ class DocumentLifecycleSubscriber
         }
 
         foreach ((new ObjectReflector($object))->documents($mappings) as $property => $document) {
-            $document->setLibrary($this->registry()->get($mappings[$property]->library));
+            $document->setLibrary($this->registry(), $mappings[$property]->library);
 
             if ($mappings[$property]->nameOnLoad()) {
                 $document->setNamer($this->namer(), self::namerContext($mappings[$property], $object));
@@ -70,7 +70,7 @@ class DocumentLifecycleSubscriber
             $document = $ref->get($property);
 
             if ($document instanceof Document && $document->exists()) {
-                $this->registry()->get($mapping->library)->delete($document->path());
+                $this->registry()->getForDocument($document)->delete($document->path());
             }
         }
     }
@@ -91,8 +91,8 @@ class DocumentLifecycleSubscriber
 
             if ($mapping->virtual) {
                 // set virtual document
-                $ref->set($property, (new LazyDocument([]))
-                    ->setLibrary($this->registry()->get($mapping->library))
+                $ref->set($property, (new LazyDocument())
+                    ->setLibrary($this->registry(), $mapping->library)
                     ->setNamer($this->namer(), self::namerContext($mapping, $object))
                 );
 
@@ -106,18 +106,22 @@ class DocumentLifecycleSubscriber
             }
 
             if ($document instanceof PendingDocument) {
+                if (!$mapping->library) {
+                    throw new \LogicException(\sprintf('A library is not configured for %s::$%s.', $object::class, $property));
+                }
+
                 $document = $this->registry()->get($mapping->library)->store(
                     $path = $this->namer()->generateName($document, self::namerContext($mapping, $object)),
                     $document
                 );
-                $this->onFailureOperations[] = fn() => $this->registry()->get($mapping->library)->delete($path);
+                $this->onFailureOperations[] = fn() => $this->registry()->getForDocument($document)->delete($path);
 
                 $ref->set($property, $document);
             }
 
-            if (!$document instanceof SerializableDocument && $mapping->metadata) {
-                // save with metadata
-                $ref->set($property, new SerializableDocument($document, $mapping->metadata));
+            if (!$document instanceof SerializableDocument) {
+                // save with correct serialization mode
+                $ref->set($property, new SerializableDocument($document, $mapping->metadata, $mapping->serializationMode(), $mapping->library));
             }
         }
     }
@@ -142,6 +146,10 @@ class DocumentLifecycleSubscriber
             $new = $event->getNewValue($property);
 
             if ($new instanceof PendingDocument) {
+                if (!$mapping->library) {
+                    throw new \LogicException(\sprintf('A library is not configured for %s::$%s.', $object::class, $property));
+                }
+
                 $new = $this->registry()->get($mapping->library)->store(
                     $path = $this->namer()->generateName($new, self::namerContext($mapping, $object)),
                     $new
@@ -151,19 +159,19 @@ class DocumentLifecycleSubscriber
                 $event->setNewValue($property, $new);
             }
 
-            if ($mapping->deleteOnChange && $new instanceof Document && $old instanceof Document && $new->path() !== $old->path()) {
+            if ($mapping->deleteOnChange && $new instanceof Document && $old instanceof Document && $new->dsn() !== $old->dsn()) {
                 // document was changed, delete old from library
-                $this->pendingOperations[] = fn() => $this->registry()->get($mapping->library)->delete($old->path());
+                $this->pendingOperations[] = fn() => $this->registry()->getForDocument($old)->delete($old->path());
             }
 
-            if ($new instanceof Document && !$new instanceof SerializableDocument && $mapping->metadata) {
-                // save with metadata
-                $event->setNewValue($property, new SerializableDocument($new, $mapping->metadata));
+            if ($new instanceof Document && !$new instanceof SerializableDocument) {
+                // save with correct serialization mode
+                $event->setNewValue($property, new SerializableDocument($new, $mapping->metadata, $mapping->serializationMode(), $mapping->library));
             }
 
             if ($mapping->deleteOnChange && $old instanceof Document && null === $new) {
                 // document was removed, delete from library
-                $this->pendingOperations[] = fn() => $this->registry()->get($mapping->library)->delete($old->path());
+                $this->pendingOperations[] = fn() => $this->registry()->getForDocument($old)->delete($old->path());
             }
         }
     }

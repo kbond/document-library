@@ -23,7 +23,7 @@ abstract class MappingProviderTest extends TestCase
             ],
             'document2' => [
                 'library' => 'memory',
-                'metadata' => ['path', 'size'],
+                'metadata' => ['library', 'path', 'size'],
             ],
             'document3' => [
                 'library' => 'memory',
