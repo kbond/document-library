@@ -106,6 +106,10 @@ class DocumentLifecycleSubscriber
             }
 
             if ($document instanceof PendingDocument) {
+                if (!$mapping->library) {
+                    throw new \LogicException(\sprintf('A library is not configured for %s::$%s.', $object::class, $property));
+                }
+
                 $document = $this->registry()->get($mapping->library)->store(
                     $path = $this->namer()->generateName($document, self::namerContext($mapping, $object)),
                     $document
@@ -142,6 +146,10 @@ class DocumentLifecycleSubscriber
             $new = $event->getNewValue($property);
 
             if ($new instanceof PendingDocument) {
+                if (!$mapping->library) {
+                    throw new \LogicException(\sprintf('A library is not configured for %s::$%s.', $object::class, $property));
+                }
+
                 $new = $this->registry()->get($mapping->library)->store(
                     $path = $this->namer()->generateName($new, self::namerContext($mapping, $object)),
                     $new
